@@ -846,7 +846,7 @@ public class ResourceAlloc {
 			List<WDMLink> protectLinkList = traffic.getProtectRoute().getWDMLinkList();
 			for (WDMLink wdmLink : protectLinkList) {
 				wdmLink.setActive(false);
-				for (FiberLink link : wdmLink.getFiberLinkList()) {// 设置保护路由不激活来计算预置路由
+				for (FiberLink link : wdmLink.getFiberLinkList()) {// 设置保护路由不激活来计算动态路由
 					link.setActive(false);
 				}
 				// 考虑srlg,可以在这里加一个标志位，选择是否考虑srlg
@@ -877,9 +877,11 @@ public class ResourceAlloc {
 		}
 
 		// 开始算路
-		Route route = null;
+		Route route1 = null; // 以断的节点算路
+		Route route2 = null; // 以业务的首末节点算路，备用：如果route1资源分配不成功就用route2
 		// 此时返回的route只包含returnnodelist和returnlinklist两个属性，既该route经过哪些节点和链路
-		route = RouteAlloc.findWDMRouteByTwoNode(traffic, flag, from, to);
+		route1 = RouteAlloc.findWDMRouteByTwoNode(traffic, flag, from, to);
+		route2 = RouteAlloc.findWDMRoute(traffic, flag);
 
 		// 算路完成后就可以将所有的链路都激活了
 		// 将所有链路设为激活
@@ -887,11 +889,11 @@ public class ResourceAlloc {
 			WDMLink.WDMLinkList.get(i).setActive(true);
 		}
 
-		if (route != null) {
+		if (route1 != null && route1.getWDMLinkList().size() != 0) {
 			// 开始判断这个route上是否有可用波道资源
-			if (Route.isRouteHaveWave(route, wave, traffic)) {// true则有，则为该route分配波道资源wave
-				for (int hop = 0; hop < route.getWDMLinkList().size(); hop++) {// 为每一条wdmLink链路分配连续波长
-					WDMLink wdmLink = route.getWDMLinkList().get(hop);
+			if (Route.isRouteHaveWave(route1, wave, traffic)) {// true则有，则为该route分配波道资源wave
+				for (int hop = 0; hop < route1.getWDMLinkList().size(); hop++) {// 为每一条wdmLink链路分配连续波长
+					WDMLink wdmLink = route1.getWDMLinkList().get(hop);
 					{
 						if (wdmLink.getWaveLengthList().get(wave).getStatus().equals(Status.空闲)) {
 							wdmLink.setRemainResource(wdmLink.getRemainResource() - 1);
@@ -901,11 +903,227 @@ public class ResourceAlloc {
 						wdmLink.getCarriedTrafficList().add(traffic);// 为链路添加承载业务
 					}
 				}
-				return route;
+				return route1;
 			} // 波长分配完毕
+				// 如果wave没有资源，则用以业务首末节点算出的route2进行资源分配
+			if (!Route.isRouteHaveWave(route1, wave, traffic)) {
+				if (route2 != null && route2.getWDMLinkList().size() != 0) {
+					// if (osnr.calculateOSNR(route) >= Dlg_PolicySetting.osnRGate) {// 如果满足osnr要求
+					// 避开OSNR
+					if (1 > 0) {
+						if (CommonAlloc.allocateWaveLength3(route2) && PortAlloc.allocatePort(route2)) {// 对光纤链路分配时隙成功，并且分配端口成功
+							// CommonAlloc.fallBuffer.append("业务:" + traffic + "预置路由及资源分配成功！\r\n");
+							traffic.setDynamicRoute(route2);// 如果路由不为空则设置预置重路由
+							traffic.setStatus(TrafficStatus.动态重路由已分配);
+							return route2;
+						} else {// 资源分配失败
+
+							// CommonAlloc.fallBuffer.append("业务:" + traffic + "预置路由波长或端口资源分配失败！\r\n");
+							RouteAlloc.releaseRoute(route2);
+						}
+					}
+					// else {// 如果osnr超过门限
+					// if (Suggest.isSuggested == true) {// 2017.10.14
+					// OSNR.allOSNRList.add(OSNR.select(route));// wb 2017.10.11
+					// OSNR.OSNRRouteList.add(route);//10.19
+					// }
+					// CommonAlloc.fallBuffer.append("业务:" + traffic + "保护路由OSNR不满足条件！\r\n");
+					// }
+				} else {
+					// 算路失败
+					// CommonAlloc.fallBuffer.append("业务:" + traffic + "由于波道资源不足预置路由算路失败！\r\n");
+				}
+			}
+		}
+		else if (route2 != null && route2.getWDMLinkList().size() != 0) {
+			// if (osnr.calculateOSNR(route) >= Dlg_PolicySetting.osnRGate) {// 如果满足osnr要求
+			// 避开OSNR
+			if (1 > 0) {
+				if (CommonAlloc.allocateWaveLength3(route2) && PortAlloc.allocatePort(route2)) {// 对光纤链路分配时隙成功，并且分配端口成功
+					// CommonAlloc.fallBuffer.append("业务:" + traffic + "预置路由及资源分配成功！\r\n");
+					traffic.setDynamicRoute(route2);// 如果路由不为空则设置预置重路由
+					traffic.setStatus(TrafficStatus.动态重路由已分配);
+					return route2;
+				} else {// 资源分配失败
+
+					// CommonAlloc.fallBuffer.append("业务:" + traffic + "预置路由波长或端口资源分配失败！\r\n");
+					RouteAlloc.releaseRoute(route2);
+				}
+			}
+			// else {// 如果osnr超过门限
+			// if (Suggest.isSuggested == true) {// 2017.10.14
+			// OSNR.allOSNRList.add(OSNR.select(route));// wb 2017.10.11
+			// OSNR.OSNRRouteList.add(route);//10.19
+			// }
+			// CommonAlloc.fallBuffer.append("业务:" + traffic + "保护路由OSNR不满足条件！\r\n");
+			// }
 		}
 		return null;
-
 	}
 
+	// 节点断
+	public static Route reRoute1(Route oldroute, CommonNode from, CommonNode to, int wave1, int wave2, int flag) {
+
+		Traffic traffic = oldroute.getBelongsTraffic();
+		List<WDMLink> workLinkList = traffic.getWorkRoute().getWDMLinkList();
+
+		// 将链路上没有可用波道资源的链路设为不激活
+		for (int i = 0; i < WDMLink.WDMLinkList.size(); i++) {
+			if ((WDMLink.WDMLinkList.get(i).getRemainResource() == 0))
+				WDMLink.WDMLinkList.get(i).setActive(false);
+		}
+		// 将原路由设为不激活
+		for (int i = 0; i < oldroute.getWDMLinkList().size(); i++) {
+			oldroute.getWDMLinkList().get(i).setActive(false);
+		}
+
+		// 设置工作路由不激活来计算动态恢复路由
+		for (WDMLink wdmLink : workLinkList) {
+			wdmLink.setActive(false);
+			for (FiberLink link : wdmLink.getFiberLinkList()) {
+				link.setActive(false);
+			}
+			// 考虑srlg,可以在这里加一个标志位，选择是否考虑srlg
+			if (LinkRGroup.srlg == true) {
+				for (LinkRGroup group : wdmLink.getWdmRelatedList()) {
+					for (WDMLink wLink : group.getSRLGWDMLinkList()) {
+						wLink.setActive(false);
+					}
+				}
+			}
+		}
+		// 如果保护路由存在，则将保护路由设为不激活
+		if (traffic.getProtectRoute() != null) {
+			List<WDMLink> protectLinkList = traffic.getProtectRoute().getWDMLinkList();
+			for (WDMLink wdmLink : protectLinkList) {
+				wdmLink.setActive(false);
+				for (FiberLink link : wdmLink.getFiberLinkList()) {// 设置保护路由不激活来计算动态路由
+					link.setActive(false);
+				}
+				// 考虑srlg,可以在这里加一个标志位，选择是否考虑srlg
+				if (LinkRGroup.srlg == true) {
+					for (LinkRGroup group : wdmLink.getWdmRelatedList()) {
+						for (WDMLink wLink : group.getSRLGWDMLinkList()) {
+							wLink.setActive(false);
+						}
+					}
+				}
+			}
+		}
+
+		// 如果该业务有关联业务组，并且类型为工作、恢复路由均分离，则将相关联的业务组的业务的恢复路由设为false
+		if (traffic.getTrafficgroup() != null && traffic.getTrafficgroup().getType().equals("工作、恢复路由均分离"))// 如果业务的关联业务组不为空
+		{
+			for (int i = 0; i < Traffic.trafficList.size(); i++) {
+				Traffic tra = Traffic.trafficList.get(i);
+				// 判断是否是一个风险共享业务组并且不是同一个业务
+				if (tra.getTrafficgroup() != null && tra.getTrafficgroup().getId() == traffic.getTrafficgroup().getId()
+						&& tra.getRankId() != traffic.getRankId()) {
+					if (tra.getDynamicRoute() != null) {// 如果相关联的业务动态恢复路由存在
+						for (int j = 0; j < tra.getDynamicRoute().getWDMLinkList().size(); j++)
+							tra.getDynamicRoute().getWDMLinkList().get(j).setActive(false);
+					}
+				}
+			}
+		}
+
+		// 开始算路
+		Route route1 = null; // 以断的节点算路
+		Route route2 = null; // 以业务的首末节点算路，备用：如果route1资源分配不成功就用route2
+		// 此时返回的route只包含returnnodelist和returnlinklist两个属性，既该route经过哪些节点和链路
+		route1 = RouteAlloc.findWDMRouteByTwoNode(traffic, flag, from, to);
+		route2 = RouteAlloc.findWDMRoute(traffic, flag);
+
+		// 算路完成后就可以将所有的链路都激活了
+		// 将所有链路设为激活
+		for (int i = 0; i < WDMLink.WDMLinkList.size(); i++) {
+			WDMLink.WDMLinkList.get(i).setActive(true);
+		}
+
+		if (route1 != null && route1.getWDMLinkList().size() != 0) {
+			// 开始判断这个route上是否有可用波道资源
+			if (Route.isRouteHaveWave(route1, wave1, traffic)) {// true则有，则为该route分配波道资源wave
+				for (int hop = 0; hop < route1.getWDMLinkList().size(); hop++) {// 为每一条wdmLink链路分配连续波长
+					WDMLink wdmLink = route1.getWDMLinkList().get(hop);
+					{
+						if (wdmLink.getWaveLengthList().get(wave1).getStatus().equals(Status.空闲)) {
+							wdmLink.setRemainResource(wdmLink.getRemainResource() - 1);
+						} // 更新链路剩余资源
+						wdmLink.getWaveLengthList().get(wave1).setStatus(Status.恢复);// 改变工作状态
+						wdmLink.getWaveLengthList().get(wave1).getDynamicTrafficList().add(traffic);// 加入该波长的动态业务表
+						wdmLink.getCarriedTrafficList().add(traffic);// 为链路添加承载业务
+					}
+				}
+				return route1;
+			} // 波长分配完毕
+			if (Route.isRouteHaveWave(route1, wave2, traffic)) {// true则有，则为该route分配波道资源wave
+				for (int hop = 0; hop < route1.getWDMLinkList().size(); hop++) {// 为每一条wdmLink链路分配连续波长
+					WDMLink wdmLink = route1.getWDMLinkList().get(hop);
+					{
+						if (wdmLink.getWaveLengthList().get(wave2).getStatus().equals(Status.空闲)) {
+							wdmLink.setRemainResource(wdmLink.getRemainResource() - 1);
+						} // 更新链路剩余资源
+						wdmLink.getWaveLengthList().get(wave2).setStatus(Status.恢复);// 改变工作状态
+						wdmLink.getWaveLengthList().get(wave2).getDynamicTrafficList().add(traffic);// 加入该波长的动态业务表
+						wdmLink.getCarriedTrafficList().add(traffic);// 为链路添加承载业务
+					}
+				}
+				return route1;
+			} // 波长分配完毕
+				// 如果wave1和wave2都没有资源，则用以业务首末节点算出的route2进行资源分配
+			if (Route.isRouteHaveWave(route1, wave1, traffic) == false
+					&& Route.isRouteHaveWave(route1, wave2, traffic) == false) {
+				if (route2 != null && route2.getWDMLinkList().size() != 0) {
+					// if (osnr.calculateOSNR(route) >= Dlg_PolicySetting.osnRGate) {// 如果满足osnr要求
+					// 避开OSNR
+					if (1 > 0) {
+						if (CommonAlloc.allocateWaveLength3(route2) && PortAlloc.allocatePort(route2)) {// 对光纤链路分配时隙成功，并且分配端口成功
+							// CommonAlloc.fallBuffer.append("业务:" + traffic + "预置路由及资源分配成功！\r\n");
+							traffic.setDynamicRoute(route2);// 如果路由不为空则设置预置重路由
+							traffic.setStatus(TrafficStatus.动态重路由已分配);
+							return route2;
+						} else {// 资源分配失败
+
+							// CommonAlloc.fallBuffer.append("业务:" + traffic + "预置路由波长或端口资源分配失败！\r\n");
+							RouteAlloc.releaseRoute(route2);
+						}
+					}
+					// else {// 如果osnr超过门限
+					// if (Suggest.isSuggested == true) {// 2017.10.14
+					// OSNR.allOSNRList.add(OSNR.select(route));// wb 2017.10.11
+					// OSNR.OSNRRouteList.add(route);//10.19
+					// }
+					// CommonAlloc.fallBuffer.append("业务:" + traffic + "保护路由OSNR不满足条件！\r\n");
+					// }
+				} else {
+					// 算路失败
+					// CommonAlloc.fallBuffer.append("业务:" + traffic + "由于波道资源不足预置路由算路失败！\r\n");
+				}
+			}
+		}
+		else if (route2 != null && route2.getWDMLinkList().size() != 0) {
+			// if (osnr.calculateOSNR(route) >= Dlg_PolicySetting.osnRGate) {// 如果满足osnr要求
+			// 避开OSNR
+			if (1 > 0) {
+				if (CommonAlloc.allocateWaveLength3(route2) && PortAlloc.allocatePort(route2)) {// 对光纤链路分配时隙成功，并且分配端口成功
+					// CommonAlloc.fallBuffer.append("业务:" + traffic + "预置路由及资源分配成功！\r\n");
+					traffic.setDynamicRoute(route2);// 如果路由不为空则设置预置重路由
+					traffic.setStatus(TrafficStatus.动态重路由已分配);
+					return route2;
+				} else {// 资源分配失败
+
+					// CommonAlloc.fallBuffer.append("业务:" + traffic + "预置路由波长或端口资源分配失败！\r\n");
+					RouteAlloc.releaseRoute(route2);
+				}
+			}
+			// else {// 如果osnr超过门限
+			// if (Suggest.isSuggested == true) {// 2017.10.14
+			// OSNR.allOSNRList.add(OSNR.select(route));// wb 2017.10.11
+			// OSNR.OSNRRouteList.add(route);//10.19
+			// }
+			// CommonAlloc.fallBuffer.append("业务:" + traffic + "保护路由OSNR不满足条件！\r\n");
+			// }
+		}
+		return null;
+	}
 }

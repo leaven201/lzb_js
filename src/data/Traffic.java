@@ -143,9 +143,11 @@ public class Traffic implements Serializable{
 	    RouteAlloc.releaseRoute(tr.getWorkRoute());
 	    RouteAlloc.releaseRoute(tr.getProtectRoute());
 	    RouteAlloc.releaseRoute(tr.getPreRoute());
+	    RouteAlloc.releaseRoute(tr.getDynamicRoute());
 	    tr.setWorkRoute(null);
 	    tr.setProtectRoute(null);
 	    tr.setPreRoute(null);
+	    tr.setDynamicRoute(null);
 	}
 	if (i == 1) {
 	    RouteAlloc.releaseRoute(tr.getWorkRoute());
@@ -159,6 +161,11 @@ public class Traffic implements Serializable{
 		RouteAlloc.releaseRoute(tr.getPreRoute());
 		tr.setPreRoute(null);
 	}
+	if(i == 4) {
+		RouteAlloc.releaseRoute(tr.getDynamicRoute());
+		tr.setDynamicRoute(null);
+	}
+	
     }
     
     //清空线路端口
