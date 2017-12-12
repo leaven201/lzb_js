@@ -54,6 +54,7 @@ public class WDMLink extends BasicLink implements Serializable {
 	private List<Traffic> carriedTrafficList = new LinkedList<>();// 承载的业务
 	public static LinkedList<WDMLink> WDMLinkList = new LinkedList<WDMLink>();// 存放所有WDMLink
 	private List<LinkRGroup> wdmRelatedList = new LinkedList<LinkRGroup>(); // 链路所在的共享风险链路组
+	public  LinkedList<WDMLink> parallelLinkList = new LinkedList<>(); //存放平行边
 
 	public WDMLink() {
 	}
@@ -423,6 +424,14 @@ public class WDMLink extends BasicLink implements Serializable {
 		this.weight = weight;
 	}
 
+	public LinkedList<WDMLink> getParallelLinkList() {
+		return parallelLinkList;
+	}
+
+	public void setParallelLinkList(LinkedList<WDMLink> parallelLinkList) {
+		this.parallelLinkList = parallelLinkList;
+	}
+
 	// 打印该链路已被使用于工作的波长
 	public static void printWorkUsedWave(WDMLink link) {
 		List<WaveLength> wavelist = link.getWaveLengthList();
@@ -508,5 +517,16 @@ public class WDMLink extends BasicLink implements Serializable {
 		}
 		return null;
 	}
+	//设置parallelLinkList
+	public void createParallelLinkList() {
+		for(int i=0;i<WDMLink.WDMLinkList.size();i++) {
+			WDMLink link=WDMLink.WDMLinkList.get(i);
+			if((this.getFromNode().getName().equals(link.getFromNode().getName())&&this.getToNode().getName().equals(link.getToNode().getName()))
+					||(this.getFromNode().getName().equals(link.getToNode().getName())&&this.getToNode().getName().equals(link.getFromNode().getName()))) {
+				this.parallelLinkList.add(link);
+			}
+		}
+	}
+	
 
 }

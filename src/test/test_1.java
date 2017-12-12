@@ -69,7 +69,7 @@ public class test_1 {
 			System.out.println(Traffic.trafficList.get(i).getMustPassLink());
 	}
 	
-	ResourceAlloc.allocateResource1(Traffic.trafficList, 0);
+	ResourceAlloc.allocateResource(Traffic.trafficList, 1);
 //	Iterator<Traffic> it = Traffic.trafficList.iterator();
 //	while (it.hasNext()) {
 //		Traffic traffic = it.next();
@@ -133,7 +133,7 @@ public class test_1 {
 //						&&link.getToNode().getName().equals("I"))) {
 //    		System.out.println(link.getName());   		
 //    	}
-    	System.out.println(link.getName());
+    	
     }
 
 //	LinkData dbsl = new LinkData();
@@ -155,10 +155,22 @@ public class test_1 {
 //		System.out.println("工作路由："+tra.getWorkRoute()+":"+osnr.calculateOSNR(tra.getWorkRoute()));
 //		System.out.println("保护路由："+tra.getProtectRoute()+":"+osnr.calculateOSNR(tra.getProtectRoute()));
 //	}
+
+	
+    for(int i=0;i<WDMLink.WDMLinkList.size();i++) {
+    	WDMLink link=WDMLink.WDMLinkList.get(i);
+    	System.out.println(link.getName()+":"+link.getRemainResource());
+    }
+    System.out.println();
     
-    
-    
-    
+   
+	for(int i=0;i<WDMLink.WDMLinkList.size();i++) {
+		WDMLink link=WDMLink.WDMLinkList.get(i);
+		System.out.println(link.getParallelLinkList());
+	}
+	
+	
+	
     
     }
 }

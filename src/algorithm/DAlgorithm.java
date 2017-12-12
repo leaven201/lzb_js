@@ -29,7 +29,7 @@ public class DAlgorithm {
 		{
 			while (itLink.hasNext()) {
 				WDMLink theLink = itLink.next();
-				theLink.setWeight(1);
+				theLink.setWeight(10+(81/(theLink.getRemainResource()+1)));
 			//	theLink.setWeight(1*0.4+(theLink.getZhongjiNum())*0.6);
 			}
 		} else if (flag == 0) {// 长度
@@ -37,7 +37,7 @@ public class DAlgorithm {
 				WDMLink theLink = itLink.next();
 				//先用该链路的长度除以平均链路长度使其归一
 	//			double weight = ((theLink.getLength()/LinkData.aveLinkLength)*0.4+(theLink.getZhongjiNum())*0.6);
-				theLink.setWeight(theLink.getLength());
+				theLink.setWeight(theLink.getLength()*10+(81/(theLink.getRemainResource()+1)));
 			}
 		}
 
@@ -115,12 +115,12 @@ public class DAlgorithm {
 		List<CommonNode> theNodeList = nodeList;
 		List<WDMLink> theLinkList = new LinkedList<WDMLink>();
 		theLinkList.addAll(linkList);// 10.27
-		
-		/*
-		 * 需增加消除平行边的方法
-		 */
-
 		Initialization(flag, theLinkList);// 初始化链路权重
+		
+		//消除平行边的方法
+		removeParallelLink();
+		
+		
 		int nNodeSum = SetNodeRankID(theNodeList);// 初始化节点id
 
 		double[][] Adjacency = new double[nNodeSum][nNodeSum];
@@ -244,11 +244,7 @@ public class DAlgorithm {
 		return true;
 	}
 	
-	
-	//消除平行边的方法
-	public static void removeParallelLink(int flag,List<WDMLink> linkList) {
-		
-	}
+
 	
 
 	public static boolean dijkstra(int flag, CommonNode from, CommonNode to, List<CommonNode> nodeList,
@@ -378,6 +374,34 @@ public class DAlgorithm {
 			return false;
 		}
 		return true;
+	}
+	
+	//消除平行边的方法
+	public static void removeParallelLink() {
+		for(int i=0;i<WDMLink.WDMLinkList.size();i++) {
+			WDMLink lk=WDMLink.WDMLinkList.get(i);
+			LinkedList<WDMLink> parallel=lk.getParallelLinkList();
+			//size==1说明没有平行边，直接找下一个链路
+			if(parallel.size()==1)
+				continue;
+			//有平行边
+			else {
+				int minindex=0;
+				double currentWeight=parallel.get(0).getWeight();
+				for(int j=0;j<parallel.size();j++) {
+					WDMLink plk=parallel.get(j);
+					plk.setActive(false);
+					//链路的weight必currentWeiht小，则更新minindex为链路的index，currentWeight为链路的weight
+					if(plk.getWeight()<currentWeight)
+					{
+						minindex=j;
+						currentWeight=plk.getWeight();
+					}		
+				}
+				//将权值最小的链路激活
+				parallel.get(minindex).setActive(true);
+			}
+		}
 	}
 
 }

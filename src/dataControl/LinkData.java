@@ -94,6 +94,12 @@ public class LinkData {
 
 				}
 			}
+			//WDMLinkList生成完毕了   开始设置parallelLinkList
+			for(int i=0;i<WDMLink.WDMLinkList.size();i++) {
+				WDMLink linkk=WDMLink.WDMLinkList.get(i);
+				linkk.createParallelLinkList();
+			}
+			
 			aveLinkLength = aveLinkLength / FiberLink.fiberLinkList.size();
 			msgw = "成功导入" + k + "条WDM链路数据" + "\n";
 			System.out.println(msgw);
