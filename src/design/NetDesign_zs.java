@@ -23,12 +23,16 @@ import javax.swing.plaf.MenuItemUI;
 import javax.swing.plaf.PopupMenuUI;
 import javax.swing.plaf.basic.BasicMenuUI;
 
+import org.apache.poi.hssf.record.formula.functions.Fixed1ArgFunction;
 import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 
+import Interface.UserInterface;
+import Interface.UserInterface.Progress;
 import netdesigntitle.NSTitleFrame;
+import survivance.Evaluation;
 import twaver.*;
 import twaver.gis.GeographyMap;
 import twaver.gis.GisManager;
@@ -46,6 +50,7 @@ import UIGradient.GradientMenubar;
 import UIGradient.GradientPanel;
 import UIGradient.GradientToolbar;
 import UIGradient.MySplitPaneUI;
+import algorithm.OSNR;
 import algorithm.RouteAlloc;
 import data.*;
 import dataControl.LinkData;
@@ -61,7 +66,10 @@ import java.lang.*;
 import java.text.SimpleDateFormat;
 
 public class NetDesign_zs extends NSTitleFrame {
-
+	
+	public static int processValue;
+	public static List<Integer> process;
+	
 	public static String filenameall; // 全名
 	public static String filename; // 工程名
 	public static String filepath; // 工程路径
@@ -256,7 +264,9 @@ public class NetDesign_zs extends NSTitleFrame {
 	JMenuItem menuItemproperty = new JMenuItem(" 工程信息  ");
 	JMenuItem menuItemExit = new JMenuItem(" 退出  ");
 	// 物理拓扑及业务创建
-	JMenu businessDesign = new JMenu("物理拓扑及业务创建 ");
+//	JMenu businessDesign = new JMenu("物理拓扑及业务创建 ");
+	JMenu networkModelCreat = new JMenu("网络模型创建");
+	JMenu businessCreat = new JMenu("业务创建");
 	JMenuItem siteimport = new JMenuItem(" 站点站型导入  ");
 	JMenuItem fiberimport = new JMenuItem(" 光纤参数导入  ");
 	JMenuItem AllInput = new JMenuItem(" 导入节点和链路  ");
@@ -266,28 +276,34 @@ public class NetDesign_zs extends NSTitleFrame {
 	JMenuItem resourceclear = new JMenuItem(" 资源清空  ");
 	// 参数设置
 	JMenu parameterSetting = new JMenu("参数设置 ");
-	JMenuItem NFsetting = new JMenuItem(" NF系数设置  ");
-	JMenuItem OSNRsetting = new JMenuItem(" OSNR容量设置  ");
-	JMenuItem overOSNRsetting = new JMenuItem(" 过系统OSNR裕量设置  ");
-	JMenuItem amplifiersetting = new JMenuItem(" 放大器入纤光功率设置  ");
-	JMenuItem attenuatorsetting = new JMenuItem(" 可调衰减器插损设置  ");
-	JMenuItem OSCsetting = new JMenuItem(" OSC合分波器插损设置  ");
-	JMenuItem capacitysetting = new JMenuItem(" 系统容量设置  ");
-	JMenuItem Wavelengthsetting = new JMenuItem(" 可用波长设置  ");
+	JMenuItem NFsetting = new JMenuItem(" 放大噪声系数AF设置  ");
+	JMenuItem OSNRSetting = new JMenuItem("OSNR参数设置");
+	//JMenuItem OSNRsetting = new JMenuItem(" OSNR容量设置  ");
+	JMenuItem overOSNRsetting = new JMenuItem(" 背靠背指标及过系统OSNR阈量设定  ");
+//	JMenuItem amplifiersetting = new JMenuItem(" 放大器入纤光功率设置  ");
+//	JMenuItem attenuatorsetting = new JMenuItem(" 线路侧可调衰减器插损设置  ");
+//	JMenuItem OSCsetting = new JMenuItem(" OSC合分波器插损设置  ");
+	//JMenuItem capacitysetting = new JMenuItem(" 系统容量设置  ");
+	//JMenuItem Wavelengthsetting = new JMenuItem(" 可用波长设置  ");
 	// 网络管理
-	JMenu networkManagement = new JMenu("网络管理 ");
-	JMenuItem resourcemanagement = new JMenuItem(" 资源管理  ");
-	JMenuItem businessmanagement = new JMenuItem(" 业务管理  ");
+//	JMenu networkManagement = new JMenu("网络管理 ");
+	JMenu resourcemanagement = new JMenu(" 资源管理  ");//有二级菜单
+	JMenuItem nodemanagement = new JMenuItem(" 节点管理  ");
+	JMenuItem fibermanagement = new JMenuItem(" Fiber管理  ");
+	JMenuItem wdmmanagement = new JMenuItem(" WDM管理  ");
+	JMenuItem businessmanagement = new JMenuItem(" 业务路由管理  ");
 	JMenuItem SRLGmanagement = new JMenuItem(" SRLG管理  ");
 	JMenuItem trafficgroup = new JMenuItem(" 共享风险业务组管理  ");
 	// 网络规划
 	JMenu networkDesign = new JMenu("网络规划 ");
-	JMenuItem networkDesignguide = new JMenuItem(" 网络规划策略设置向导  ");
+	JMenuItem networkDesignguide = new JMenuItem(" 路由策略  ");
+	JMenuItem bussinessPlan = new JMenuItem(" 业务规划  ");
+//	JMenuItem Algorithmused = new JMenuItem(" 规划算法调用 ");
 	// 故障模拟
-	JMenu faultSimulation = new JMenu("故障模拟 ");
+	JMenu faultSimulation = new JMenu("网络仿真 ");
 	JMenuItem Nodesingle = new JMenuItem(" 节点单断仿真  ");
 	JMenuItem Linksingle = new JMenuItem(" 链路单断仿真  ");
-	JMenuItem SRLGsingle = new JMenuItem(" SRLG组单断仿真  ");
+//	JMenuItem SRLGsingle = new JMenuItem(" SRLG组单断仿真  ");
 	JMenuItem Artificialsetting = new JMenuItem(" 人工故障设置仿真  ");
 //	JMenuItem nodeArtificialsetting = new JMenuItem(" 节点故障设置仿真  ");
 //	JMenuItem linkArtificialsetting = new JMenuItem(" 链路故障设置仿真  ");
@@ -295,9 +311,12 @@ public class NetDesign_zs extends NSTitleFrame {
 	JMenu reportOutput = new JMenu("报表输出 ");
 	JMenuItem nodeoutput = new JMenuItem(" 节点配置表  ");
 	JMenuItem traficoutput = new JMenuItem(" 工作路由表  ");
+	JMenu guzhangout=new JMenu("故障模拟报表输出");
+	JMenuItem nodeout = new JMenuItem(" 节点单断循环 ");
+	JMenuItem linkout = new JMenuItem(" 链路单断循环  ");
 	
 	// 链路资源利用率
-	JMenu LinkUtilization = new JMenu("链路资源利用率 ");
+	//JMenu LinkUtilization = new JMenu("链路资源利用率 ");
 	// SRLG自动映射
 	JMenu SRLGyingshe = new JMenu("SRLG自动映射");
 	JMenuItem SRLGzidongyingshe = new JMenuItem(" SRLG自动映射  ");
@@ -411,13 +430,15 @@ public class NetDesign_zs extends NSTitleFrame {
 
 		Color menufore = new Color(0, 0, 0);// 是字体的颜色
 		menubar.add(projectDesign);// 工程管理
-		menubar.add(businessDesign);// 物理拓扑及业务创建
-		menubar.add(parameterSetting);// 参数设置
-		menubar.add(networkManagement);// 网络管理
+//		menubar.add(businessDesign);// 物理拓扑及业务创建
+		menubar.add(networkModelCreat);
+		menubar.add(businessCreat);
+//		menubar.add(parameterSetting);// 参数设置
+//		menubar.add(networkManagement);// 网络管理
 		menubar.add(networkDesign);// 网络规划
 		menubar.add(faultSimulation);// 故障模拟
 		menubar.add(reportOutput);// 报表输出
-		menubar.add(LinkUtilization);// 链路资源利用率
+//		menubar.add(LinkUtilization);// 链路资源利用率
 //		menubar.add(SRLGyingshe);// SRLG自动映射
 		// 工程管理
 		projectDesign.setUI((BasicMenuUI) NSMenuUI.createUI(projectDesign));
@@ -436,67 +457,134 @@ public class NetDesign_zs extends NSTitleFrame {
 		menuItemproperty.setUI((MenuItemUI) NSMenuItemUI.createUI(menuItemproperty));
 		projectDesign.add(menuItemExit);
 		menuItemExit.setUI((MenuItemUI) NSMenuItemUI.createUI(menuItemExit));
-		// 物理拓扑及业务创建
-		businessDesign.setUI((BasicMenuUI) NSMenuUI.createUI(businessDesign));
-		businessDesign.getPopupMenu().setUI((PopupMenuUI) NSPopupMenuUI.createUI(businessDesign.getPopupMenu()));
-		businessDesign.setFont(new java.awt.Font("微软雅黑", Font.PLAIN, 13));
-		businessDesign.setForeground(menufore);
-		businessDesign.add(siteimport);
+		// 网络模型创建
+		networkModelCreat.setUI((BasicMenuUI) NSMenuUI.createUI(networkModelCreat));
+		networkModelCreat.getPopupMenu().setUI((PopupMenuUI) NSPopupMenuUI.createUI(networkModelCreat.getPopupMenu()));
+		networkModelCreat.setFont(new java.awt.Font("微软雅黑", Font.PLAIN, 13));
+		networkModelCreat.setForeground(menufore);
+		networkModelCreat.add(siteimport);
 		siteimport.setUI((MenuItemUI) NSMenuItemUI.createUI(siteimport));
-		businessDesign.add(fiberimport);
+		networkModelCreat.add(fiberimport);
 		fiberimport.setUI((MenuItemUI) NSMenuItemUI.createUI(fiberimport));
-		businessDesign.add(AllInput);
+		networkModelCreat.add(AllInput);
 	    AllInput.setUI((MenuItemUI)NSMenuItemUI.createUI(AllInput));
+	    networkModelCreat.add(resourcemanagement);
+		resourcemanagement.setUI((BasicMenuUI) NSMenuUI.createUI(resourcemanagement));
+		resourcemanagement.getPopupMenu().setUI(
+				(PopupMenuUI) NSPopupMenuUI.createUI(resourcemanagement.getPopupMenu()));
+		nodemanagement.setUI((MenuItemUI) NSMenuItemUI.createUI(nodemanagement));
+		resourcemanagement.add(nodemanagement);
+		fibermanagement.setUI((MenuItemUI) NSMenuItemUI.createUI(fibermanagement));
+		resourcemanagement.add(fibermanagement);
+		wdmmanagement.setUI((MenuItemUI) NSMenuItemUI.createUI(wdmmanagement));
+		resourcemanagement.add(wdmmanagement);
+		networkModelCreat.add(SRLGmanagement);
+		SRLGmanagement.setUI((MenuItemUI) NSMenuItemUI.createUI(SRLGmanagement));
+        //业务创建
+	    businessCreat.setUI((BasicMenuUI) NSMenuUI.createUI(businessCreat));
+	    businessCreat.getPopupMenu().setUI((PopupMenuUI) NSPopupMenuUI.createUI(businessCreat.getPopupMenu()));
+	    businessCreat.setFont(new java.awt.Font("微软雅黑", Font.PLAIN, 13));
+	    businessCreat.setForeground(menufore);
+	    businessCreat.add(businessimport);
+		businessimport.setUI((MenuItemUI) NSMenuItemUI.createUI(businessimport));
+		businessCreat.add(resourceclear);
+		resourceclear.setUI((MenuItemUI) NSMenuItemUI.createUI(resourceclear));
+		businessCreat.add(trafficgroup);
+		trafficgroup.setUI((MenuItemUI) NSMenuItemUI.createUI(trafficgroup));
+//		businessDesign.setUI((BasicMenuUI) NSMenuUI.createUI(businessDesign));
+//		businessDesign.getPopupMenu().setUI((PopupMenuUI) NSPopupMenuUI.createUI(businessDesign.getPopupMenu()));
+//		businessDesign.setFont(new java.awt.Font("微软雅黑", Font.PLAIN, 13));
+//		businessDesign.setForeground(menufore);
+//		businessDesign.add(siteimport);
+//		siteimport.setUI((MenuItemUI) NSMenuItemUI.createUI(siteimport));
+//		businessDesign.add(fiberimport);
+//		fiberimport.setUI((MenuItemUI) NSMenuItemUI.createUI(fiberimport));
+//		businessDesign.add(AllInput);
+//	    AllInput.setUI((MenuItemUI)NSMenuItemUI.createUI(AllInput));
 //		businessDesign.add(WDMimport);
 //		WDMimport.setUI((MenuItemUI) NSMenuItemUI.createUI(WDMimport));
 //		businessDesign.add(OTNimport);
 //		OTNimport.setUI((MenuItemUI) NSMenuItemUI.createUI(OTNimport));
-		businessDesign.add(businessimport);
-		businessimport.setUI((MenuItemUI) NSMenuItemUI.createUI(businessimport));
-		businessDesign.add(resourceclear);
-		resourceclear.setUI((MenuItemUI) NSMenuItemUI.createUI(resourceclear));
+//		businessDesign.add(businessimport);
+//		businessimport.setUI((MenuItemUI) NSMenuItemUI.createUI(businessimport));
+//		businessDesign.add(resourceclear);
+//		resourceclear.setUI((MenuItemUI) NSMenuItemUI.createUI(resourceclear));
 		// 参数设置
-		parameterSetting.setUI((BasicMenuUI) NSMenuUI.createUI(parameterSetting));
-		parameterSetting.getPopupMenu().setUI((PopupMenuUI) NSPopupMenuUI.createUI(parameterSetting.getPopupMenu()));
-		parameterSetting.setFont(new java.awt.Font("微软雅黑", Font.PLAIN, 13));
-		parameterSetting.setForeground(menufore);
-		parameterSetting.add(NFsetting);
-		NFsetting.setUI((MenuItemUI) NSMenuItemUI.createUI(NFsetting));
-		parameterSetting.add(OSNRsetting);
-		OSNRsetting.setUI((MenuItemUI) NSMenuItemUI.createUI(OSNRsetting));
-		parameterSetting.add(overOSNRsetting);
-		overOSNRsetting.setUI((MenuItemUI) NSMenuItemUI.createUI(overOSNRsetting));
-		parameterSetting.add(amplifiersetting);
-		amplifiersetting.setUI((MenuItemUI) NSMenuItemUI.createUI(amplifiersetting));
-		parameterSetting.add(attenuatorsetting);
-		attenuatorsetting.setUI((MenuItemUI) NSMenuItemUI.createUI(attenuatorsetting));
-		parameterSetting.add(OSCsetting);
-		OSCsetting.setUI((MenuItemUI) NSMenuItemUI.createUI(OSCsetting));
-		parameterSetting.add(capacitysetting);
-		capacitysetting.setUI((MenuItemUI) NSMenuItemUI.createUI(capacitysetting));
-		parameterSetting.add(Wavelengthsetting);
-		Wavelengthsetting.setUI((MenuItemUI) NSMenuItemUI.createUI(Wavelengthsetting));
+//		parameterSetting.setUI((BasicMenuUI) NSMenuUI.createUI(parameterSetting));
+//		parameterSetting.getPopupMenu().setUI((PopupMenuUI) NSPopupMenuUI.createUI(parameterSetting.getPopupMenu()));
+//		parameterSetting.setFont(new java.awt.Font("微软雅黑", Font.PLAIN, 13));
+//		parameterSetting.setForeground(menufore);
+//		parameterSetting.add(NFsetting);
+//		NFsetting.setUI((MenuItemUI) NSMenuItemUI.createUI(NFsetting));
+//		parameterSetting.add(OSNRSetting);
+//		OSNRSetting.setUI((MenuItemUI) NSMenuItemUI.createUI(OSNRSetting));
+//		parameterSetting.add(OSNRsetting);
+//		OSNRsetting.setUI((MenuItemUI) NSMenuItemUI.createUI(OSNRsetting));
+//		parameterSetting.add(overOSNRsetting);
+//		overOSNRsetting.setUI((MenuItemUI) NSMenuItemUI.createUI(overOSNRsetting));
+//		parameterSetting.add(amplifiersetting);
+//		amplifiersetting.setUI((MenuItemUI) NSMenuItemUI.createUI(amplifiersetting));
+//		parameterSetting.add(attenuatorsetting);
+//		attenuatorsetting.setUI((MenuItemUI) NSMenuItemUI.createUI(attenuatorsetting));
+//		parameterSetting.add(OSCsetting);
+//		OSCsetting.setUI((MenuItemUI) NSMenuItemUI.createUI(OSCsetting));
+//		parameterSetting.add(capacitysetting);
+//		capacitysetting.setUI((MenuItemUI) NSMenuItemUI.createUI(capacitysetting));
+//		parameterSetting.add(Wavelengthsetting);
+//		Wavelengthsetting.setUI((MenuItemUI) NSMenuItemUI.createUI(Wavelengthsetting));
 		// 网络管理
-		networkManagement.setUI((BasicMenuUI) NSMenuUI.createUI(networkManagement));
-		networkManagement.getPopupMenu().setUI((PopupMenuUI) NSPopupMenuUI.createUI(networkManagement.getPopupMenu()));
-		networkManagement.setFont(new java.awt.Font("微软雅黑", Font.PLAIN, 13));
-		networkManagement.setForeground(menufore);
-		networkManagement.add(resourcemanagement);
-		resourcemanagement.setUI((MenuItemUI) NSMenuItemUI.createUI(resourcemanagement));
-		networkManagement.add(businessmanagement);
-		businessmanagement.setUI((MenuItemUI) NSMenuItemUI.createUI(businessmanagement));
-		networkManagement.add(SRLGmanagement);
-		SRLGmanagement.setUI((MenuItemUI) NSMenuItemUI.createUI(SRLGmanagement));
-		networkManagement.add(trafficgroup);
-		trafficgroup.setUI((MenuItemUI) NSMenuItemUI.createUI(trafficgroup));
+//		networkManagement.setUI((BasicMenuUI) NSMenuUI.createUI(networkManagement));
+//		networkManagement.getPopupMenu().setUI((PopupMenuUI) NSPopupMenuUI.createUI(networkManagement.getPopupMenu()));
+//		networkManagement.setFont(new java.awt.Font("微软雅黑", Font.PLAIN, 13));
+//		networkManagement.setForeground(menufore);
+//		networkManagement.add(resourcemanagement);
+//		resourcemanagement.setUI((BasicMenuUI) NSMenuUI.createUI(resourcemanagement));
+//		resourcemanagement.getPopupMenu().setUI(
+//				(PopupMenuUI) NSPopupMenuUI.createUI(resourcemanagement.getPopupMenu()));
+//		networkManagement.add(businessmanagement);
+//		nodemanagement.setUI((MenuItemUI) NSMenuItemUI.createUI(nodemanagement));
+//		resourcemanagement.add(nodemanagement);
+//		fibermanagement.setUI((MenuItemUI) NSMenuItemUI.createUI(fibermanagement));
+//		resourcemanagement.add(fibermanagement);
+//		wdmmanagement.setUI((MenuItemUI) NSMenuItemUI.createUI(wdmmanagement));
+//		resourcemanagement.add(wdmmanagement);
+//		
+//		networkManagement.add(businessmanagement);
+//		businessmanagement.setUI((MenuItemUI) NSMenuItemUI.createUI(businessmanagement));
+//		networkManagement.add(SRLGmanagement);
+//		SRLGmanagement.setUI((MenuItemUI) NSMenuItemUI.createUI(SRLGmanagement));
+//		networkManagement.add(trafficgroup);
+//		trafficgroup.setUI((MenuItemUI) NSMenuItemUI.createUI(trafficgroup));
 		// 网络规划
 		networkDesign.setUI((BasicMenuUI) NSMenuUI.createUI(networkDesign));
 		networkDesign.getPopupMenu().setUI((PopupMenuUI) NSPopupMenuUI.createUI(networkDesign.getPopupMenu()));
 		networkDesign.setFont(new java.awt.Font("微软雅黑", Font.PLAIN, 13));
 		networkDesign.setForeground(menufore);
+		
+		networkDesign.add(parameterSetting);
+		parameterSetting.setUI((BasicMenuUI) NSMenuUI.createUI(parameterSetting));
+		parameterSetting.getPopupMenu().setUI(
+				(PopupMenuUI) NSPopupMenuUI.createUI(parameterSetting.getPopupMenu()));
+		parameterSetting.add(NFsetting);
+		NFsetting.setUI((MenuItemUI) NSMenuItemUI.createUI(NFsetting));
+		parameterSetting.add(OSNRSetting);
+		OSNRSetting.setUI((MenuItemUI) NSMenuItemUI.createUI(OSNRSetting));
+		parameterSetting.add(overOSNRsetting);
+		overOSNRsetting.setUI((MenuItemUI) NSMenuItemUI.createUI(overOSNRsetting));
+		
+		 
+			
 		networkDesign.add(networkDesignguide);
 		networkDesignguide.setUI((MenuItemUI) NSMenuItemUI.createUI(networkDesignguide));
-		// 故障模拟
+//		networkDesignguide.getPopupMenu().setUI(
+//				(PopupMenuUI) NSPopupMenuUI.createUI(networkDesignguide.getPopupMenu()));
+//		networkDesignguide.add(Algorithmused);
+//		Algorithmused.setUI((MenuItemUI) NSMenuItemUI.createUI(Algorithmused));
+		networkDesign.add(businessmanagement);
+		businessmanagement.setUI((MenuItemUI) NSMenuItemUI.createUI(businessmanagement));
+		networkDesign.add(bussinessPlan);
+		bussinessPlan.setUI((MenuItemUI) NSMenuItemUI.createUI(bussinessPlan));
+		// 网络仿真
 		faultSimulation.setUI((BasicMenuUI) NSMenuUI.createUI(faultSimulation));
 		faultSimulation.getPopupMenu().setUI((PopupMenuUI) NSPopupMenuUI.createUI(faultSimulation.getPopupMenu()));
 		faultSimulation.setFont(new java.awt.Font("微软雅黑", Font.PLAIN, 13));
@@ -505,8 +593,8 @@ public class NetDesign_zs extends NSTitleFrame {
 		Nodesingle.setUI((MenuItemUI) NSMenuItemUI.createUI(Nodesingle));
 		faultSimulation.add(Linksingle);
 		Linksingle.setUI((MenuItemUI) NSMenuItemUI.createUI(Linksingle));
-		faultSimulation.add(SRLGsingle);
-		SRLGsingle.setUI((MenuItemUI) NSMenuItemUI.createUI(SRLGsingle));
+//		faultSimulation.add(SRLGsingle);
+//		SRLGsingle.setUI((MenuItemUI) NSMenuItemUI.createUI(SRLGsingle));
 		faultSimulation.add(Artificialsetting);
 		Artificialsetting.setUI((MenuItemUI) NSMenuItemUI.createUI(Artificialsetting));
 //		Artificialsetting.add(nodeArtificialsetting);
@@ -522,12 +610,22 @@ public class NetDesign_zs extends NSTitleFrame {
 		nodeoutput.setUI((MenuItemUI) NSMenuItemUI.createUI(nodeoutput));
 		reportOutput.add(traficoutput);
 		traficoutput.setUI((MenuItemUI) NSMenuItemUI.createUI(traficoutput));
+		reportOutput.add(guzhangout);
+		guzhangout.setUI((BasicMenuUI) NSMenuUI.createUI(guzhangout));
+		guzhangout.getPopupMenu().setUI((PopupMenuUI) NSPopupMenuUI.createUI(guzhangout.getPopupMenu()));
 		
-		// 链路资源利用率
-		LinkUtilization.setUI((BasicMenuUI) NSMenuUI.createUI(LinkUtilization));
-		LinkUtilization.getPopupMenu().setUI((PopupMenuUI) NSPopupMenuUI.createUI(LinkUtilization.getPopupMenu()));
-		LinkUtilization.setFont(new java.awt.Font("微软雅黑", Font.PLAIN, 13));
-		LinkUtilization.setForeground(menufore);
+		guzhangout.add(nodeout);
+		nodeout.setUI((MenuItemUI) NSMenuItemUI.createUI(nodeout));
+		
+		guzhangout.add(linkout);
+		linkout.setUI((MenuItemUI) NSMenuItemUI.createUI(linkout));
+		
+		
+//		// 链路资源利用率
+//		LinkUtilization.setUI((BasicMenuUI) NSMenuUI.createUI(LinkUtilization));
+//		LinkUtilization.getPopupMenu().setUI((PopupMenuUI) NSPopupMenuUI.createUI(LinkUtilization.getPopupMenu()));
+//		LinkUtilization.setFont(new java.awt.Font("微软雅黑", Font.PLAIN, 13));
+//		LinkUtilization.setForeground(menufore);
 		
 		// SRLG自动映射
 		SRLGyingshe.removeAll();
@@ -602,7 +700,7 @@ public class NetDesign_zs extends NSTitleFrame {
 
 		GisNetworkAdapter adapter = new GisNetworkAdapter(network);
 		adapter.installAdapter();
-		adapter.getMap().setZoomLevels(new int[] { 4, 5, 7 });
+		adapter.getMap().setZoomLevels(new int[] { 7,8,9 });
 		map = adapter.getMap();
 		String b = "file:/" + System.getProperty("user.dir") + "/map/localecache";
 		GisManager.registerDefaultSetting(TWaverGisConst.MAPDRIVER_GOOGLE_MAP, b);
@@ -1427,7 +1525,7 @@ public class NetDesign_zs extends NSTitleFrame {
 		// box1.addElement(EleLinkDummy);
 		box1.addElement(TrafficDummy);
 
-		 PropertyDisplay.cleartable();
+		// PropertyDisplay.cleartable();
 		LinkData.clearLink();// 11.22
 		NodeData.clearNode();
 		TrafficData.clearTraffic();
@@ -1762,12 +1860,66 @@ public class NetDesign_zs extends NSTitleFrame {
 		});
 		
 		// 资源清空
-		resourceclear.addActionListener(new ActionListener() {
+				resourceclear.addActionListener(new ActionListener() {
+							public void actionPerformed(ActionEvent e) {
+							int test = JOptionPane.showConfirmDialog(null, "是否确定要清空全部网元及业务资源？");
+							switch(test)
+							{
+								case 0:
+								onlydataclear();                         //清空网元资源
+								TrafficData traffic=new TrafficData();   //清空业务资源
+							    traffic.clearTraffic();
+							    LinkRGroup.clear();                      //清空共享风险链路组
+							       
+							    JOptionPane.showMessageDialog(null, "资源已清空");
+							    
+							    break;
+								case 1:
+								case 2:	
+									break;
+								}	
+							}
+						});
+//				Algorithmused.addActionListener(new ActionListener() {
+//					public void actionPerformed(ActionEvent e) {
+//					
+//					}
+				
+//				});
+       //NF系数设置
+				NFsetting.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
-
+//						new NFCoefficient();	
+						new AFSetting();
+						//window.frmAf.setVisible(true);
+						for(FiberLink link : FiberLink.fiberLinkList) {
+							System.out.println(link.getName()+": "+link.getOSNRCount());
+						}
 					}
 				});
-		
+      //背靠背指标
+				overOSNRsetting.addActionListener(new ActionListener() {
+					
+					@Override
+					public void actionPerformed(ActionEvent e) {
+						// TODO Auto-generated method stub
+						new BackToBackCoefficient();
+					}
+				});
+	  //OSNR参数设置
+				OSNRSetting.addActionListener(new ActionListener() {
+					
+					@Override
+					public void actionPerformed(ActionEvent arg0) {
+						// TODO Auto-generated method stub
+						new dialog.OSNRSetting();
+						for(FiberLink link : FiberLink.fiberLinkList) {
+							System.out.println(link.getOSNRCount());
+						}
+					}
+				});
+				
+				
 		Nodesingle.addActionListener(new ActionListener() {// 节点单断
 			public void actionPerformed(ActionEvent e) {
 				new Dlg_NodePoll(dt);
@@ -1780,16 +1932,16 @@ public class NetDesign_zs extends NSTitleFrame {
 			}
 		});
 		
-		SRLGsingle.addActionListener(new ActionListener() {// 链路单断
-			public void actionPerformed(ActionEvent e) {
-				if ((FiberLink.fiberLinkList.isEmpty()) && (WDMLink.WDMLinkList.isEmpty())) {
-					JOptionPane.showMessageDialog(null, "请先导入网元资源！");
-					return;
-				} else {
-				new Dlg_SRLGPoll(dt);
-				}
-			}
-		});
+//		SRLGsingle.addActionListener(new ActionListener() {// 链路单断
+//			public void actionPerformed(ActionEvent e) {
+//				if ((FiberLink.fiberLinkList.isEmpty()) && (WDMLink.WDMLinkList.isEmpty())) {
+//					JOptionPane.showMessageDialog(null, "请先导入网元资源！");
+//					return;
+//				} else {
+//				new Dlg_SRLGPoll(dt);
+//				}
+//			}
+//		});
 		//人工设置故障
 //		 nodeArtificialsetting.addActionListener(new ActionListener() {
 //				@Override
@@ -1804,6 +1956,26 @@ public class NetDesign_zs extends NSTitleFrame {
 //					new Dlg_SetLinkPoll(dt);
 //				}
 //		 });
+		//资源管理
+		nodemanagement.addActionListener(new ActionListener() {// 节点管理
+			public void actionPerformed(ActionEvent e) {
+				new Dlg_noderesult();
+			}
+		});
+		fibermanagement.addActionListener(new ActionListener() {//fiber管理
+			public void actionPerformed(ActionEvent e) {
+				new Dlg_fiberresult();
+			}
+		});
+		wdmmanagement.addActionListener(new ActionListener() {//wdm管理
+			public void actionPerformed(ActionEvent e) {
+				new Dlg_wdmresult();
+			}
+		});
+		businessmanagement.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent e) {    //业务管理
+				new Dlg_DesignResult();
+			}});
 		
 		Artificialsetting.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e) {    //人工故障设置
@@ -1815,6 +1987,11 @@ public class NetDesign_zs extends NSTitleFrame {
 				new Dlg_PolicySetting();
 			}});
 		
+        bussinessPlan.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent e) {    //路由分配
+				new Dlg_BussinessPlan();
+			}});
+		
 		SRLGmanagement.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -1822,7 +1999,7 @@ public class NetDesign_zs extends NSTitleFrame {
 					JOptionPane.showMessageDialog(null, "请先导入网元资源！");
 					return;
 				} else {
-					new Dlg_SRLGSet();
+					new Dlg_SRLGSet(dt);
 				}
 			}
 			});
@@ -1859,392 +2036,959 @@ public class NetDesign_zs extends NSTitleFrame {
 				});
 	
 
-		//报表导出
-				nodeoutput.addActionListener(new ActionListener() {
-					public void actionPerformed(ActionEvent e) {
+		// 报表导出
+		nodeoutput.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
 
-						if (e.getSource() == nodeoutput) {
-							JFileChooser chooser = new JFileChooser();
-							if (null == filepath) {// 如果当前不存在正在操作的工程
-								chooser = new JFileChooser();
-							} else {
-								filelist = filepath;
-								chooser = new JFileChooser(filelist);// 打开默认路径为工程的路径
-							}
-							chooser.setDialogTitle("导出节点配置表");
-							chooser.setAcceptAllFileFilterUsed(false);
-							// 前一个xls为窗口下拉选择文件类型显示，后一个是文件过滤器的文件类型
-							FileNameExtensionFilter filter = new FileNameExtensionFilter("xls", "xls");
-							chooser.setFileFilter(filter);
-							// 获取当前时间
-							Calendar cal = Calendar.getInstance();
-							SimpleDateFormat dateformat = new SimpleDateFormat("MM-dd");
-							String date = dateformat.format(cal.getTime());
-							JTextField text = getTextField(chooser);// 获取输入文件名部分
-							text.setText("节点配置表" + date);// 设置默认文件名
-							chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-							int option = chooser.showSaveDialog(chooser);
-							if (option == JFileChooser.APPROVE_OPTION) {// 如果点击确定
-								File file = chooser.getSelectedFile();
-								filelist = file.getPath();
-								if (!(filelist.endsWith(".xls")))// 如果现在的文件名里不包含扩展名，就给其加上
-									filelist = filelist + ".xls";
-								file = new File(filelist);
-								if (file.exists()) {// 如果这个文件已经存在了
-									// JOptionPane.showMessageDialog(null, "当前文件已存存在，请删除或重命名后再导出");}
-									int test = JOptionPane.showConfirmDialog(null, "当前文件已存在，是否覆盖？");
-									switch (test) {
-									case 0:// 覆盖
-											// PortDataBase portOut = new PortDataBase();
-											// int id = Integer
-											// .parseInt(String.valueOf(nodeModel.getValueAt(nodeTable.getSelectedRow(),
-											// 0)));
-											// theNode = CommonNode.getNode(id);
-										try {
-											NodeOutput(filelist);
-											JOptionPane.showMessageDialog(null, "表格已覆盖");
-										} catch (Exception e1) {
-											JOptionPane.showMessageDialog(null, "请关闭原Excel文件，否则无法完成覆盖");
-										}
-										setVisible(false);
-										dispose();
-										break;
-									case 1:
-										return;
-									case 2:
-										return;
-									}
-								} else {
+				if (e.getSource() == nodeoutput) {
+					JFileChooser chooser = new JFileChooser();
+					if (null == filepath) {// 如果当前不存在正在操作的工程
+						chooser = new JFileChooser();
+					} else {
+						filelist = filepath;
+						chooser = new JFileChooser(filelist);// 打开默认路径为工程的路径
+					}
+					chooser.setDialogTitle("导出节点配置表");
+					chooser.setAcceptAllFileFilterUsed(false);
+					// 前一个xls为窗口下拉选择文件类型显示，后一个是文件过滤器的文件类型
+					FileNameExtensionFilter filter = new FileNameExtensionFilter("xls", "xls");
+					chooser.setFileFilter(filter);
+					// 获取当前时间
+					Calendar cal = Calendar.getInstance();
+					SimpleDateFormat dateformat = new SimpleDateFormat("MM-dd");
+					String date = dateformat.format(cal.getTime());
+					JTextField text = getTextField(chooser);// 获取输入文件名部分
+					text.setText("节点配置表" + date);// 设置默认文件名
+					chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+					int option = chooser.showSaveDialog(chooser);
+					if (option == JFileChooser.APPROVE_OPTION) {// 如果点击确定
+						File file = chooser.getSelectedFile();
+						filelist = file.getPath();
+						if (!(filelist.endsWith(".xls")))// 如果现在的文件名里不包含扩展名，就给其加上
+							filelist = filelist + ".xls";
+						file = new File(filelist);
+						if (file.exists()) {// 如果这个文件已经存在了
+							// JOptionPane.showMessageDialog(null, "当前文件已存存在，请删除或重命名后再导出");}
+							int test = JOptionPane.showConfirmDialog(null, "当前文件已存在，是否覆盖？");
+							switch (test) {
+							case 0:// 覆盖
+									// PortDataBase portOut = new PortDataBase();
+									// int id = Integer
+									// .parseInt(String.valueOf(nodeModel.getValueAt(nodeTable.getSelectedRow(),
+									// 0)));
+									// theNode = CommonNode.getNode(id);
+								try {
 									NodeOutput(filelist);
-									JOptionPane.showMessageDialog(null, "数据已导出");
+									JOptionPane.showMessageDialog(null, "表格已覆盖");
+								} catch (Exception e1) {
+									JOptionPane.showMessageDialog(null, "请关闭原Excel文件，否则无法完成覆盖");
 								}
-
+//								setVisible(false);
+//								dispose();
+								break;
+							case 1:
+								return;
+							case 2:
+								return;
 							}
+						} else {
+							NodeOutput(filelist);
+							JOptionPane.showMessageDialog(null, "数据已导出");
 						}
-					}
 
-
-					private void NodeOutput(String str) {
-						HSSFWorkbook wb = null;
-						HSSFSheet sheet1 = null;
-						HSSFSheet sheet2 = null;
-						try {
-							// fs = new POIFSFileSystem(new FileInputStream(str));
-							wb = new HSSFWorkbook();
-							sheet1 = wb.createSheet("链路利用率");
-							sheet2 = wb.createSheet("节点");
-						} catch (Exception e) {
-							e.printStackTrace();
-						}
-						
-						HSSFRow row1 = sheet1.createRow(0);
-						HSSFCell cell1 = row1.createCell(0);
-						cell1.setCellValue("序号");
-						cell1 = row1.createCell(1);
-						cell1.setCellValue("起点");
-						cell1 = row1.createCell(2);
-						cell1.setCellValue("终点");
-						cell1 = row1.createCell(3);
-						cell1.setCellValue("数量");
-						cell1 = row1.createCell(4);
-						cell1.setCellValue("用于工作路由的波长波道编号");
-						cell1 = row1.createCell(5);
-						cell1.setCellValue("数量");
-						cell1 = row1.createCell(6);
-						cell1.setCellValue("用于恢复路由的波长波道编号");
-						
-						for (int i = 0; i < WDMLink.WDMLinkList.size(); i++) {
-							WDMLink link = WDMLink.WDMLinkList.get(i);
-							row1 = sheet1.createRow(i + 1);
-							cell1 = row1.createCell(0);
-							cell1.setCellValue(link.getId());
-							cell1 = row1.createCell(1);
-							cell1.setCellValue(link.getFromNode().getName());
-							cell1 = row1.createCell(2);
-							cell1.setCellValue(link.getToNode().getName());
-							cell1 = row1.createCell(3);
-							List<WaveLength> wavelist=link.getWaveLengthList();
-							int workUsedWaveNum=0;
-							for(int k=0;k<wavelist.size();k++) {
-								if(wavelist.get(k).getStatus()==Status.工作)				
-									workUsedWaveNum++;				
-							}
-							cell1.setCellValue(workUsedWaveNum);
-							cell1 = row1.createCell(4);
-							cell1.setCellValue((link.workedUseWave()));
-							
-							cell1 = row1.createCell(5);
-							int otherUsedWaveNum=0;
-							List<WaveLength> wavelist2=link.getWaveLengthList();
-							for(int j=0;j<wavelist2.size();j++) {
-								if(wavelist2.get(j).getStatus()==Status.保护||wavelist.get(j).getStatus()==Status.恢复)				
-									otherUsedWaveNum++;				
-							}
-							cell1.setCellValue(otherUsedWaveNum);
-							cell1 = row1.createCell(6);
-							cell1.setCellValue(link.otherUseWave());
-						}
-						
-						
-						HSSFRow row2 = sheet2.createRow(0);
-						HSSFCell cell2 = row2.createCell(0);
-						cell2.setCellValue("序号");
-						cell2 = row2.createCell(1);
-						cell2.setCellValue("节点");
-						cell2 = row2.createCell(2);
-						cell2.setCellValue("上下路模块组数量");
-						cell2 = row2.createCell(3);
-						cell2.setCellValue("用于工作的中继OTU数量");
-						cell2 = row2.createCell(4);
-						cell2.setCellValue("用于恢复的中继OTU数量");
-						
-                        System.out.println(CommonNode.ROADM_NodeList.size());
-                        for(int k=0;k<CommonNode.ROADM_NodeList.size();k++) {
-                        	                     	
-							CommonNode node=CommonNode.ROADM_NodeList.get(k);
-							row2 = sheet2.createRow(k + 1);
-							cell2 = row2.createCell(0);
-							cell2.setCellValue(node.getId());
-							cell2 = row2.createCell(1);
-							cell2.setCellValue(node.getName());
-							cell2 = row2.createCell(2);
-							cell2.setCellValue(node.getUpDown());
-							cell2 = row2.createCell(3);
-							cell2.setCellValue(node.getWorkOTUNum());
-							cell2 = row2.createCell(4);
-							cell2.setCellValue(node.getRestoreOTUNum());
-//							cell2 = row2.createCell(5);
-//							cell2.setCellValue();
-						}
-						
-						
-						FileOutputStream os = null;
-						try {
-							os = new FileOutputStream(str);
-						} catch (FileNotFoundException e) {
-							// TODO 自动生成 catch 块
-							e.printStackTrace();
-						}
-						try {
-							wb.write(os);
-						} catch (IOException e) {
-							// TODO 自动生成 catch 块
-							e.printStackTrace();
-						}
-						try {
-							os.close();
-						} catch (IOException e) {
-							// TODO 自动生成 catch 块
-							e.printStackTrace();
-						}
-					}
-					
-				});
-				traficoutput.addActionListener(new ActionListener() {
-					public void actionPerformed(ActionEvent e) {
-
-
-						if (e.getSource() == traficoutput) {
-							JFileChooser chooser = new JFileChooser();
-							if (null == filepath) {// 如果当前不存在正在操作的工程
-								chooser = new JFileChooser();
-							} else {
-								filelist = filepath;
-								chooser = new JFileChooser(filelist);// 打开默认路径为工程的路径
-							}
-							chooser.setDialogTitle("导出工作路由表");
-							chooser.setAcceptAllFileFilterUsed(false);
-							// 前一个xls为窗口下拉选择文件类型显示，后一个是文件过滤器的文件类型
-							FileNameExtensionFilter filter = new FileNameExtensionFilter("xls", "xls");
-							chooser.setFileFilter(filter);
-							// 获取当前时间
-							Calendar cal = Calendar.getInstance();
-							SimpleDateFormat dateformat = new SimpleDateFormat("MM-dd");
-							String date = dateformat.format(cal.getTime());
-							JTextField text = getTextField(chooser);// 获取输入文件名部分
-							text.setText("工作路由表" + date);// 设置默认文件名
-							chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-							int option = chooser.showSaveDialog(chooser);
-							if (option == JFileChooser.APPROVE_OPTION) {// 如果点击确定
-								File file = chooser.getSelectedFile();
-								filelist = file.getPath();
-								if (!(filelist.endsWith(".xls")))// 如果现在的文件名里不包含扩展名，就给其加上
-									filelist = filelist + ".xls";
-								file = new File(filelist);
-								if (file.exists()) {// 如果这个文件已经存在了
-									// JOptionPane.showMessageDialog(null, "当前文件已存存在，请删除或重命名后再导出");}
-									int test = JOptionPane.showConfirmDialog(null, "当前文件已存在，是否覆盖？");
-									switch (test) {
-									case 0:// 覆盖
-											// PortDataBase portOut = new PortDataBase();
-											// int id = Integer
-											// .parseInt(String.valueOf(nodeModel.getValueAt(nodeTable.getSelectedRow(),
-											// 0)));
-											// theNode = CommonNode.getNode(id);
-										try {
-											TrafficOutPut(filelist);
-											JOptionPane.showMessageDialog(null, "表格已覆盖");
-										} catch (Exception e1) {
-											JOptionPane.showMessageDialog(null, "请关闭原Excel文件，否则无法完成覆盖");
-										}
-										setVisible(false);
-										dispose();
-										break;
-									case 1:
-										return;
-									case 2:
-										return;
-									}
-								} else {
-									TrafficOutPut(filelist);
-									JOptionPane.showMessageDialog(null, "数据已导出");
-								}
-
-							}
-						}
-					}
-				});}
-	
-	
-
-				private void TrafficOutPut(String str) {
-						HSSFWorkbook wb = null;
-						HSSFSheet sheet1 = null;
-						try {
-							// fs = new POIFSFileSystem(new FileInputStream(str));
-							wb = new HSSFWorkbook();
-							sheet1 = wb.createSheet("工作路由");
-						} catch (Exception e) {
-							e.printStackTrace();
-						}
-						
-						
-						HSSFRow row1 = sheet1.createRow(0);
-						HSSFCell cell1 = row1.createCell(0);
-						cell1.setCellValue("业务编号");
-						cell1 = row1.createCell(1);
-						cell1.setCellValue("起点");
-						cell1 = row1.createCell(2);
-						cell1.setCellValue("终点");
-						cell1 = row1.createCell(3);
-						cell1.setCellValue("电中继节点");
-						cell1 = row1.createCell(4);
-						cell1.setCellValue("名称");
-						cell1 = row1.createCell(5);
-						cell1.setCellValue("中心频率");
-						cell1 = row1.createCell(6);
-						cell1.setCellValue("谱宽");
-//						cell1 = row1.createCell(7);
-//						cell1.setCellValue("业务终点");
-						cell1 = row1.createCell(7);
-						cell1.setCellValue("ODU2序号");
-						cell1 = row1.createCell(8);
-						cell1.setCellValue("ODU1序号");
-						cell1 = row1.createCell(9);
-						cell1.setCellValue("长度（km）");
-						cell1 = row1.createCell(10);
-						cell1.setCellValue("等效跨段数量");
-						cell1 = row1.createCell(11);
-						cell1.setCellValue("正向OSNR");
-						cell1 = row1.createCell(12);
-						cell1.setCellValue("反向ODNR");
-						cell1 = row1.createCell(13);
-						cell1.setCellValue("OSNR容限");
-						cell1 = row1.createCell(14);
-						cell1.setCellValue("DGD值");
-						cell1 = row1.createCell(15);
-						cell1.setCellValue("DGD容限");
-						cell1 = row1.createCell(16);
-						cell1.setCellValue("Pre-FEC BER值");
-						cell1 = row1.createCell(17);
-						cell1.setCellValue("Q值");
-						
-						System.out.println(Traffic.trafficList);
-						
-						for (int i = 0; i < data.Traffic.trafficList.size(); i++) {
-							Traffic tra = data.Traffic.trafficList.get(i);
-							row1 = sheet1.createRow(i + 1);
-							cell1 = row1.createCell(0);
-							cell1.setCellValue(tra.getId());
-							cell1 = row1.createCell(1);
-							cell1.setCellValue(tra.getFromNode().getName());
-							cell1 = row1.createCell(2);
-							cell1.setCellValue(tra.getToNode().getName());
-							cell1 = row1.createCell(3);
-							cell1.setCellValue(tra.waveChangedNode());
-
-//							if(tra.getWorkRoute().getWaveChangedNode().size()!=0)
-//							{
-//								StringBuilder b=new StringBuilder();
-//								for(int j=0;j<tra.getWorkRoute().getWaveChangedNode().size();j++) {
-//									b.append(tra.getWorkRoute().getWaveChangedNode().get(j).getName());
-//								}
-//								cell1.setCellValue(b.toString());
-//								}
-//							else
-//							{
-//								cell1.setCellValue("无");
-//							}
-							cell1 = row1.createCell(4);
-							cell1.setCellValue(tra.workedRoute().toString());
-							cell1 = row1.createCell(5);
-						
-							if(tra.getWorkRoute()!=null)
-							{
-								cell1.setCellValue(tra.getWorkRoute().toStingwave());
-							}
-							cell1 = row1.createCell(9);
-							if(tra.getWorkRoute()!=null)
-							{cell1.setCellValue(tra.getWorkRoute().routelength());}
-							
-							
-
-						
-						}
-						
-						
-						
-						
-						FileOutputStream os = null;
-						try {
-							os = new FileOutputStream(str);
-						} catch (FileNotFoundException e) {
-							// TODO 自动生成 catch 块
-							e.printStackTrace();
-						}
-						try {
-							wb.write(os);
-						} catch (IOException e) {
-							// TODO 自动生成 catch 块
-							e.printStackTrace();
-						}
-						try {
-							os.close();
-						} catch (IOException e) {
-							// TODO 自动生成 catch 块
-							e.printStackTrace();
-						}
-					}
-			
-
-			protected JTextField getTextField(Container c) {
-				// TODO Auto-generated method stub
-				JTextField text = null;
-				for (int i = 0; i < c.getComponentCount(); i++) {
-					Component cnt = c.getComponent(i);
-					if (cnt instanceof JTextField) {
-						return (JTextField) cnt;
-					}
-					if (cnt instanceof Container) {
-						text = getTextField((Container) cnt);
-						if (text != null) {
-							return text;
-						}
 					}
 				}
-				return text;
 			}
+
+			private void NodeOutput(String str) {
+				HSSFWorkbook wb = null;
+				HSSFSheet sheet1 = null;
+				HSSFSheet sheet2 = null;
+				try {
+					// fs = new POIFSFileSystem(new FileInputStream(str));
+					wb = new HSSFWorkbook();
+					sheet1 = wb.createSheet("链路利用率");
+					sheet2 = wb.createSheet("节点");
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+
+				HSSFRow row1 = sheet1.createRow(0);
+				HSSFCell cell1 = row1.createCell(0);
+				cell1.setCellValue("序号");
+				cell1 = row1.createCell(1);
+				cell1.setCellValue("起点");
+				cell1 = row1.createCell(2);
+				cell1.setCellValue("终点");
+				cell1 = row1.createCell(3);
+				cell1.setCellValue("数量");
+				cell1 = row1.createCell(4);
+				cell1.setCellValue("用于工作路由的波长波道编号");
+				cell1 = row1.createCell(5);
+				cell1.setCellValue("数量");
+				cell1 = row1.createCell(6);
+				cell1.setCellValue("用于恢复路由的波长波道编号");
+
+				for (int i = 0; i < WDMLink.WDMLinkList.size(); i++) {
+					WDMLink link = WDMLink.WDMLinkList.get(i);
+					row1 = sheet1.createRow(i + 1);
+					cell1 = row1.createCell(0);
+					cell1.setCellValue(link.getId());
+					cell1 = row1.createCell(1);
+					cell1.setCellValue(link.getFromNode().getName());
+					cell1 = row1.createCell(2);
+					cell1.setCellValue(link.getToNode().getName());
+					cell1 = row1.createCell(3);
+					List<WaveLength> wavelist = link.getWaveLengthList();
+					int workUsedWaveNum = 0;
+					for (int k = 0; k < wavelist.size(); k++) {
+						if (wavelist.get(k).getStatus() == Status.工作)
+							workUsedWaveNum++;
+
+					}
+					cell1.setCellValue(workUsedWaveNum);
+					cell1 = row1.createCell(4);
+					cell1.setCellValue((link.workedUseWave()));
+					
+					//选择的是动态重路由策略
+					if(DataSave.reRoutePolicy == 2) {
+						System.out.println("+++++++++++++++++++++++++++++++++++++++++++++++6555555555555555555555");
+						cell1 = row1.createCell(5);
+						int otherUsedWaveNum = 0;
+						String res = "";
+						int[] dynUsedLink = link.getDynUsedLink();
+						for(int j=1; j<dynUsedLink.length;j++) {
+							if(dynUsedLink[j] == 1) {
+								otherUsedWaveNum++;
+								res = res + j +",";
+							}
+						}
+						if(!res.equals("")) {
+							res = res.substring(0, res.length() - 1);
+						}
+						cell1.setCellValue(otherUsedWaveNum);
+						cell1 = row1.createCell(6);
+						cell1.setCellValue(res);
+					}else {
+						cell1 = row1.createCell(5);
+						int otherUsedWaveNum = 0;
+						List<WaveLength> wavelist2 = link.getWaveLengthList();
+						for (int j = 0; j < wavelist2.size(); j++) {
+							if (wavelist2.get(j).getStatus() == Status.保护 || wavelist.get(j).getStatus() == Status.恢复)
+								otherUsedWaveNum++;
+						}
+						cell1.setCellValue(otherUsedWaveNum);
+						cell1 = row1.createCell(6);
+						cell1.setCellValue(link.otherUseWave());
+					}
+					
+					
+				}
+
+				HSSFRow row2 = sheet2.createRow(0);
+				HSSFCell cell2 = row2.createCell(0);
+				cell2.setCellValue("序号");
+				cell2 = row2.createCell(1);
+				cell2.setCellValue("节点");
+				cell2 = row2.createCell(2);
+				cell2.setCellValue("上下路模块组数量");
+				cell2 = row2.createCell(3);
+				cell2.setCellValue("用于工作的中继OTU数量");
+				cell2 = row2.createCell(4);
+				cell2.setCellValue("用于恢复的中继OTU数量");
+
+				System.out.println(CommonNode.ROADM_NodeList.size());
+				for (int k = 0; k < CommonNode.ROADM_NodeList.size(); k++) {
+
+					CommonNode node = CommonNode.ROADM_NodeList.get(k);
+					row2 = sheet2.createRow(k + 1);
+					cell2 = row2.createCell(0);
+					cell2.setCellValue(node.getId());
+					cell2 = row2.createCell(1);
+					cell2.setCellValue(node.getName());
+					if(DataSave.reRoutePolicy == 2) {
+						System.out.println("哎！！！！！！！！！！！！！！！！！！！！！！");
+						cell2 = row2.createCell(2);
+						cell2.setCellValue(Math.max(node.getDynUsedUpdown(), node.countUpdown(node)));
+						//cell2.setCellValue(node.getDynUsedUpdown());
+					} else {
+						cell2 = row2.createCell(2);
+						cell2.setCellValue(node.countUpdown(node));}
+					cell2 = row2.createCell(3);
+					cell2.setCellValue(node.getWorkOTUNum());
+					
+					//选择的是动态重路由策略
+					if(DataSave.reRoutePolicy == 2) {
+						cell2 = row2.createCell(4);
+						int[] dynUsedOTU = node.getDynUsedOTU();
+						cell2.setCellValue(dynUsedOTU[0]);
+					}else {
+						cell2 = row2.createCell(4);
+						cell2.setCellValue(node.getRestoreOTUNum());
+					}
+					
+					
+					// cell2 = row2.createCell(5);
+					// cell2.setCellValue();
+				}
+
+				FileOutputStream os = null;
+				try {
+					os = new FileOutputStream(str);
+				} catch (FileNotFoundException e) {
+					// TODO 自动生成 catch 块
+					e.printStackTrace();
+				}
+				try {
+					wb.write(os);
+				} catch (IOException e) {
+					// TODO 自动生成 catch 块
+					e.printStackTrace();
+				}
+				try {
+					os.close();
+				} catch (IOException e) {
+					// TODO 自动生成 catch 块
+					e.printStackTrace();
+				}
+			}
+
+		});
+		traficoutput.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (e.getSource() == traficoutput) {
+					JFileChooser chooser = new JFileChooser();
+					if (null == filepath) {// 如果当前不存在正在操作的工程
+						chooser = new JFileChooser();
+					} else {
+						filelist = filepath;
+						chooser = new JFileChooser(filelist);// 打开默认路径为工程的路径
+					}
+					chooser.setDialogTitle("导出工作路由表");
+					chooser.setAcceptAllFileFilterUsed(false);
+					// 前一个xls为窗口下拉选择文件类型显示，后一个是文件过滤器的文件类型
+					FileNameExtensionFilter filter = new FileNameExtensionFilter("xls", "xls");
+					chooser.setFileFilter(filter);
+					// 获取当前时间
+					Calendar cal = Calendar.getInstance();
+					SimpleDateFormat dateformat = new SimpleDateFormat("MM-dd");
+					String date = dateformat.format(cal.getTime());
+					JTextField text = getTextField(chooser);// 获取输入文件名部分
+					text.setText("工作路由表" + date);// 设置默认文件名
+					chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+					int option = chooser.showSaveDialog(chooser);
+					if (option == JFileChooser.APPROVE_OPTION) {// 如果点击确定
+						
+						
+					    
+					    File file = chooser.getSelectedFile();
+						filelist = file.getPath();
+						if (!(filelist.endsWith(".xls")))// 如果现在的文件名里不包含扩展名，就给其加上
+							filelist = filelist + ".xls";
+						file = new File(filelist);
+						if (file.exists()) {// 如果这个文件已经存在了
+							// JOptionPane.showMessageDialog(null, "当前文件已存存在，请删除或重命名后再导出");}
+							int test = JOptionPane.showConfirmDialog(null, "当前文件已存在，是否覆盖？");
+							switch (test) {
+							case 0:// 覆盖
+									// PortDataBase portOut = new PortDataBase();
+									// int id = Integer
+									// .parseInt(String.valueOf(nodeModel.getValueAt(nodeTable.getSelectedRow(),
+									// 0)));
+									// theNode = CommonNode.getNode(id);
+								try {
+									TrafficOutPut(filelist);
+									JOptionPane.showMessageDialog(null, "表格已覆盖");
+								} catch (Exception e1) {
+									JOptionPane.showMessageDialog(null, "请关闭原Excel文件，否则无法完成覆盖");
+								}
+//								setVisible(false);
+//								dispose();
+								break;
+							case 1:
+								return;
+							case 2:
+								return;
+							}
+						} else {
+							TrafficOutPut(filelist);
+							JOptionPane.showMessageDialog(null, "数据已导出");
+						}
+
+					}
+				}
+			}
+		});
+		
+//		linkout.addActionListener(new ActionListener() {
+//			public void actionPerformed(ActionEvent e) {
+//				if (e.getSource() == traficoutput) {
+//					JFileChooser chooser = new JFileChooser();
+//					if (null == filepath) {// 如果当前不存在正在操作的工程
+//						chooser = new JFileChooser();
+//					} else {
+//						filelist = filepath;
+//						chooser = new JFileChooser(filelist);// 打开默认路径为工程的路径
+//					}
+//					chooser.setDialogTitle("导出链路单断循环表");
+//					chooser.setAcceptAllFileFilterUsed(false);
+//					// 前一个xls为窗口下拉选择文件类型显示，后一个是文件过滤器的文件类型
+//					FileNameExtensionFilter filter = new FileNameExtensionFilter("xls", "xls");
+//					chooser.setFileFilter(filter);
+//					// 获取当前时间
+//					Calendar cal = Calendar.getInstance();
+//					SimpleDateFormat dateformat = new SimpleDateFormat("MM-dd");
+//					String date = dateformat.format(cal.getTime());
+//					JTextField text = getTextField(chooser);// 获取输入文件名部分
+//					text.setText("链路单断循环表" + date);// 设置默认文件名
+//					chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+//					int option = chooser.showSaveDialog(chooser);
+//					if (option == JFileChooser.APPROVE_OPTION) {// 如果点击确定
+//						File file = chooser.getSelectedFile();
+//						filelist = file.getPath();
+//						if (!(filelist.endsWith(".xls")))// 如果现在的文件名里不包含扩展名，就给其加上
+//							filelist = filelist + ".xls";
+//						file = new File(filelist);
+//						if (file.exists()) {// 如果这个文件已经存在了
+//							// JOptionPane.showMessageDialog(null, "当前文件已存存在，请删除或重命名后再导出");}
+//							int test = JOptionPane.showConfirmDialog(null, "当前文件已存在，是否覆盖？");
+//							switch (test) {
+//							case 0:// 覆盖
+//								try {
+//									TrafficOutPut(filelist);
+//									JOptionPane.showMessageDialog(null, "表格已覆盖");
+//								} catch (Exception e1) {
+//									JOptionPane.showMessageDialog(null, "请关闭原Excel文件，否则无法完成覆盖");
+//								}
+////								setVisible(false);
+////								dispose();
+//								break;
+//							case 1:
+//								return;
+//							case 2:
+//								return;
+//							}
+//						} else {
+//							TrafficOutPut(filelist);
+//							JOptionPane.showMessageDialog(null, "数据已导出");
+//						}
+//
+//					}
+//				}
+//			}
+//		});
+		//45456
+		linkout.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (e.getSource() == linkout) {
+					JFileChooser chooser = new JFileChooser();
+					if (null == filepath) {// 如果当前不存在正在操作的工程
+						chooser = new JFileChooser();
+					} else {
+						filelist = filepath;
+						chooser = new JFileChooser(filelist);// 打开默认路径为工程的路径
+					}
+					chooser.setDialogTitle("导出链路单断信息表");
+					chooser.setAcceptAllFileFilterUsed(false);
+					// 前一个xls为窗口下拉选择文件类型显示，后一个是文件过滤器的文件类型
+					FileNameExtensionFilter filter = new FileNameExtensionFilter("xls", "xls");
+					chooser.setFileFilter(filter);
+					// 获取当前时间
+					Calendar cal = Calendar.getInstance();
+					SimpleDateFormat dateformat = new SimpleDateFormat("MM-dd");
+					String date = dateformat.format(cal.getTime());
+					JTextField text = getTextField(chooser);// 获取输入文件名部分
+					text.setText("链路单断信息表" + date);// 设置默认文件名
+					chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+					int option = chooser.showSaveDialog(chooser);
+					if (option == JFileChooser.APPROVE_OPTION) {// 如果点击确定
+						File file = chooser.getSelectedFile();
+						filelist = file.getPath();
+						if (!(filelist.endsWith(".xls")))// 如果现在的文件名里不包含扩展名，就给其加上
+							filelist = filelist + ".xls";
+						file = new File(filelist);
+						if (file.exists()) {// 如果这个文件已经存在了
+							// JOptionPane.showMessageDialog(null, "当前文件已存存在，请删除或重命名后再导出");}
+							int test = JOptionPane.showConfirmDialog(null, "当前文件已存在，是否覆盖？");
+							switch (test) {
+							case 0:// 覆盖
+									// PortDataBase portOut = new PortDataBase();
+									// int id = Integer
+									// .parseInt(String.valueOf(nodeModel.getValueAt(nodeTable.getSelectedRow(),
+									// 0)));
+									// theNode = CommonNode.getNode(id);
+								try {
+									
+									//去重
+									LinkedList<FiberLink> unrepeat = new LinkedList<>();
+					                unrepeat.addAll(FiberLink.fiberLinkList);
+					                for  ( int  i  =   0 ; i  <  unrepeat.size()  -   1 ; i ++ )  {       
+					                    for  ( int  j  =  unrepeat.size()  -   1 ; j  >  i; j -- )  {       
+					                         if  (unrepeat.get(j).getName().equals(unrepeat.get(i).getName()))  {       
+					                        	 unrepeat.remove(j);       
+					                          }        
+					                      }        
+					                    } 
+									
+									Thread thread = new Thread() {
+							            public void run() {
+							                int i = 0;
+ 						                
+							              //每次单断循环的时候都初始化节点dynUsedOTU[]和链路的dynUsedLink[]属性
+							        		for(CommonNode node : CommonNode.allNodeList) {
+							        			int[] dynUsedOTU = node.getDynUsedOTU();
+							        			dynUsedOTU[0]=dynUsedOTU[1]=0;
+							        		}
+							        		for(WDMLink link : WDMLink.WDMLinkList) {
+							        			int[] dynUsedLink = link.getDynUsedLink();
+							        			for(int j=0;j<dynUsedLink.length;j++) {
+							        				dynUsedLink[j]=0;
+							        			}
+							        		}
+							                
+							                while (i < unrepeat.size()) {		                   
+													
+													FiberLink fl = unrepeat.get(i);
+													// this.linkEvaluation(fl,isSRLG);
+													System.out.println(fl.getName() + " "+i+"/"+ unrepeat.size());
+													List<Traffic> tralist = Evaluation.linkEvaluation(fl);
+													if (tralist != null && tralist.size() != 0 ) {
+														for (Traffic tra : tralist) {
+															if (tra.getResumeRoute() != null) {
+																Route.setDynNodeAndLinkParams(tra.getResumeRoute());
+															}
+														}
+													}
+													// 判断此次仿真用了多少个OTU，如果大于当前使用的OTU数dynOTU[0]，则更新
+													for (CommonNode node : CommonNode.allNodeList) {
+														node.countUpdown1(node);//更新此次仿真用的上下路模块
+														int[] dynUsedOTU = node.getDynUsedOTU();
+														if (dynUsedOTU[1] > dynUsedOTU[0]) {
+															dynUsedOTU[0] = dynUsedOTU[1];
+														}
+													}
+													if(tralist!=null&&tralist.size()!=0) {
+														for(Traffic tra:tralist) {
+//															if (tra.getFaultType()!=0)
+															Evaluation.PutOutTraffic.add(tra);
+														}
+													}
+													TrafficDatabase lldd=new TrafficDatabase();
+													lldd.TrafficOutPut(filelist,fl);
+													TrafficDatabase.index = 1;
+													Evaluation.PutOutTraffic.clear();
+													
+													Evaluation.clearRsmRoute(tralist);
+													i++;    
+							                }
+							            }
+							        };
+							        TestProgressBar.show((Frame) null, thread, "数据导出中...", "数据已导出!", "Cancel");
+									TrafficDatabase.index = 0;
+									JOptionPane.showMessageDialog(null, "表格已覆盖");
+								} catch (Exception e1) {
+									JOptionPane.showMessageDialog(null, "请关闭原Excel文件，否则无法完成覆盖");
+								}
+//								setVisible(false);
+//								dispose();
+								break;
+							case 1:
+								return;
+							case 2:
+								return;
+							}
+						} else {
+							
+							//去重
+							LinkedList<FiberLink> unrepeat = new LinkedList<>();
+			                unrepeat.addAll(FiberLink.fiberLinkList);
+			                for  ( int  i  =   0 ; i  <  unrepeat.size()  -   1 ; i ++ )  {       
+			                    for  ( int  j  =  unrepeat.size()  -   1 ; j  >  i; j -- )  {       
+			                         if  (unrepeat.get(j).getName().equals(unrepeat.get(i).getName()))  {       
+			                        	 unrepeat.remove(j);       
+			                          }        
+			                      }        
+			                    } 
+
+							Thread thread = new Thread() {
+					            public void run() {
+					                int i = 0;					 
+					                while (i < unrepeat.size()) {		                   
+											
+											FiberLink fl = unrepeat.get(i);
+											// this.linkEvaluation(fl,isSRLG);
+											System.out.println(fl.getName() + " "+i+"/"+ unrepeat.size());
+											List<Traffic> tralist = Evaluation.linkEvaluation(fl);
+											if (tralist != null && tralist.size() != 0 ) {
+												for (Traffic tra : tralist) {
+													if (tra.getResumeRoute() != null) {
+														Route.setDynNodeAndLinkParams(tra.getResumeRoute());
+													}
+												}
+											}
+											// 判断此次仿真用了多少个OTU，如果大于当前使用的OTU数dynOTU[0]，则更新
+											for (CommonNode node : CommonNode.allNodeList) {
+												node.countUpdown1(node);//更新此次仿真用的上下路模块
+												int[] dynUsedOTU = node.getDynUsedOTU();
+												if (dynUsedOTU[1] > dynUsedOTU[0]) {
+													dynUsedOTU[0] = dynUsedOTU[1];
+												}
+											}
+											if(tralist!=null&&tralist.size()!=0) {
+												for(Traffic tra:tralist) {
+//													if (tra.getFaultType()!=0)
+													Evaluation.PutOutTraffic.add(tra);
+												}
+											}
+											TrafficDatabase lldd=new TrafficDatabase();
+											lldd.TrafficOutPut(filelist,fl);
+											TrafficDatabase.index = 1;
+											Evaluation.PutOutTraffic.clear();
+											Evaluation.clearRsmRoute(tralist);
+											i++;    
+					                }
+					            }
+					        };
+					        						    
+//							for (int i = 0; i < FiberLink.fiberLinkList.size(); ++i) {
+//								int size = FiberLink.fiberLinkList.size();
+//								NetDesign_zs.processValue = 100*(i+1)/size;
+//								System.out.println("++++++++++++++++++++++++++++++++++"+processValue);
+//								FiberLink fl = FiberLink.fiberLinkList.get(i);
+//								// this.linkEvaluation(fl,isSRLG);
+//								List<Traffic> tralist = Evaluation.linkEvaluation(fl);
+//								if(tralist!=null&&tralist.size()!=0) {
+//									for(Traffic tra:tralist) {
+////										if (tra.getFaultType()!=0)
+//										Evaluation.PutOutTraffic.add(tra);
+//									}
+//								}
+//								TrafficDatabase lldd=new TrafficDatabase();
+//								lldd.TrafficOutPut(filelist,fl);
+//								TrafficDatabase.index = 1;
+//								Evaluation.PutOutTraffic.clear();
+//								Evaluation.clearRsmRoute(tralist);
+//							}
+							TestProgressBar.show((Frame) null, thread, "数据导出中...", "数据已导出!", "Cancel");
+							TrafficDatabase.index = 0;
+							//JOptionPane.showMessageDialog(null, "数据已导出");
+						}
+
+					}
+				}
+			}
+		});
+
+//		linkout.addActionListener(new ActionListener() {
+//			public void actionPerformed(ActionEvent e) {
+//				NetDesign_zs.listEvaluation(FiberLink.fiberLinkList);
+//				// 显示链路单断的窗口
+//			}
+//		});
+		
+
+//		nodeout.addActionListener(new ActionListener() {
+//			public void actionPerformed(ActionEvent e) {
+//				NetDesign_zs.nodelistEvaluation(CommonNode.allNodeList);
+//				// 显示节点单断的窗口
+//			}
+//		});
+		nodeout.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (e.getSource() == linkout) {
+					JFileChooser chooser = new JFileChooser();
+					if (null == filepath) {// 如果当前不存在正在操作的工程
+						chooser = new JFileChooser();
+					} else {
+						filelist = filepath;
+						chooser = new JFileChooser(filelist);// 打开默认路径为工程的路径
+					}
+					chooser.setDialogTitle("导出节点节点信息表");
+					chooser.setAcceptAllFileFilterUsed(false);
+					// 前一个xls为窗口下拉选择文件类型显示，后一个是文件过滤器的文件类型
+					FileNameExtensionFilter filter = new FileNameExtensionFilter("xls", "xls");
+					chooser.setFileFilter(filter);
+					// 获取当前时间
+					Calendar cal = Calendar.getInstance();
+					SimpleDateFormat dateformat = new SimpleDateFormat("MM-dd");
+					String date = dateformat.format(cal.getTime());
+					JTextField text = getTextField(chooser);// 获取输入文件名部分
+					text.setText("节点单断信息表" + date);// 设置默认文件名
+					chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+					int option = chooser.showSaveDialog(chooser);
+					if (option == JFileChooser.APPROVE_OPTION) {// 如果点击确定
+						File file = chooser.getSelectedFile();
+						filelist = file.getPath();
+						if (!(filelist.endsWith(".xls")))// 如果现在的文件名里不包含扩展名，就给其加上
+							filelist = filelist + ".xls";
+						file = new File(filelist);
+						if (file.exists()) {// 如果这个文件已经存在了
+							// JOptionPane.showMessageDialog(null, "当前文件已存存在，请删除或重命名后再导出");}
+							int test = JOptionPane.showConfirmDialog(null, "当前文件已存在，是否覆盖？");
+							switch (test) {
+							case 0:// 覆盖
+									// PortDataBase portOut = new PortDataBase();
+									// int id = Integer
+									// .parseInt(String.valueOf(nodeModel.getValueAt(nodeTable.getSelectedRow(),
+									// 0)));
+									// theNode = CommonNode.getNode(id);
+								try {
+									for (int i = 0; i < CommonNode.allNodeList.size(); ++i) {
+										CommonNode node = CommonNode.allNodeList.get(i);
+										List<Traffic> tralist = Evaluation.nodeEvaluation(node);
+										if(tralist!=null&&tralist.size()!=0) {
+											for(Traffic tra:tralist) {
+												if (tra.getFaultType()!=0)
+												{Evaluation.PutOutTraffic.add(tra);}
+											}
+										}
+										NodeDataBase jd=new NodeDataBase();
+										jd.NodeDanOutPut(filelist, node);
+										NodeDataBase.index = 1;
+										Evaluation.PutOutTraffic.clear();
+										Evaluation.clearRsmRoute(tralist);
+									}
+									
+									JOptionPane.showMessageDialog(null, "表格已覆盖");
+								} catch (Exception e1) {
+									JOptionPane.showMessageDialog(null, "请关闭原Excel文件，否则无法完成覆盖");
+								}
+//								setVisible(false);
+//								dispose();
+								break;
+							case 1:
+								return;
+							case 2:
+								return;
+							}
+						} else {
+							for (int i = 0; i < CommonNode.allNodeList.size(); ++i) {
+								CommonNode node = CommonNode.allNodeList.get(i);
+								List<Traffic> tralist = Evaluation.nodeEvaluation(node);
+								if(tralist!=null&&tralist.size()!=0) {
+									for(Traffic tra:tralist) {
+										if (tra.getFaultType()!=0)
+										{Evaluation.PutOutTraffic.add(tra);}
+									}
+								}
+								NodeDataBase jd=new NodeDataBase();
+								jd.NodeDanOutPut(filelist, node);
+								NodeDataBase.index = 1;
+								Evaluation.PutOutTraffic.clear();
+								Evaluation.clearRsmRoute(tralist);
+							}
+							JOptionPane.showMessageDialog(null, "数据已导出");
+						}
+
+					}
+				}
+			}
+		});
+	}
 	
+	public static void nodelistEvaluation(List<CommonNode> nodelist) {
+		Evaluation.nodeCutoff = 0;
+		Evaluation.nodeKeep = 0;
+		Evaluation.nodeDown = 0;
+		Evaluation.refresh();
+		for (int i = 0; i < nodelist.size(); ++i) {
+			CommonNode node = nodelist.get(i);
+			List<Traffic> tralist = Evaluation.nodeEvaluation(node);
+			if(tralist!=null&&tralist.size()!=0) {
+				for(Traffic tra:tralist) {
+					if (tra.getFaultType()!=0)
+					{Evaluation.PutOutTraffic.add(tra);}
+				}
+			}
+			NodeDataBase jd=new NodeDataBase();
+			jd.OutPutNodeDan(node);
+			Evaluation.PutOutTraffic.clear();
+			Evaluation.clearRsmRoute(tralist);
+		}
+		if(NodeDataBase.index!=2) {
+			JOptionPane.showMessageDialog(null, "数据已导出");
+			}
+			NodeDataBase.index=0;
+        for(Traffic tra:Traffic.getTrafficList()) {
+        	tra.setFaultType(0);
+        }
+	}
+	
+	
+	public static void listEvaluation(LinkedList<FiberLink> allLinkList) {
+		Evaluation.linkCutoff = 0;
+		Evaluation.linkKeep = 0;
+		Evaluation.linkDown = 0;
+		Evaluation.refresh();
+		for (int i = 0; i < allLinkList.size(); ++i) {
+			FiberLink fl = allLinkList.get(i);
+			// this.linkEvaluation(fl,isSRLG);
+			List<Traffic> tralist = Evaluation.linkEvaluation(fl);
+			if(tralist!=null&&tralist.size()!=0) {
+				for(Traffic tra:tralist) {
+//					if (tra.getFaultType()!=0)
+					Evaluation.PutOutTraffic.add(tra);
+				}
+			}
+			TrafficDatabase lldd=new TrafficDatabase();
+			lldd.OutPutRoute(fl);
+			Evaluation.PutOutTraffic.clear();
+			Evaluation.clearRsmRoute(tralist);
+		}
+		if(TrafficDatabase.index!=2) {
+			JOptionPane.showMessageDialog(null, "数据已导出");
+			}
+			TrafficDatabase.index=0;
+		for(Traffic tra:Traffic.getTrafficList()) {
+			tra.setFaultType(0);
+		}
+	}
+
+	private void TrafficOutPut(String str) {
+		HSSFWorkbook wb = null;
+		HSSFSheet sheet1 = null;
+		HSSFSheet sheet2 = null;
+		JRadioButton[] temp = new JRadioButton[2];//用于暂时存储 选择重路由策略
+		temp=Dlg_PolicySetting.getArithmetic_new();
+		try {
+			// fs = new POIFSFileSystem(new FileInputStream(str));
+			wb = new HSSFWorkbook();
+			sheet1 = wb.createSheet("工作路由");
+			if (temp[0].isSelected()) {// 选择了预置重路由的规划方法
+				sheet2 = wb.createSheet("预置恢复路由");
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		HSSFRow row1 = sheet1.createRow(0);
+		HSSFCell cell1 = row1.createCell(0);
+		cell1.setCellValue("业务编号");
+		cell1 = row1.createCell(1);
+		cell1.setCellValue("起点");
+		cell1 = row1.createCell(2);
+		cell1.setCellValue("终点");
+		cell1 = row1.createCell(3);
+		cell1.setCellValue("电中继节点");
+		cell1 = row1.createCell(4);
+		cell1.setCellValue("名称");
+		cell1 = row1.createCell(5);
+		cell1.setCellValue("中心频率");
+		cell1 = row1.createCell(6);
+		cell1.setCellValue("谱宽");
+		// cell1 = row1.createCell(7);
+		// cell1.setCellValue("业务终点");
+		cell1 = row1.createCell(7);
+		cell1.setCellValue("ODU2序号");
+		cell1 = row1.createCell(8);
+		cell1.setCellValue("ODU1序号");
+		cell1 = row1.createCell(9);
+		cell1.setCellValue("长度（km）");
+		cell1 = row1.createCell(10);
+		cell1.setCellValue("等效跨段数量");
+		cell1 = row1.createCell(11);
+		cell1.setCellValue("正向OSNR");
+		cell1 = row1.createCell(12);
+		cell1.setCellValue("反向ODNR");
+		cell1 = row1.createCell(13);
+		cell1.setCellValue("OSNR容限");
+		cell1 = row1.createCell(14);
+		cell1.setCellValue("DGD值");
+		cell1 = row1.createCell(15);
+		cell1.setCellValue("DGD容限");
+		cell1 = row1.createCell(16);
+		cell1.setCellValue("Pre-FEC BER值");
+		cell1 = row1.createCell(17);
+		cell1.setCellValue("Q值");
+
+		System.out.println(Traffic.trafficList);
+
+		for (int i = 0; i < data.Traffic.trafficList.size(); i++) {
+			Traffic tra = data.Traffic.trafficList.get(i);
+			row1 = sheet1.createRow(i + 1);
+			cell1 = row1.createCell(0);
+//			if(tra.getTrafficgroup()==null) {
+//				cell1.setCellValue("常规-"+(i+1));
+//			}else {
+//				cell1.setCellValue(tra.getTrafficgroup().getTheName()+tra.getNumRank());
+//			}
+			cell1.setCellValue(tra.getTrafficId());
+			cell1 = row1.createCell(1);
+			cell1.setCellValue(tra.getFromNode().getName());
+			cell1 = row1.createCell(2);
+			cell1.setCellValue(tra.getToNode().getName());
+			//电中继
+			cell1 = row1.createCell(3);
+			if (tra.getWorkRoute() != null) {
+			cell1.setCellValue(tra.getWorkRoute().waveChangedNode());}
+			//路由
+			cell1 = row1.createCell(4);
+			cell1.setCellValue(tra.getWorkRoute().toString());
+			//使用波道
+			cell1 = row1.createCell(5);
+			if (tra.getWorkRoute() != null) {
+				//cell1.setCellValue(tra.getWorkRoute().getWaveLengthIdList().toString());
+				cell1.setCellValue(tra.getWorkRoute().toStingwave());
+			}
+			//长度
+			cell1 = row1.createCell(9);
+			if (tra.getWorkRoute() != null) {
+				cell1.setCellValue(tra.getWorkRoute().routelength());
+			}
+			//等效跨段数
+			cell1 = row1.createCell(10);
+			if (tra.getWorkRoute() != null) {
+				cell1.setCellValue(OSNR.crossSum(tra.getWorkRoute()));
+			}
+			//正向OSNR(OSNR模拟值)
+			cell1 = row1.createCell(11);
+			if (tra.getWorkRoute() != null) {
+				cell1.setCellValue(OSNR.calculateOSNR(tra.getWorkRoute()));
+			}
+			//OSNR容限
+			cell1 = row1.createCell(13);
+			if (tra.getWorkRoute() != null) {
+				cell1.setCellValue(OSNR.crossOSNR(tra.getWorkRoute()));
+			}
+			
+			
+		}
+		try {
+			HSSFRow row2 = sheet2.createRow(0);
+			HSSFCell cell2 = row2.createCell(0);
+			cell2.setCellValue("业务编号");
+			cell2 = row2.createCell(1);
+			cell2.setCellValue("起点");
+			cell2 = row2.createCell(2);
+			cell2.setCellValue("终点");
+			cell2 = row2.createCell(3);
+			cell2.setCellValue("电中继节点");
+			cell2 = row2.createCell(4);
+			cell2.setCellValue("名称");
+			cell2 = row2.createCell(5);
+			cell2.setCellValue("中心频率");
+			cell2 = row2.createCell(6);
+			cell2.setCellValue("谱宽");
+			cell2 = row2.createCell(7);
+			cell2.setCellValue("ODU2序号");
+			cell2 = row2.createCell(8);
+			cell2.setCellValue("ODU1序号");
+			cell2 = row2.createCell(9);
+			cell2.setCellValue("长度（km）");
+			cell2 = row2.createCell(10);
+			cell2.setCellValue("等效跨段数量");
+			cell2 = row2.createCell(11);
+			cell2.setCellValue("正向OSNR");
+			cell2 = row2.createCell(12);
+			cell2.setCellValue("反向ODNR");
+			cell2 = row2.createCell(13);
+			cell2.setCellValue("OSNR容限");
+			cell2 = row2.createCell(14);
+			cell2.setCellValue("DGD值");
+			cell2 = row2.createCell(15);
+			cell2.setCellValue("DGD容限");
+			cell2 = row2.createCell(16);
+			cell2.setCellValue("Pre-FEC BER值");
+			cell2 = row2.createCell(17);
+			cell2.setCellValue("Q值");
+
+			System.out.println(Traffic.trafficList);
+
+			for (int i = 0; i < data.Traffic.trafficList.size(); i++) {
+				Traffic tra = data.Traffic.trafficList.get(i);
+				row2 = sheet2.createRow(i + 1);
+				cell2 = row2.createCell(0);
+//				if(tra.getTrafficgroup()==null) {
+//					cell2.setCellValue("常规-"+(i+1));
+//				}else {
+//					cell2.setCellValue(tra.getTrafficgroup().getTheName()+tra.getNumRank());
+//				}
+				cell2.setCellValue(tra.getTrafficId());
+				cell2 = row2.createCell(1);
+				cell2.setCellValue(tra.getFromNode().getName());
+				cell2 = row2.createCell(2);
+				cell2.setCellValue(tra.getToNode().getName());
+				//电中继
+				cell2 = row2.createCell(3);
+				if (tra.getPreRoute() != null) {
+				cell2.setCellValue(tra.getPreRoute().waveChangedNode());}
+				//路由
+				cell2 = row2.createCell(4);
+				if (tra.getPreRoute() != null) {
+					cell2.setCellValue(tra.getPreRoute().toString());
+				}
+				//使用波道
+				cell2 = row2.createCell(5);
+				if (tra.getPreRoute() != null) {
+					//cell2.setCellValue(tra.getPreRoute().getWaveLengthIdList().toString());
+					cell2.setCellValue(tra.getPreRoute().toStingwave());
+				}
+				//长度
+				cell2 = row2.createCell(9);
+				if (tra.getPreRoute()!= null) {
+					cell2.setCellValue(tra.getPreRoute().routelength());
+				}
+				
+				//等效跨段数
+				cell2 = row2.createCell(10);
+				if (tra.getPreRoute()!= null) {
+					cell2.setCellValue(OSNR.crossSum(tra.getPreRoute()));
+				}
+				//正向OSNR(OSNR模拟值)
+				cell2 = row2.createCell(11);
+				if (tra.getPreRoute()!= null) {
+					cell2.setCellValue(OSNR.calculateOSNR(tra.getPreRoute()));
+				}
+				//OSNR容限
+				cell2 = row2.createCell(13);
+				if (tra.getPreRoute()!= null) {
+					cell2.setCellValue(OSNR.crossOSNR(tra.getPreRoute()));
+				}
+				
+			}
+		} catch (Exception e1) {
+			// TODO Auto-generated catch block
+		}
+
+		FileOutputStream os = null;
+		try {
+			os = new FileOutputStream(str);
+		} catch (FileNotFoundException e) {
+			// TODO 自动生成 catch 块
+			e.printStackTrace();
+		}
+		try {
+			wb.write(os);
+		} catch (IOException e) {
+			// TODO 自动生成 catch 块
+			e.printStackTrace();
+		}
+		try {
+			os.close();
+		} catch (IOException e) {
+			// TODO 自动生成 catch 块
+			e.printStackTrace();
+		}
+	}
+		
+	
+	protected JTextField getTextField(Container c) {
+		// TODO Auto-generated method stub
+		JTextField text = null;
+		for (int i = 0; i < c.getComponentCount(); i++) {
+			Component cnt = c.getComponent(i);
+			if (cnt instanceof JTextField) {
+				return (JTextField) cnt;
+			}
+			if (cnt instanceof Container) {
+				text = getTextField((Container) cnt);
+				if (text != null) {
+					return text;
+				}
+			}
+		}
+		return text;
+	}
 
 	public static void main(String[] args) {
 		NetDesign_zs frame = new NetDesign_zs(1);
@@ -2259,5 +3003,57 @@ public class NetDesign_zs extends NSTitleFrame {
 		frame.setVisible(true);
 
 	}
+	
+	//Internal class to implement the progress bar
+		class Progress extends Thread{
+		    private final int[]   progressValue = new int[101];
+		    private JProgressBar progressBar;
+		    private JFrame frame;
+		    public Progress(JProgressBar progressBar,JFrame j1)
+		    {
+		        this.progressBar = progressBar;
+		        this.frame=j1;
+		    }
+		    public void run(){
+		    	
+		    	for(int j=0;j<101;j++) {
+		    	   progressValue[j]=j;
+		        }
+		    	progressBar.setValue(progressValue[1]);
+		    	while(true) {
+		    		try
+	                {
+	                Thread.sleep(500);
+	                }catch(Exception e)
+	                {
+	                e.printStackTrace();
+	                }
+		    		if(NetDesign_zs.processValue==0) progressBar.setValue(progressValue[1]);
+		    		else {
+		    		progressBar.setValue(progressValue[NetDesign_zs.processValue]);
+		    		//System.out.println(UserInterface.Process);
+		    		if(NetDesign_zs.processValue==100) {
+		    			NetDesign_zs.processValue=0;
+		    			break;
+		    		 }
+		    		}
+		    	}
+		        
+		        progressBar.setIndeterminate(false);  
+		       // progressBar.setIndeterminate(true);   //
+		        progressBar.setString("表格已导出");  //鎻愮ず淇℃伅
+		        try
+	            {
+	                Thread.sleep(1000);
+	            }catch(Exception e)
+	            {
+	                e.printStackTrace();
+	            }
+		       
+		        progressBar.setVisible(false);
+		        //ResultsPresent.remove(progressBar);
+		        frame.dispose();
+		    }
+		}
 
 }

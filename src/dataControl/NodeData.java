@@ -19,6 +19,8 @@ public class NodeData {
 
     public static void clearNode() {
 	CommonNode.allNodeList.clear();
+	CommonNode.OLA_NodeList.clear();
+	CommonNode.ROADM_NodeList.clear();
 	NodeDataBase.flag = true;
 	System.gc();// ‘À––Garbage collector
     }

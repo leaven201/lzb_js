@@ -30,6 +30,14 @@ public class CommonNode implements Serializable{
 	private int upDown=0;//上下路分组数
 	private int workOTUNum=0;//用于工作的中继OTU数量
 	private int restoreOTUNum=0;//用于恢复的中继OTU数量
+	private int usedUpdown=0; //计算该节点当前使用了多少个上下路模块
+	private int maxUpdown = 0;//最大本地上下路分组数
+	private int dynMaxUpdown = 0;//动态重路由时最大上下路分组数
+	private int dynUsedUpdown=0; //动态重路由计算该节点当前使用了多少个上下路模块
+	private int degree = 0; //节点的度
+	private int[] dynUsedOTU = new int[2];//统计动态重路由时使用的OTU数量 0：max:本次仿真该节点最多需要使用多少OTU 1：current：某个link断时该节点需要使用多少OTU
+	
+	
 	
 //	public static List<CommonNode> allFiberNodeList=new LinkedList<>();//存储光纤节点
 	public static List<CommonNode> ROADM_NodeList = new LinkedList<>();// 储存ROADM节点
@@ -57,7 +65,7 @@ public class CommonNode implements Serializable{
     }
 	//lzb+9.21   新的构造方法
 	public CommonNode(int id, String name, String otherName, double longitude, double latitude,
-			NodeType nodeType, boolean iszhongji, int WSS, int upDown,boolean isActive) {
+			NodeType nodeType, boolean iszhongji, int WSS, int maxUpdown,boolean isActive) {
 		super();
 		this.id = id;
 		this.name = name;
@@ -67,7 +75,7 @@ public class CommonNode implements Serializable{
 		this.nodeType = nodeType;
 		this.iszhongji = iszhongji;
 		this.WSS = WSS;
-		this.upDown = upDown;
+		this.maxUpdown = maxUpdown;
 		this.isActive=true;//新建节点后初始化为激活
 		this.maxPortNum=Integer.MAX_VALUE;//可用端口数初始化为无穷大
 		
@@ -192,7 +200,7 @@ public class CommonNode implements Serializable{
     	Iterator<CommonNode> it = CommonNode.allNodeList.iterator();
     	while(it.hasNext()) {
     		CommonNode node=it.next();
-    		if (node.getName()== name) {
+    		if (node.getName().equals(name)) {
 				return node;
 			}
     	}return null;
@@ -222,7 +230,25 @@ public class CommonNode implements Serializable{
 	}
 	
 	
-    public static void	addCommonNode(CommonNode e){//静态方法用以维护链表，注意与实际对象无关
+    public int getDynMaxUpdown() {
+		return dynMaxUpdown;
+	}
+	public void setDynMaxUpdown(int dynMaxUpdown) {
+		this.dynMaxUpdown = dynMaxUpdown;
+	}
+	public int getDynUsedUpdown() {
+		return dynUsedUpdown;
+	}
+	public void setDynUsedUpdown(int dynUsedUpdown) {
+		this.dynUsedUpdown = dynUsedUpdown;
+	}
+	public int[] getDynUsedOTU() {
+		return dynUsedOTU;
+	}
+	public void setDynUsedOTU(int[] dynUsedOTU) {
+		this.dynUsedOTU = dynUsedOTU;
+	}
+	public static void	addCommonNode(CommonNode e){//静态方法用以维护链表，注意与实际对象无关
     	allNodeList.add(e);
 
 	}			
@@ -247,6 +273,24 @@ public class CommonNode implements Serializable{
 	}	
 	//lzb-9.22
 	
+	public int getUsedUpdown() {
+		return usedUpdown;
+	}
+	public void setUsedUpdown(int usedUpdown) {
+		this.usedUpdown = usedUpdown;
+	}
+	public int getMaxUpdown() {
+		return maxUpdown;
+	}
+	public void setMaxUpdown(int maxUpdown) {
+		this.maxUpdown = maxUpdown;
+	}
+	public int getDegree() {
+		return degree;
+	}
+	public void setDegree(int degree) {
+		this.degree = degree;
+	}
 	//lzb+9.22
 	//得到对应id的光放节点并返回其属性
 	public static CommonNode getROADMNode(int ID) {
@@ -647,8 +691,96 @@ public class CommonNode implements Serializable{
 	public static void setAllNodeList(List<CommonNode> allNodeList) {
 		CommonNode.allNodeList = allNodeList;
 	}
+	//重新定义节点的经纬度，使拓扑呈现在中心
+	public static void reDefineSite() {
+		double latitudeSum=0;
+		double longitudeSum=0;
+		for(int i=0;i<CommonNode.allNodeList.size();i++) {
+			latitudeSum=latitudeSum+CommonNode.allNodeList.get(i).getLatitude();
+			longitudeSum=longitudeSum+CommonNode.allNodeList.get(i).getLongitude();
+		}
+		double latitudeAve=latitudeSum/CommonNode.allNodeList.size();
+		double longitudeAve=longitudeSum/CommonNode.allNodeList.size();
+		for(int i=0;i<CommonNode.allNodeList.size();i++) {
+			double nodelati=CommonNode.allNodeList.get(i).getLatitude();
+			double nodelongi=CommonNode.allNodeList.get(i).getLongitude();
+			CommonNode.allNodeList.get(i).setLatitude((nodelati/latitudeAve)*35);
+			System.out.println(CommonNode.allNodeList.get(i).getLatitude());
+			CommonNode.allNodeList.get(i).setLongitude((nodelongi/longitudeAve)*100);
+			System.out.println(CommonNode.allNodeList.get(i).getLongitude());
+
+		}
+	}
 	
- 	
+	/**
+	 * @Desc 计算该节点使用了多少个本地上下路模块
+	 * @param node
+	 * @return
+	   @author Lin
+	   @Date 2018年10月8日 下午4:35:24
+	 */
+	public int countUpdown(CommonNode node) {
+		LinkedList<WDMLink> wdmList = WDMLink.WDMLinkList;
+		LinkedList<WDMLink> nodeLinkedList = new LinkedList<>();
+		for (WDMLink wdmLink : wdmList) {
+			if(wdmLink.getFromNode().getName().equals(node.getName()) || wdmLink.getToNode().getName().equals(node.getName())) {
+				nodeLinkedList.add(wdmLink);
+			}
+		}
+		for(int i=1;i<=DataSave.waveNum;i++) {
+			int num = 0;
+			for (WDMLink wdmLink : nodeLinkedList) {
+				if(!wdmLink.getWavelengthById(i).getStatus().equals(Status.空闲)) {
+					num++;
+				}
+			}
+			if(num > node.getUsedUpdown()) {
+				node.setUsedUpdown(num);
+			}
+		}
+		return node.getUsedUpdown();
+	}
+
+	public int countUpdown1(CommonNode node) {
+		LinkedList<WDMLink> wdmList = WDMLink.WDMLinkList;
+		LinkedList<WDMLink> nodeLinkedList = new LinkedList<>();
+		for (WDMLink wdmLink : wdmList) {
+			if (wdmLink.getFromNode().getName().equals(node.getName())
+					|| wdmLink.getToNode().getName().equals(node.getName())) {
+				nodeLinkedList.add(wdmLink);
+			}
+		}
+		for (int i = 1; i <= DataSave.waveNum; i++) {
+			int num = 0;
+			for (WDMLink wdmLink : nodeLinkedList) {
+				if (!wdmLink.getWavelengthById(i).getStatus().equals(Status.空闲)) {
+					num++;
+				}
+			}
+			if (num > node.getDynUsedUpdown()) {
+				node.setDynUsedUpdown(num);
+			}
+		}
+		return node.getDynUsedUpdown();
+	}
+	/**
+	 * 
+	 * @Desc 计算节点的度
+	 * @param node
+	 * @return
+	   @author Lin
+	   @Date 2018年10月8日 下午5:00:50
+	 */
+	public int countDegree(CommonNode node) {
+		int degree = 0;
+		LinkedList<WDMLink> wdmList = WDMLink.WDMLinkList;
+		for (WDMLink wdmLink : wdmList) {
+			if(wdmLink.getFromNode().getName().equals(node.getName()) || wdmLink.getToNode().getName().equals(node.getName())) {
+				degree++;
+			}
+		}
+		return degree;
+	}
 
     
 

@@ -107,18 +107,19 @@ public class LinkDataBase {
 			int id = Integer.MAX_VALUE;
 			String name = "";
 			String LinkType = "";
-			double attenuation = Double.MAX_VALUE;
-			double PMD=Double.MAX_VALUE;
-			int FiberStage=Integer.MAX_VALUE;
+			double attenuation = 0;
+			double PMD=0;
+			int FiberStage=0;
+			double inputPower = 1;//单波平均入纤光功率	
 			Layer linkLayer =Layer.Fiber;
 			CommonNode fromNode = null;// 链路源节点
 			CommonNode toNode = null;// 链路宿节点
-			double length =Double.MAX_VALUE;
-			int waveNum=Integer.MAX_VALUE;//波道数
+			double length =0;
+			int waveNum=0;//波道数
 			boolean isActive = true;// 是否激活
 			int size = Integer.MAX_VALUE;// 链路含有下层低粒度的数量,波长数量
 			String SRLG="";
-			double inPower=Double.MAX_VALUE;//入纤功率
+			double inPower=1;//入纤功率
 			double spanLoss=Double.MAX_VALUE;//跨段损耗
 			double NF=Double.MAX_VALUE;//外部噪声系数
 			int OSNRCount=0;//OSNR计算值
@@ -176,7 +177,9 @@ public class LinkDataBase {
 			
 			try {// 8.光纤阶段
 				cell = row.getCell(7);
-			    FiberStage = (int) cell.getNumericCellValue();
+				if(cell != null) {
+					FiberStage =  (int) cell.getNumericCellValue();
+				}
 			} catch (Exception e) {
 			    e.printStackTrace();
 			}
@@ -267,9 +270,11 @@ public class LinkDataBase {
 			boolean isIDRepeat = FiberLink.isLinkIDRepeat(id);
 			if (isIDRepeat || id == Integer.MAX_VALUE) {
 			    msgerr += "链路表格第" + a + "行，链路ID属性有错误(如：重复)，请确认！" + "\n";
-			} else if (name.equals("") || FiberLink.isLinkNameRepeat(name)) {
-			    msgerr += "链路表格第" + a + "行，链路名称属性有错误（如名称重复），请确认！" + "\n";
-			} else if (fromNode == null) {
+			} 
+//			else if (name.equals("") || FiberLink.isLinkNameRepeat(name)) {
+//			    msgerr += "链路表格第" + a + "行，链路名称属性有错误（如名称重复），请确认！" + "\n";
+//			} 
+			else if (fromNode == null) {
 			    msgerr += "链路表格第" + a + "行，链路首节点名称属性有错误（如此节点不存在），请确认！" + "\n";
 			} else if (toNode == null) {
 			    msgerr += "链路表格第" + a + "行，链路末节点名称属性有错误（如此节点不存在），请确认！" + "\n";

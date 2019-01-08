@@ -109,6 +109,7 @@ public class Dlg_InputAll extends JFrame{
 						node.inputNode(filelist);
 						LinkData link =new LinkData(); //后台导入链路资源
 						link.inputLink(filelist);
+						WDMLink.setwdmengname();
 						pro.setVal(100);
 						Dlg_InputInfo input = new Dlg_InputInfo(box, nodeDummy, FIBERlinkDummy, OPTLinkDummy,
 								ELELinkDummy, TrafficDummy, 0, 2);// 弹出消息窗

@@ -48,7 +48,7 @@ public class NSTitle extends JPanel {
 	//private Color titleColor = Color.red;
 	private Color textColor = Color.BLACK;
 	private Font textFontABC = new Font("Berlin Sans FB Demi", Font.PLAIN | Font.BOLD, 14);
-	private Font textFontHanzi = new Font("Î¢ÈíÑÅºÚ", Font.PLAIN | Font.PLAIN , 15);
+	private Font textFontHanzi = new Font("å¾®è½¯é›…é»‘", Font.PLAIN | Font.PLAIN , 15);
 	private Font textFont = new Font("Berlin Sans FB Demi", Font.PLAIN | Font.BOLD, 14);
 	
 	private int xGap = 5;
@@ -176,7 +176,7 @@ public class NSTitle extends JPanel {
 		menu.setTitleGradientColor(Color.BLACK);
 		menu.setTitleColor(Color.GREEN);
 		menu.setTitlePosition(NSPopupMenu.POSITION_TOP);
-		JMenuItem item = new JMenuItem("»¹Ô­");
+		JMenuItem item = new JMenuItem("è¿˜åŸ");
 		item.setEnabled(isMaxed() && isResizable());
 		item.setIcon(restoreIcon);
 		item.addActionListener(new ActionListener() {
@@ -185,7 +185,7 @@ public class NSTitle extends JPanel {
 			}
 		});
 		menu.add(item);
-		item = new JMenuItem("×î´ó»¯");
+		item = new JMenuItem("æœ€å¤§åŒ–");
 		item.setEnabled(!isMaxed() && isResizable());
 		item.setIcon(maxIcon);
 		item.addActionListener(new ActionListener() {
@@ -194,7 +194,7 @@ public class NSTitle extends JPanel {
 			}
 		});
 		menu.add(item);
-		item = new JMenuItem("×îĞ¡»¯");
+		item = new JMenuItem("æœ€å°åŒ–");
 		item.setEnabled(window instanceof JFrame);
 		item.setIcon(minIcon);
 		item.addActionListener(new ActionListener() {
@@ -204,7 +204,7 @@ public class NSTitle extends JPanel {
 		});
 		menu.add(item);
 		menu.addSeparator();
-		item = new JMenuItem("¹Ø±Õ");
+		item = new JMenuItem("å…³é—­");
 		item.setIcon(closeIcon);
 		item.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -215,7 +215,7 @@ public class NSTitle extends JPanel {
 		menu.add(item);
 
 		if (window instanceof JFrame || window instanceof JDialog) {
-			final JCheckBoxMenuItem cItem = new JCheckBoxMenuItem("¿ÉĞŞ¸Ä´óĞ¡");
+			final JCheckBoxMenuItem cItem = new JCheckBoxMenuItem("å¯ä¿®æ”¹å¤§å°");
 			cItem.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					if (window instanceof JFrame) {

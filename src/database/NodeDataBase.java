@@ -40,7 +40,8 @@ public class NodeDataBase {
     public String msgr; // 导入数据错误提示信息
     private String filelist = "wrong";
   	public static int index = 0;
-  	public static String Sfilelist = "";
+	public static String Sfilelist = "";
+	public static String filepath; // 工程路径
 
     /**
      * 函数名：inputNode  
@@ -72,6 +73,7 @@ public class NodeDataBase {
 	}
 	
 	int f=0;
+	
 	if(sheet!=null){
 	    outter:for(Row row:sheet){
 		if(row.getRowNum()!=0){
@@ -155,20 +157,20 @@ public class NodeDataBase {
 				e.printStackTrace();
 			    }
 		    
-
+		    //拓扑中心位置为（100，35）
 		    try { // 4.longitude
 			cell = row.getCell(3);
-			longitude = cell.getNumericCellValue()/30+75;
-	/*		if((0<longitude&&longitude<1)||(-1<longitude&&longitude<0)){
+			longitude = cell.getNumericCellValue();
+/*			if((0<longitude&&longitude<1)||(-1<longitude&&longitude<0)){
 				longitude=longitude*10;
 			}
 			else if((1<=longitude&&longitude<=10)||(-10<=longitude&&longitude<=-1)){
 				longitude=longitude*5;}
-//			}else if((10<longitude&&longitude<=145)||(-145<=longitude&&longitude<-10)) {
-//				longitude=longitude;
-//			}else if((145<longitude)||(longitude<-145)) {
-//				longitude=longitude/5;
-//			}
+			else if((10<longitude&&longitude<=145)||(-145<=longitude&&longitude<-10)) {
+				longitude=longitude;
+			}else if((145<longitude)||(longitude<-145)) {
+				longitude=longitude/5;
+			}
 			if ((90 <= longitude) || (longitude <= -70)) {
 			    longitude = (longitude / 20) + 30;
 			}*/
@@ -178,8 +180,8 @@ public class NodeDataBase {
 		    
 		    try { // 5.latitude
 			cell = row.getCell(4);
-			latitude = cell.getNumericCellValue()/30+30;
-	/*		if ((0 < latitude && latitude < 1) || (-1 < latitude && latitude < 0)) {
+			latitude = cell.getNumericCellValue();
+/*			if ((0 < latitude && latitude < 1) || (-1 < latitude && latitude < 0)) {
 			    latitude = latitude * 10;
 			} else if ((1 <= latitude && latitude <= 10) || (-10 <= latitude && latitude <= -1)) {
 			    latitude = latitude * 5;
@@ -193,15 +195,19 @@ public class NodeDataBase {
 		    
 		    try { // 6.OtherName
 				cell = row.getCell(5);
-				OtherName = cell.getStringCellValue().trim();
+				if(cell!=null)
+					OtherName = cell.getStringCellValue().trim();	
 			    } catch (Exception e) {
 				e.printStackTrace();
 			    }
 
 		    try{//7.上下路分组数
 			cell=row.getCell(6);
-			if(cell!=null)
-				upDown=(int) cell.getNumericCellValue();		
+			if(cell != null) {
+				upDown=(int) cell.getNumericCellValue();
+			}else {
+				upDown = -1;
+			}
 		    }catch(Exception e){
 			e.printStackTrace();
 		    }
@@ -342,7 +348,7 @@ public class NodeDataBase {
 		System.out.println(msgr);
 	    }
 	}
-	
+	 CommonNode.reDefineSite();
     }
     
     /**
@@ -453,15 +459,17 @@ public class NodeDataBase {
 	msg="成功导出节点"+(i-1)+"个";
 	System.out.println("msg");
     }
-    public void OutPutNodeDan( CommonNode node) {
+    public void OutPutNodeDan(CommonNode node) {
 
   		if (index == 0) {
   			JFileChooser chooser = new JFileChooser();
-  			if (null == NetDesign_zs.filepath) {// 如果当前不存在正在操作的工程
+  			if (null == filepath) {// 如果当前不存在正在操作的工程
   				chooser = new JFileChooser();
+  				System.out.println("节点单断，如果当前不存在正在操作的工程");
   			} else {
-  				filelist = NetDesign_zs.filepath;
+  				filelist = filepath;
   				chooser = new JFileChooser(filelist);// 打开默认路径为工程的路径
+  				System.out.println("节点单断，打开默认路径为工程的路径");
   			}
   			chooser.setDialogTitle("节点单断信息表导出路径");
   			chooser.setAcceptAllFileFilterUsed(false);
@@ -477,13 +485,18 @@ public class NodeDataBase {
   			chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
   			int option = chooser.showSaveDialog(chooser);
   			if (option == JFileChooser.APPROVE_OPTION) {// 如果点击确定
+  				 System.out.println("节点单断， 选择文件路径");
   				File file = chooser.getSelectedFile();
   				filelist = file.getPath();
   				if (!(filelist.endsWith(".xls"))) {// 如果现在的文件名里不包含扩展名，就给其加上
   					filelist = filelist + ".xls";
   					Sfilelist = filelist;
-  					System.out.println(filelist);
+  					System.out.println("filelist"+filelist);
   				}
+  			}
+  			if (option == JFileChooser.CANCEL_OPTION) {// 如果点击取消
+  				index=2;
+  				return;
   			}
 
   			File sfile = new File(Sfilelist);
@@ -499,27 +512,33 @@ public class NodeDataBase {
   						// theNode = CommonNode.getNode(id);
   					try {
   						NodeDanOutPut(Sfilelist, node);
-  						JOptionPane.showMessageDialog(null, "表格已覆盖");
+  						index=1;
+  						//JOptionPane.showMessageDialog(null, "表格已覆盖");
   					} catch (Exception e1) {
   						JOptionPane.showMessageDialog(null, "请关闭原Excel文件，否则无法完成覆盖");
+  						index=2;
   					}
   					// setVisible(false);
   					// dispose();
   					break;
   				case 1:
+  					index=2;
   					return;
   				case 2:
+  					index=2;
   					return;
   				}
   			} else {
 
   				NodeDanOutPut(Sfilelist, node);
-  				// JOptionPane.showMessageDialog(null, "数据已导出");
+  				index=1;
   			}
   		}
-  		else
+  		else if(index==1) {
   			NodeDanOutPut(Sfilelist,node);
-  		index = 1;
+  		    index = 1;
+  		  System.out.println("节点单断， index = 1");
+  		}
 
   	}
 
@@ -527,34 +546,45 @@ public class NodeDataBase {
   		
   		HSSFWorkbook wb = null;
   		HSSFSheet sheet1 = null;
+  		 System.out.println("节点单断，创建空workbook和空表");
   		POIFSFileSystem fins = null;
-  		// HSSFSheet sheet2 = null;
-  		// HSSFSheet sheet3 = null;
-  		// HSSFSheet sheet4 = null;
+  		
   		try {
   			if (index == 1) {
   				fins = new POIFSFileSystem(new FileInputStream(str));
   				wb = new HSSFWorkbook(fins);
-  			} else
+  				 sheet1 = wb.createSheet(node.getName()+ "节点单断");
+  				System.out.println("节点单断，第一次创建workbook");
+  			} 
+  			else if(index==0){
   				wb = new HSSFWorkbook();
-  			sheet1 = wb.createSheet(node.getName() + "节点单断");
-  			
+  			    sheet1 = wb.createSheet(node.getName()+ "节点单断");
+  			  System.out.println("节点单断，创建"+node.getName()+"表");
+  			}
+  			//  System.out.println(node.getName());
   		} catch (Exception e) {
   			e.printStackTrace();
   		}
   		HSSFRow Row1 = sheet1.createRow(0);
+  		System.out.println("节点单断，向"+node.getName()+"表里面写数据");
   		HSSFCell cell1 = Row1.createCell(0);
   		cell1.setCellValue("影响的业务编号");
+  		
   		cell1 = Row1.createCell(1);
   		cell1.setCellValue("起点");
+  		
   		cell1 = Row1.createCell(2);
   		cell1.setCellValue("终点");
+  		
   		cell1 = Row1.createCell(3);
   		cell1.setCellValue("电中继节点");
+  		
   		cell1 = Row1.createCell(4);
-  		cell1.setCellValue("电中继段名称");
+  		cell1.setCellValue("恢复路由");
+  		
   		cell1 = Row1.createCell(5);
   		cell1.setCellValue("波道号");
+  		
   		cell1 = Row1.createCell(6);
   		cell1.setCellValue("长度（km）");
   		cell1 = Row1.createCell(7);
@@ -578,24 +608,31 @@ public class NodeDataBase {
   			Traffic tra = Evaluation.PutOutTraffic.get(i);
   			Row1 = sheet1.createRow(i + 1);
   			cell1 = Row1.createCell(0);
-  			cell1.setCellValue(tra.toString());
+  			cell1.setCellValue(tra.getTrafficId());
+  			
   			cell1 = Row1.createCell(1);
   			cell1.setCellValue(tra.getFromNode().getName());
+  			
   			cell1 = Row1.createCell(2);
   			cell1.setCellValue(tra.getToNode().getName());
+  			
   			cell1 = Row1.createCell(3);
-			cell1.setCellValue(tra.waveChangedNode());			
+			cell1.setCellValue(tra.waveChangedNode());
+			
 			cell1 = Row1.createCell(4);
-			cell1.setCellValue(tra.workedRoute().toString());
+			if (tra.getResumeRoute()!=null) {	
+			  cell1.setCellValue(tra.getResumeRoute().toString());
+			}
+
 			cell1 = Row1.createCell(5);
-			if(tra.getWorkRoute()!=null)
+			if(tra.getResumeRoute()!=null)
 			{
-				cell1.setCellValue(tra.getWorkRoute().toStingwave());
+				cell1.setCellValue(tra.getResumeRoute().getWaveLengthIdList().toString());
 			}
 			// cell2.setCellValue(tra.getResumeRoute().getWDMLinkList().get().getName());
 			cell1 = Row1.createCell(6);
-			if(tra.getWorkRoute()!=null)
-			{cell1.setCellValue(tra.getWorkRoute().routelength());}
+			if(tra.getResumeRoute()!=null)
+			{cell1.setCellValue(tra.getResumeRoute().routelength());}
 			// cell2.setCellValue(tra.getLength());
   			
   		}

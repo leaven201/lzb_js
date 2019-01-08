@@ -422,11 +422,15 @@ public class Dlg_SetLinkPoll extends JFrame {
 				if (tra1.getResumeRoute() == null || tra1.getResumeRoute().getWDMLinkList().size() == 0) {
 					data1[5] = "中断";
 
-				} else if ((tra1.getResumeRoute() != null && tra1.getResumeRoute().getWDMLinkList().size() != 0)
-						&& (tra1.getResumeRoutePro() == null || tra1.getResumeRoutePro().getWDMLinkList().size() == 0))
+				} else if ((tra1.getResumeRoute() != null
+						&& tra1.getResumeRoute().getWDMLinkList().size() != 0)
+						&& (tra1.getResumeRoutePro() == null
+								|| tra1.getResumeRoutePro().getWDMLinkList().size() == 0))
 					data1[5] = "降级";
-				else if ((tra1.getResumeRoute() != null && tra1.getResumeRoute().getWDMLinkList().size() != 0)
-						&& (tra1.getResumeRoutePro() != null && tra1.getResumeRoutePro().getWDMLinkList().size() != 0))
+				else if ((tra1.getResumeRoute() != null
+						&& tra1.getResumeRoute().getWDMLinkList().size() != 0)
+						&& (tra1.getResumeRoutePro() != null
+								&& tra1.getResumeRoutePro().getWDMLinkList().size() != 0))
 					data1[5] = "保持";
 				break;
 			case NONPROTECT:
@@ -439,39 +443,57 @@ public class Dlg_SetLinkPoll extends JFrame {
 				if (tra1.getResumeRoute() == null || tra1.getResumeRoute().getWDMLinkList().size() == 0) {
 					data1[5] = "中断";
 
-				} else if ((tra1.getResumeRoute() != null && tra1.getResumeRoute().getWDMLinkList().size() != 0)
-						&& (tra1.getResumeRoutePro() == null || tra1.getResumeRoutePro().getWDMLinkList().size() == 0))
-					data1[5] = "降级";
-				else if ((tra1.getResumeRoute() != null && tra1.getResumeRoute().getWDMLinkList().size() != 0)
-						&& (tra1.getResumeRoutePro() != null && tra1.getResumeRoutePro().getWDMLinkList().size() != 0))
+				} else if ((tra1.getResumeRoute() != null
+						&& tra1.getResumeRoute().getWDMLinkList().size() != 0)
+						&& (tra1.getResumeRoutePro() == null
+								|| tra1.getResumeRoutePro().getWDMLinkList().size() == 0))
+					data1[5] = "保持";
+				else if ((tra1.getResumeRoute() != null
+						&& tra1.getResumeRoute().getWDMLinkList().size() != 0)
+						&& (tra1.getResumeRoutePro() != null
+								&& tra1.getResumeRoutePro().getWDMLinkList().size() != 0))
 					data1[5] = "保持";
 				break;
 			case RESTORATION:
 				if (tra1.getResumeRoute() == null || tra1.getResumeRoute().getWDMLinkList().size() == 0) {
 					data1[5] = "中断";
 
-				} else if (tra1.getResumeRoute() != null && tra1.getResumeRoute().getWDMLinkList().size() != 0)
+				} else  if ((tra1.getResumeRoute() != null && tra1.getResumeRoute().getWDMLinkList().size() != 0)
+						&& (tra1.getPreRoute() == null || tra1.getPreRoute().getWDMLinkList().size() == 0)) {
 					data1[5] = "保持";
-				break;
-			case PresetRESTORATION:
-				if (tra1.getResumeRoute() == null || tra1.getResumeRoute().getWDMLinkList().size() == 0) {
-					data1[5] = "中断";
 				} else if ((tra1.getResumeRoute() != null && tra1.getResumeRoute().getWDMLinkList().size() != 0)
-						&& (tra1.getResumeRoutePro() == null || tra1.getResumeRoutePro().getWDMLinkList().size() == 0))
-					data1[5] = "降级";
-				else if ((tra1.getResumeRoute() != null && tra1.getResumeRoute().getWDMLinkList().size() != 0)
-						&& (tra1.getResumeRoutePro() != null && tra1.getResumeRoutePro().getWDMLinkList().size() != 0))
+						&& (tra1.getPreRoute() != null && tra1.getPreRoute().getWDMLinkList().size() != 0)) {
 					data1[5] = "保持";
+				}
 				break;
+//			case PresetRESTORATION:
+//				if (tra1.getResumeRoute() == null || tra1.getResumeRoute().getWDMLinkList().size() == 0) {
+//					data1[5] = "中断";
+//				} else if ((tra1.getResumeRoute() != null
+//						&& tra1.getResumeRoute().getWDMLinkList().size() != 0)
+//						&& (tra1.getPreRoute() == null
+//								|| tra1.getPreRoute().getWDMLinkList().size() == 0))
+//					data1[5] = "保持";
+//				else if ((tra1.getResumeRoute() != null
+//						&& tra1.getResumeRoute().getWDMLinkList().size() != 0)
+//						&& (tra1.getPreRoute() != null
+//								&& tra1.getPreRoute().getWDMLinkList().size() != 0))
+//					data1[5] = "保持";
+//				break;
 			case PROTECTandRESTORATION:
 				if (tra1.getResumeRoute() == null || tra1.getResumeRoute().getWDMLinkList().size() == 0) {
 					data1[5] = "中断";
-				} else if ((tra1.getResumeRoute() != null && tra1.getResumeRoute().getWDMLinkList().size() != 0)
-						&& (tra1.getResumeRoutePro() == null || tra1.getResumeRoutePro().getWDMLinkList().size() == 0))
-					data1[5] = "降级";
-				else if ((tra1.getResumeRoute() != null && tra1.getResumeRoute().getWDMLinkList().size() != 0)
-						&& (tra1.getResumeRoutePro() != null && tra1.getResumeRoutePro().getWDMLinkList().size() != 0))
+				} else if ((tra1.getResumeRoute() != null
+						&& tra1.getResumeRoute().getWDMLinkList().size() != 0)
+						&& (tra1.getPreRoute() == null
+								|| tra1.getPreRoute().getWDMLinkList().size() == 0)) {
 					data1[5] = "保持";
+				}else if ((tra1.getResumeRoute() != null
+						&& tra1.getResumeRoute().getWDMLinkList().size() != 0)
+						&& (tra1.getPreRoute() != null
+								&& tra1.getPreRoute().getWDMLinkList().size() != 0)) {
+					data1[5] = "保持";
+				}
 				break;
 			default:
 				break;

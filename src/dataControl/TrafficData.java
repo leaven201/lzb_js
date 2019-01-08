@@ -31,9 +31,9 @@ public class TrafficData {
 	    Traffic tr;
 	    for (int i = 0; i < size; i++) {
 		tr = Traffic.trafficList.get(i);
-		tr.releasePortSource(tr, 0);// 关于资源的分配与释放，清空线路端口
+	//	tr.releasePortSource(tr, 0);// 关于资源的分配与释放，清空线路端口
 		tr.releaseTraffic(tr, 0);// 关于资源的分配与释放，11.22，清空路由
-		tr.delTrafficPort(tr); // 关于资源的分配与释放， 11.22，清空支路端口
+	//	tr.delTrafficPort(tr); // 关于资源的分配与释放， 11.22，清空支路端口
 	    }
 	}
 //	if (Traffic.trafficList != null && Traffic.trafficList.size() != 0)

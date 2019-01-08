@@ -169,7 +169,7 @@ public class Dlg_NewProject extends JDialog implements ActionListener{
 	    			DataSave.waveNum=Integer.parseInt(bodao.getText());
 	    			//调取系统速率
 	    			DataSave.judge=PortRate.stringToRate((String) slcombobox.getSelectedItem());
-					DataSave.systemRate=PortRate.Rate2Num(DataSave.judge);
+//					DataSave.systemRate=PortRate.Rate2Num(DataSave.judge);
 					//调取灵活栅格
 					DataSave.flexibleRaster=shangeyes.isSelected();
 					/*调试用  System.out.println("DataSave.waveNum:"+DataSave.waveNum);

@@ -11,6 +11,7 @@ import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 
 import javax.swing.JFileChooser;
@@ -18,6 +19,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
+import org.apache.poi.hssf.model.Sheet;
 import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
@@ -31,6 +33,7 @@ import algorithm.PortAlloc;
 import data.BasicLink;
 import data.CommonNode;
 import data.FiberLink;
+import data.LinkRGroup;
 import data.Port;
 import data.Route;
 import data.Traffic;
@@ -64,6 +67,18 @@ public class TrafficDatabase {
 	public static String Sfilelist = "";
 	public String suoyin = null;
 	public String Group = null;
+	public static String filepath; // 工程路径
+	public static List<Sheet> str1 =new LinkedList<>();//用于存储srlg成组输出的问题
+	
+	public static int getGroupid(String str) {
+		String strNew[]=str.split("-");
+		int num = Integer.parseInt(strNew[1]);
+		return num;
+	}
+	public static String getBelongGroup(String str) {
+		String strNew[]=str.split("-");
+		return strNew[2];
+	}
 	
 
 	public void inputTraffic(String str) {
@@ -184,10 +199,11 @@ public class TrafficDatabase {
 						String traGroType="无";
 						CommonNode MustPassNode = null;
 						CommonNode MustAvoidNode = null;
-						WDMLink MustPassLink = null;
-						WDMLink MustAvoidLink = null;
+						FiberLink MustPassLink = null;
+						FiberLink MustAvoidLink = null;
 						boolean isHaveTraffic = false;
 						Route existRoute = null;
+						double temp = 0;
 						int existWaveLength = 0;
 
 						// for id auto assignment
@@ -219,6 +235,7 @@ public class TrafficDatabase {
 							cell = row.getCell(3);
 							rate = TrafficRate.NumToRate(cell.getStringCellValue());
 							nrate = TrafficRate.Rate2Num(rate);
+							temp=nrate;
 						} catch (Exception e) {
 							e.printStackTrace();
 						}
@@ -277,8 +294,8 @@ public class TrafficDatabase {
 							} // 没有关联业务组索引就初始为0
 							 else {
 								 suoyin=cell.getStringCellValue();
-								 int groupid=Integer.parseInt(suoyin.substring(suoyin.length()-2, suoyin.length()-1));
-								 String belongGroup=suoyin.substring(suoyin.length()-1);
+								 int groupid=getGroupid(suoyin);
+								 String belongGroup=getBelongGroup(suoyin);
 								 trafficGroup=new TrafficGroupNew(groupid, belongGroup);							
 						}
 							} catch (Exception e) {
@@ -316,7 +333,7 @@ public class TrafficDatabase {
 							if (cell == null)
 								MustPassLink = null;
 							else
-								MustPassLink = WDMLink.getLink(cell.getStringCellValue());
+								MustPassLink = FiberLink.getLink(cell.getStringCellValue());
 						} catch (Exception e) {
 
 							e.printStackTrace();
@@ -326,7 +343,7 @@ public class TrafficDatabase {
 							if (cell == null)
 								MustAvoidLink = null;
 							else
-								MustAvoidLink = WDMLink.getLink(cell.getStringCellValue());
+								MustAvoidLink = FiberLink.getLink(cell.getStringCellValue());
 						} catch (Exception e) {
 							e.printStackTrace();
 						}
@@ -359,6 +376,46 @@ public class TrafficDatabase {
 						} catch (Exception e) {
 							e.printStackTrace();
 						}
+
+						try {// 18.oduk要求
+							cell = row.getCell(17);
+						if (cell == null) {
+							return;
+						} else {
+						  {
+							if(cell.getStringCellValue().trim().equals("odu0")) {
+								//System.out.println("odu0");
+								rate = TrafficRate.GE;
+								nrate = TrafficRate.Rate2Num(rate);
+							}
+							if(cell.getStringCellValue().trim().equals("odu1")) {
+							//	System.out.println("odu1");
+								rate = TrafficRate.G2Dot5;
+								nrate = TrafficRate.Rate2Num(rate);
+								//rate = TrafficRate.NumToRate(cell.getStringCellValue());
+							}
+							if(cell.getStringCellValue().trim().equals("odu2")) {
+								//System.out.println("odu2");
+								rate = TrafficRate.G10;
+								nrate = TrafficRate.Rate2Num(rate);
+							}
+							if(cell.getStringCellValue().trim().equals("odu3")) {
+								rate = TrafficRate.G40;
+								nrate = TrafficRate.Rate2Num(rate);
+							}
+							if(cell.getStringCellValue().trim().equals("odu4")) {
+								//System.out.println("odu4");
+								rate = TrafficRate.G100;
+								nrate = TrafficRate.Rate2Num(rate);
+						    	}
+							}
+						}
+							
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+					
+						//
 
 						//
 						//
@@ -428,7 +485,12 @@ public class TrafficDatabase {
 							msgerr += "业务表格第" + a + "行，业务保护级别属性有错误，请确认！" + "\n";
 						} else if (rate == null) {
 							msgerr += "业务表格第" + a + "行，业务速率属性有错误，请确认！" + "\n";
-						} else {
+						} 
+						else if(nrate<temp) { 
+							msgerr="业务表格第" + a + "行，业务带宽与oduk设定不匹配，请确认！" + "\n";
+						}
+
+							else {
 
 							// 节点ID补零(补为3位数)
 							String fromIDString = String.valueOf(fromNode.getId());
@@ -466,13 +528,15 @@ public class TrafficDatabase {
 										isElectricalCrossConnection, isShare, trafficGroup, 
 										MustPassNode, MustAvoidNode, MustPassLink, MustAvoidLink, isHaveTraffic,
 										existRoute, existWaveLength);
+								t1.setNumRank(traNum+1-t);
+								
 
 								t1.setNrate(nrate);
 								addTrafficPort(t1);
 								String a1=String.valueOf(id);
 
-								// 如果导入时该该业务以有路由及使用波长，则对该业务进行路由及资源分配
-								if (existRoute != null && existWaveLength != 0&&(a1.substring(a1.length()-1).equals("1"))) {
+								// 如果导入时该业务以有路由及使用波长，则对该业务进行路由及资源分配
+								if (existRoute != null && existWaveLength != 0&&(a1.substring(a1.length()-1).equals("0"))) {
 									existRoute.setBelongsTraffic(t1); // 设置该路由的belongTraffic属性
 
 									List<WDMLink> wdmLinkList = existRoute.getWDMLinkList(); // 储存该路由的WDM链路
@@ -515,12 +579,14 @@ public class TrafficDatabase {
 				// TODO 自动生成 catch 块
 				e.printStackTrace();
 			}
+			Traffic.setAllTrafficId();
 			int sum=0;
 			for(int i=0;i<Traffic.trafficList.size();i++) {
 				Traffic tra=Traffic.trafficList.get(i);
 				if(tra.getWorkRoute()!=null)
 					sum++;
 			}
+			
 			if(sum==0) {
 			msgt = "成功导入" + f + "条业务数据";}
 			else
@@ -698,10 +764,10 @@ public class TrafficDatabase {
 
 		if (index == 0) {
 			JFileChooser chooser = new JFileChooser();
-			if (null == NetDesign_zs.filepath) {// 如果当前不存在正在操作的工程
+			if (null == filepath) {// 如果当前不存在正在操作的工程
 				chooser = new JFileChooser();
 			} else {
-				filelist = NetDesign_zs.filepath;
+				filelist = filepath;
 				chooser = new JFileChooser(filelist);// 打开默认路径为工程的路径
 			}
 			chooser.setDialogTitle("链路单断信息表");
@@ -726,6 +792,11 @@ public class TrafficDatabase {
 					System.out.println(filelist);
 				}
 			}
+			if (option == JFileChooser.CANCEL_OPTION) {// 如果点击取消
+  				index=2;
+  				return;
+  			}
+
 
 			File sfile = new File(Sfilelist);
 			if (sfile.exists()) {// 如果这个文件已经存在了
@@ -740,26 +811,32 @@ public class TrafficDatabase {
 						// theNode = CommonNode.getNode(id);
 					try {
 						TrafficOutPut(Sfilelist, fl);
-						JOptionPane.showMessageDialog(null, "表格已覆盖");
+						index=1;
+						//JOptionPane.showMessageDialog(null, "表格已覆盖");
 					} catch (Exception e1) {
 						JOptionPane.showMessageDialog(null, "请关闭原Excel文件，否则无法完成覆盖");
+						index=2;
 					}
 					// setVisible(false);
 					// dispose();
 					break;
 				case 1:
+  					index=2;
 					return;
 				case 2:
+  					index=2;
 					return;
 				}
 			} else {
 
 				TrafficOutPut(Sfilelist, fl);
-				// JOptionPane.showMessageDialog(null, "数据已导出");
+				index=1;
 			}
-		} else
-			TrafficOutPut(Sfilelist, fl);
+		} 
+		else if(index==1) {
+		TrafficOutPut(Sfilelist, fl);
 		index = 1;
+		}
 
 	}
 
@@ -775,198 +852,129 @@ public class TrafficDatabase {
 			if (index == 1) {
 				fins = new POIFSFileSystem(new FileInputStream(str));
 				wb = new HSSFWorkbook(fins);
-			} else
+				try {
+					if (fl.getFiberRelatedList().size() != 0) {
+						List<FiberLink> temp = fl.getFiberRelatedList().get(0).getSRLGFiberLinkList();
+						sheet1 = wb.createSheet(LinkRGroup.PutOutSRLG(temp)+"链路单断");
+						
+					} else {
+						sheet1 = wb.createSheet(fl.getName() + "链路单断");
+					}
+				} catch (Exception e) {
+					
+				}
+
+			} 
+			else if(index == 0) {
 				wb = new HSSFWorkbook();
-			sheet1 = wb.createSheet(fl.getName() + "恢复路由");
-			// sheet2 = wb.createSheet("恢复路由-AB1断纤");
-			// sheet3 = wb.createSheet("恢复路由-AB2断纤");
-			// sheet4 = wb.createSheet("恢复路由-断纤");
+				if (fl.getGroupSRLG().size() != 0) {
+					List<FiberLink> temp = fl.getFiberRelatedList().get(0).getSRLGFiberLinkList();
+					sheet1 = wb.createSheet(LinkRGroup.PutOutSRLG(temp)+"链路单断");
+				} else {
+					sheet1 = wb.createSheet(fl.getName() + "链路单断");
+				}
+			}
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 
-		// HSSFRow row1 = sheet1.createRow(0);
-		// HSSFCell cell1 = row1.createCell(0);
-		// cell1.setCellValue("业务编号");
-		// cell1 = row1.createCell(1);
-		// cell1.setCellValue("起点");
-		// cell1 = row1.createCell(2);
-		// cell1.setCellValue("终点");
-		// cell1 = row1.createCell(3);
-		// cell1.setCellValue("电中继节点");
-		// cell1 = row1.createCell(4);
-		// cell1.setCellValue("名称");
-		// cell1 = row1.createCell(5);
-		// cell1.setCellValue("中心频率");
-		// cell1 = row1.createCell(6);
-		// cell1.setCellValue("谱宽");
-		// // cell1 = row1.createCell(7);
-		// // cell1.setCellValue("业务终点");
-		// cell1 = row1.createCell(7);
-		// cell1.setCellValue("ODU2序号");
-		// cell1 = row1.createCell(8);
-		// cell1.setCellValue("ODU1序号");
-		// cell1 = row1.createCell(9);
-		// cell1.setCellValue("长度（km）");
-		// cell1 = row1.createCell(10);
-		// cell1.setCellValue("等效跨段数量");
-		// cell1 = row1.createCell(11);
-		// cell1.setCellValue("正向OSNR");
-		// cell1 = row1.createCell(12);
-		// cell1.setCellValue("反向ODNR");
-		// cell1 = row1.createCell(13);
-		// cell1.setCellValue("OSNR容限");
-		// cell1 = row1.createCell(14);
-		// cell1.setCellValue("DGD值");
-		// cell1 = row1.createCell(15);
-		// cell1.setCellValue("DGD容限");
-		// cell1 = row1.createCell(16);
-		// cell1.setCellValue("Pre-FEC BER值");
-		// cell1 = row1.createCell(17);
-		// cell1.setCellValue("Q值");
-		//
-		// for (int i = 0; i < data.Traffic.trafficList.size(); i++) {
-		// Traffic tra = data.Traffic.trafficList.get(i);
-		// row1 = sheet1.createRow(i + 1);
-		// cell1 = row1.createCell(0);
-		// cell1.setCellValue(tra.getId());
-		// cell1 = row1.createCell(1);
-		// cell1.setCellValue(tra.getFromNode().getName());
-		// cell1 = row1.createCell(2);
-		// cell1.setCellValue(tra.getToNode().getName());
-		// cell1 = row1.createCell(3);
-		// cell1.setCellValue(tra.waveChangedNode());
-		// cell1 = row1.createCell(4);
-		// cell1.setCellValue(tra.workedRoute().toString());
-		// cell1 = row1.createCell(5);
-		//
-		// if (tra.getWorkRoute() != null) {
-		// cell1.setCellValue(tra.getWorkRoute().getUsedWaveList().toString());
-		// }
-		//
-		// }
-
-		HSSFRow Row1 = sheet1.createRow(0);
-		HSSFCell cell1 = Row1.createCell(0);
-		cell1.setCellValue("影响的业务编号");
-		cell1 = Row1.createCell(1);
-		cell1.setCellValue("起点");
-		cell1 = Row1.createCell(2);
-		cell1.setCellValue("终点");
-		cell1 = Row1.createCell(3);
-		cell1.setCellValue("电中继节点");
-		cell1 = Row1.createCell(4);
-		cell1.setCellValue("名称");
-		cell1 = Row1.createCell(5);
-		cell1.setCellValue("波道号");
-		cell1 = Row1.createCell(6);
-		cell1.setCellValue("长度（km）");
-		cell1 = Row1.createCell(7);
-		cell1.setCellValue("等效跨段数量");
-		cell1 = Row1.createCell(8);
-		cell1.setCellValue("正向OSNR");
-		cell1 = Row1.createCell(9);
-		cell1.setCellValue("反向ODNR");
-		cell1 = Row1.createCell(10);
-		cell1.setCellValue("OSNR容限");
-		cell1 = Row1.createCell(11);
-		cell1.setCellValue("DGD值");
-		cell1 = Row1.createCell(12);
-		cell1.setCellValue("DGD容限");
-		cell1 = Row1.createCell(13);
-		cell1.setCellValue("Pre-FEC BER值");
-		cell1 = Row1.createCell(14);
-		cell1.setCellValue("Q值");
-
-		for (int i = 0; i < Evaluation.PutOutTraffic.size(); i++) {
-			Traffic tra = Evaluation.PutOutTraffic.get(i);
-			Row1 = sheet1.createRow(i + 1);
-			cell1 = Row1.createCell(0);
-			cell1.setCellValue(tra.toString());
+		try {
+			HSSFRow Row1 = sheet1.createRow(0);
+			HSSFCell cell1 = Row1.createCell(0);
+			cell1.setCellValue("影响的业务编号");
 			cell1 = Row1.createCell(1);
-			cell1.setCellValue(tra.getFromNode().getName());
+			cell1.setCellValue("起点");
 			cell1 = Row1.createCell(2);
-			cell1.setCellValue(tra.getToNode().getName());
+			cell1.setCellValue("终点");
 			cell1 = Row1.createCell(3);
-			cell1.setCellValue(tra.waveChangedNode());
+			cell1.setCellValue("电中继节点");
 			cell1 = Row1.createCell(4);
-			cell1.setCellValue(tra.workedRoute().toString());
+			cell1.setCellValue("恢复路由");
 			cell1 = Row1.createCell(5);
-			if (tra.getWorkRoute() != null) {
-				cell1.setCellValue(tra.getWorkRoute().toStingwave());
-			}
-			// cell2.setCellValue(tra.getResumeRoute().getWDMLinkList().get().getName());
+			cell1.setCellValue("波道号");
 			cell1 = Row1.createCell(6);
-			if (tra.getWorkRoute() != null) {
-				cell1.setCellValue(tra.getWorkRoute().routelength());
+			cell1.setCellValue("谱宽");
+			cell1 = Row1.createCell(7);
+			cell1.setCellValue("ODU2序号");
+			cell1 = Row1.createCell(8);
+			cell1.setCellValue("ODU1序号");
+			cell1 = Row1.createCell(9);
+			cell1.setCellValue("长度（km）");
+			cell1 = Row1.createCell(10);
+			cell1.setCellValue("等效跨段数量");
+			cell1 = Row1.createCell(11);
+			cell1.setCellValue("正向OSNR");
+			cell1 = Row1.createCell(12);
+			cell1.setCellValue("反向ODNR");
+			cell1 = Row1.createCell(13);
+			cell1.setCellValue("OSNR容限");
+			cell1 = Row1.createCell(14);
+			cell1.setCellValue("DGD值");
+			cell1 = Row1.createCell(15);
+			cell1.setCellValue("DGD容限");
+			cell1 = Row1.createCell(16);
+			cell1.setCellValue("Pre-FEC BER值");
+			cell1 = Row1.createCell(17);
+			cell1.setCellValue("Q值");
+
+			for (int i = 0; i < Evaluation.PutOutTraffic.size(); i++) {
+				Traffic tra = Evaluation.PutOutTraffic.get(i);
+				Row1 = sheet1.createRow(i + 1);
+				cell1 = Row1.createCell(0);
+				cell1.setCellValue(tra.getTrafficId());
+				cell1 = Row1.createCell(1);
+				cell1.setCellValue(tra.getFromNode().getName());
+				
+				cell1 = Row1.createCell(2);
+				cell1.setCellValue(tra.getToNode().getName());
+				
+				cell1 = Row1.createCell(3);
+				if(tra.getResumeRoute() != null) {
+				cell1.setCellValue(tra.getResumeRoute().waveChangedNode());
+				}
+				cell1 = Row1.createCell(4);
+				if(tra.getResumeRoute() != null) {
+				cell1.setCellValue(tra.getResumeRoute().toString());
+				}
+				
+				cell1 = Row1.createCell(5);
+				if (tra.getResumeRoute() != null) {
+					cell1.setCellValue(tra.getResumeRoute().getWaveLengthIdListToString());
+				}
+				
+				// cell2.setCellValue(tra.getResumeRoute().getWDMLinkList().get().getName());
+				cell1 = Row1.createCell(9);
+				if (tra.getResumeRoute() != null) {
+					cell1.setCellValue(tra.getResumeRoute().routelength());
+				}
+				
+				//等效跨段数
+				cell1 = Row1.createCell(10);
+				if(tra.getResumeRoute()!= null) {
+				cell1.setCellValue(OSNR.crossSum(tra.getResumeRoute()));
+				}
+				
+				//正向OSNR(OSNR模拟值)
+				cell1 = Row1.createCell(11);
+				if(tra.getResumeRoute()!= null) {
+				cell1.setCellValue(OSNR.calculateOSNR(tra.getResumeRoute()));
+				}
+				
+				//OSNR容限
+				cell1 = Row1.createCell(13);
+				if(tra.getResumeRoute()!= null) {					
+				cell1.setCellValue(OSNR.crossOSNR(tra.getResumeRoute()));
+				}
+								
+				
+				// cell2.setCellValue(tra.getLength());
 			}
-			// cell2.setCellValue(tra.getLength());
+		} catch (Exception e1) {
+
 		}
-
-		// HSSFRow row3 = sheet3.createRow(0);
-		// HSSFCell cell3 = row3.createCell(0);
-		// cell3.setCellValue("影响的业务编号");
-		// cell3 = row3.createCell(1);
-		// cell3.setCellValue("起点");
-		// cell3 = row3.createCell(2);
-		// cell3.setCellValue("终点");
-		// cell3 = row3.createCell(3);
-		// cell3.setCellValue("电中继节点");
-		// cell3 = row3.createCell(4);
-		// cell3.setCellValue("名称");
-		// cell3 = row3.createCell(5);
-		// cell3.setCellValue("波道号");
-		// cell3 = row3.createCell(6);
-		// cell3.setCellValue("长度（km）");
-		// cell3 = row3.createCell(7);
-		// cell3.setCellValue("等效跨段数量");
-		// cell3 = row3.createCell(8);
-		// cell3.setCellValue("正向OSNR");
-		// cell3 = row3.createCell(9);
-		// cell3.setCellValue("反向ODNR");
-		// cell3 = row3.createCell(10);
-		// cell3.setCellValue("OSNR容限");
-		// cell3 = row3.createCell(11);
-		// cell3.setCellValue("DGD值");
-		// cell3 = row3.createCell(12);
-		// cell3.setCellValue("DGD容限");
-		// cell3 = row3.createCell(13);
-		// cell3.setCellValue("Pre-FEC BER值");
-		// cell3 = row3.createCell(14);
-		// cell3.setCellValue("Q值");
-		//
-		// HSSFRow row4 = sheet4.createRow(0);
-		// HSSFCell cell4 = row4.createCell(0);
-		// cell4.setCellValue("影响的业务编号");
-		// cell4 = row4.createCell(1);
-		// cell4.setCellValue("起点");
-		// cell4 = row4.createCell(2);
-		// cell4.setCellValue("终点");
-		// cell4 = row4.createCell(3);
-		// cell4.setCellValue("电中继节点");
-		// cell4 = row4.createCell(4);
-		// cell4.setCellValue("名称");
-		// cell4 = row4.createCell(5);
-		// cell4.setCellValue("波道号");
-		// cell4 = row4.createCell(6);
-		// cell4.setCellValue("长度（km）");
-		// cell4 = row4.createCell(7);
-		// cell4.setCellValue("等效跨段数量");
-		// cell4 = row4.createCell(8);
-		// cell4.setCellValue("正向OSNR");
-		// cell4 = row4.createCell(9);
-		// cell4.setCellValue("反向ODNR");
-		// cell4 = row4.createCell(10);
-		// cell4.setCellValue("OSNR容限");
-		// cell4 = row4.createCell(11);
-		// cell4.setCellValue("DGD值");
-		// cell4 = row4.createCell(12);
-		// cell4.setCellValue("DGD容限");
-		// cell4 = row4.createCell(13);
-		// cell4.setCellValue("Pre-FEC BER值");
-		// cell4 = row4.createCell(14);
-		// cell4.setCellValue("Q值");
-
+		
+	
 		FileOutputStream os = null;
 		try {
 			os = new FileOutputStream(str);
@@ -987,7 +995,7 @@ public class TrafficDatabase {
 			e.printStackTrace();
 		}
 	}
-
+	
 	protected JTextField getTextField(Container c) {
 		// TODO Auto-generated method stub
 		JTextField text = null;

@@ -10,7 +10,7 @@ import enums.*;
 
 public class BasicLink {
 
-    private int id;  //
+    private int id;
     private String name;
     private CommonNode fromNode;//链路源节点
     private CommonNode toNode;//链路宿节点
@@ -21,11 +21,11 @@ public class BasicLink {
     
 //    private Port fromPort;// 起始端口
 //    private Port toPort;// 结束端口
-//    private double length;
+    private double length;
 //    private double nrate; // 存储double类型的速率，单位是G；
 //    private PortRate rate;
 //    private int remainResource;// 链路空闲资源
-//    private int size;// 链路含有下层低粒度的数量,波道数
+    private int size;// 链路含有下层低粒度的数量,波道数
 //    private double weight;// 权重
 //    private String SRLG;
 //    private int waveNum;//波道数
@@ -201,12 +201,12 @@ public class BasicLink {
     public void setToNode(CommonNode toNode) {
         this.toNode = toNode;
     }
-//    public double getLength() {
-//        return length;
-//    }
-//    public void setLength(double length) {
-//        this.length = length;
-//    }
+    public double getLength() {
+        return length;
+    }
+    public void setLength(double length) {
+        this.length = length;
+    }
 //    public double getNrate() {
 //        return nrate;
 //    }
@@ -231,12 +231,12 @@ public class BasicLink {
 //    public void setRemainResource(int remainResource) {
 //        this.remainResource = remainResource;
 //    }
-//    public int getSize() {
-//        return size;
-//    }
-//    public void setSize(int size) {
-//        this.size = size;
-//    }
+    public int getSize() {
+        return size;
+    }
+    public void setSize(int size) {
+        this.size = size;
+    }
 //    public Port getFromPort() {
 //        return fromPort;
 //    }

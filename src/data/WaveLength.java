@@ -21,12 +21,19 @@ public class WaveLength implements Serializable {
 	private int ID; // 波长编号
 	private PortRate rate;// 波长带宽
 	private Status status = Status.空闲; // 波长使用状态 空闲,工作,保护,恢复,可用
+	private boolean simUse = false;
 	private WDMLink holder = null; // 波长所属WDMLink
-	private Traffic carriedTraffic; // 承载业务
 	private boolean used;//标记是否使用过，用于规划建议
 	private boolean isPre;//是否被预置恢复路由占用
 	private boolean yongguo;//标记是否使用过，用于抗毁仿真
+	private boolean isSimUse=false;//标记是否为抗毁仿真时用，用于抗毁仿真清资源
+	private double m_nCaption; // 波道可容纳业务量
+	private double m_nFree=100; // 波道剩余可承载业务量
+	private double m_nUsed=0; // 波道已承载业务量
 	
+	
+	public List<Traffic> carriedTrafficList = new LinkedList<>();// 子波长承载的业务
+	private Traffic carriedTraffic; // 承载业务
 	//正常情况下，一个波道只承载一个业务，但如果这个波道是预置(动态)用的，则这个波道可能同时承载多个业务（是多个业务的预置路由使用波长），只要这些业务的工作路由是分离的
     public List<Traffic> preTrafficList=new LinkedList<>();//存放是预置使用的波道所包含的业务
     public List<Traffic> dynamicTrafficList=new LinkedList<>();//存放是动态使用的波道所包含的业务
@@ -56,8 +63,8 @@ public class WaveLength implements Serializable {
 	// 为WDMLINK链路的两端节点添加线路端口
 	public static void addWaveLengthPort(WaveLength wave) {
 		CommonNode from = wave.getfNode();
-		CommonNode to = wave.gettNode();
 		int fromportid = 0;
+		CommonNode to = wave.gettNode();
 		int toportid = 0;
 		fromportid = from.getPortList().size() + 1;
 		toportid = to.getPortList().size() + 1;
@@ -98,6 +105,15 @@ public class WaveLength implements Serializable {
 
 	public void setCarriedTraffic(Traffic carriedTraffic) {
 		this.carriedTraffic = carriedTraffic;
+	}
+	
+
+	public List<Traffic> getCarriedTrafficList() {
+		return carriedTrafficList;
+	}
+
+	public void setCarriedTrafficList(List<Traffic> carriedTrafficList) {
+		this.carriedTrafficList = carriedTrafficList;
 	}
 
 	public WDMLink getHolder() {
@@ -187,6 +203,72 @@ public class WaveLength implements Serializable {
 	public void setDynamicTrafficList(List<Traffic> dynamicTrafficList) {
 		this.dynamicTrafficList = dynamicTrafficList;
 	}
+
+	public boolean isSimUse() {
+		return simUse;
+	}
+
+	public void setSimUse(boolean simUse) {
+		this.simUse = simUse;
+	}
+	
+
+	public double getM_nFree() {
+		return m_nFree;
+	}
+
+	public void setM_nFree(double m_nFree) {
+		this.m_nFree = m_nFree;
+	}
+
+	public double getM_nUsed() {
+		return m_nUsed;
+	}
+
+	public void setM_nUsed(double m_nUsed) {
+		this.m_nUsed = m_nUsed;
+	}
+	
+
+	public double getM_nCaption() {
+		return m_nCaption;
+	}
+
+	public void setM_nCaption(double m_nCaption) {
+		this.m_nCaption = m_nCaption;
+	}
+
+	//更新波道资源
+	public void updateWaveResource() {
+		double used=0;
+		double max=0;
+		for(int i=0;i<this.getCarriedTrafficList().size();i++) {
+			used=used+this.getCarriedTrafficList().get(i).getNrate();
+		}
+	    if(this.getPreTrafficList()!=null&&this.getPreTrafficList().size()!=0) {
+	    	for(int j=0;j<this.getPreTrafficList().size();j++) {
+	    		if(this.getPreTrafficList().get(j).getNrate()>max) {
+	    			max=this.getPreTrafficList().get(j).getNrate();
+	    		}
+	    	}
+	    }
+	    used=used+max;
+	    this.setM_nFree(100-used);
+	    this.setM_nUsed(used);
+	}
+	//返回波道被预置路由占用的资源
+	public double preUsed() {
+		double preused=0;
+		if(this.getPreTrafficList()!=null&&this.getPreTrafficList().size()!=0) {
+	    	for(int j=0;j<this.getPreTrafficList().size();j++) {
+	    		if(this.getPreTrafficList().get(j).getNrate()>preused) {
+	    			preused=this.getPreTrafficList().get(j).getNrate();
+	    		}
+	    	}
+	    }
+		return preused;
+	}
+	
 	
 	
 	

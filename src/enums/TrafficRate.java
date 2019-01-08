@@ -64,6 +64,9 @@ public enum TrafficRate {//
 	case "2.5GE":
 	    rate = TrafficRate.G2Dot5;
 	    break;
+	case "1GE":
+	    rate = TrafficRate.GE;
+	    break;    
 	default:
 	    break;
 	}
@@ -105,18 +108,18 @@ public enum TrafficRate {//
 	case G100:
 	    rate = PortRate.G100;
 	    break;
-	// case G40:
-	// rate = PortRate.G40;
-	// break;
+	 case G40:
+	 rate = PortRate.G40;
+	 break;
 	case G10:
 	    rate = PortRate.G10;
 	    break;
-	// case G2Dot5: // 2.5G
-	// rate = PortRate.G2Dot5;
-	// break;
-	// case GE:
-	// rate = PortRate.GE;
-	// break;
+	 case G2Dot5: // 2.5G
+	 rate = PortRate.G2Dot5;
+	 break;
+	 case GE:
+	 rate = PortRate.GE;
+	 break;
 	// case M622:
 	// rate = PortRate.M622;
 	// break;

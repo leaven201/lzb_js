@@ -17,9 +17,9 @@ public class Dlg_login extends JFrame{
     JPasswordField jpf;  
     JButton jb1, jb2;  
   
-//    public static void main(String[] args) {  
-//    	Dlg_login test = new Dlg_login();  
-//    }  
+    public static void main(String[] args) {  
+    	Dlg_login test = new Dlg_login();  
+    }  
         //构造函数 初始化组件  
     public Dlg_login(){  
         jp1 = new JPanel();  

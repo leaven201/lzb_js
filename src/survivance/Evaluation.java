@@ -5,6 +5,7 @@ import java.awt.Container;
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -17,9 +18,11 @@ import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 
+import algorithm.RouteAlloc;
 import algorithm.Suggest;
 import data.CommonNode;
 import data.Port;
+import data.Route;
 import data.FiberLink;
 import data.LinkRGroup;
 import data.Traffic;
@@ -91,8 +94,12 @@ public class Evaluation {
 	public static float multiKeepPer = 0; // 人工时保持百分比
 	public static float multiDownPer = 0; // 人工时降级百分比
 	public static float multiUneffPer = 0; // 人工时未受影响百分比
-	
-
+	public static int ceshi=0;
+    public static int ceshilianlu=0;
+    public static int ceshi0=0;
+    public static int ceshi1=0;
+    public static int ceshi2=0;
+    public static int ceshi3=0;
 	/**
 	 * 节点单断
 	 * 
@@ -102,42 +109,47 @@ public class Evaluation {
 	public static List<Traffic> nodeEvaluation(CommonNode node) {
 		Survivance surv = new Survivance();
 		List<FiberLink> basicLink = Survivance.getNodeEffectLink(node);
+//		for (int j=0;j<basicLink.size();j++) {
+//			System.out.println("输出所有的受影响链路"+basicLink.get(j));			
+//		}
+//		for(int i=0;i<WDMLink.WDMLinkList.size();i++) {
+//			System.out.println("输出所有链路的故障状态"+i+"   "+WDMLink.WDMLinkList.get(i).isBroken());
+//			System.out.println("输出所有链路的标号"+WDMLink.WDMLinkList.get(i));
+//		}
 		Survivance.setFault(basicLink);// 设置故障状态
+//		for(int i=0;i<WDMLink.WDMLinkList.size();i++) {
+//			System.out.println("输出所有链路的故障状态"+i+"   "+WDMLink.WDMLinkList.get(i).isBroken());
+//			
+//		}
 		List<Traffic> trafficList = surv.getAffectedTraffic(basicLink);
-		List<Traffic> tl = evaluation(trafficList, 1);
+		System.out.println(trafficList);
+		for(Traffic tra:trafficList) {
+			if (tra.getFaultType()==0) {
+				ceshi0++;
+			}
+			if(tra.getFaultType()==1) {
+				ceshi1++;
+			}
+			if (tra.getFaultType()==2) {
+				ceshi2++;
+			}
+			if (tra.getFaultType()==3) {
+				ceshi3++;
+			}
+		}
+		ceshi+=trafficList.size();
+		ceshilianlu+=basicLink.size();
+//		System.out.println("输出所有的受影响业务"+trafficList);
+		List<Traffic> tl = evaluation(trafficList, 1,node);
+		System.out.println(tl);
+		for (int i = 0; i < WDMLink.WDMLinkList.size(); i++) {
+			WDMLink.WDMLinkList.get(i).setActive(true);
+		}
 		Survivance.setback(basicLink);
 		return tl;
 	}
-
-//	/**
-//	 * 节点单断2次
-//	 * 
-//	 * @param node
-//	 * @param times
-//	 *            单断次数
-//	 * @return 受影响的业务
-//	 */
-//	public static List<Traffic> nodeEvaluation(CommonNode node, int times,int suggset) {
-//		Survivance surv = new Survivance();
-//		List<FiberLink> basicLink = Survivance.getNodeEffectLink(node);
-//		Survivance.setFault(basicLink);// 设置故障状态
-//		List<Traffic> trafficList = surv.getAffectedTraffic(basicLink);
-//		List<Traffic> tl = evaluation(trafficList, 3, 1);// 1次单断
-//
-//		// 2次故障部分
-//		for (Traffic tra : Traffic.trafficList) {// 更新工作路由和保护路由
-//			if (tra.getResumeRoute() != null)
-//				tra.setWorkRoute(tra.getResumeRoute());
-//			if (tra.getResumeRoutePro() != null)
-//				tra.setProtectRoute(tra.getResumeRoutePro());
-//		}
-//		List<Traffic> trafficList2 = surv.getAffectedTraffic(basicLink);
-//		evaluation(trafficList, 3, 2);// 2次单断
-//
-//		Survivance.setback(basicLink);
-//		return tl;
-//	}
-
+	
+	
 	/**
 	 * 节点单断循环
 	 * 
@@ -153,89 +165,28 @@ public class Evaluation {
 			CommonNode node = nodelist.get(i);
 			// this.nodeEvaluation(node,isSRLG);
 			List<Traffic> tralist = Evaluation.nodeEvaluation(node);
-			
-			
-			
-			if(tralist!=null&&tralist.size()!=0) {
-				for(Traffic tra:tralist) {
-					Evaluation.PutOutTraffic.add(tra);
-				}
-			}
-		
-			NodeDataBase jd=new NodeDataBase();
-			jd.OutPutNodeDan(node);
-			
-			PutOutTraffic.clear();
-			//******调用Traffic的时候调用这个PutOutTraffic,这个是每次循环受影响的业务*******//
-			//输出的地方我这里能提供的就是恢复路由，在表的第5列，调用的方法是traffic.getREsumeRoute().getWDMLinkList().get(n).getName()//
 			Evaluation.clearRsmRoute(tralist);
+			
 		}
-		JOptionPane.showMessageDialog(null, "数据已导出");
-		TrafficDatabase.index=0;
-		Suggest.isKanghui=false;//2017.10.25
-	
-		
-		// System.out.println("循环节点故障业务中断次数："+nodecutoff);
-		// System.out.println("循环节点故障业务保持次数："+nodekeep);
-		// System.out.println("循环节点故障业务降级次数："+nodedown);
+//        System.out.println("输出测试业务值"+ceshi);
+//        System.out.println("输出测试链路的值"+ceshilianlu);
+//        System.out.println("输出没进来的业务"+ceshi0);
+//        System.out.println("输出工作受影响的业务"+ceshi1);
+//        System.out.println("输出保护受影响的业务"+ceshi2);
+//        System.out.println("输出工作保护受影响的业务"+ceshi3);
+//        System.out.println("输出测试sur"+Survivance.ceshisur);
+//        ceshi=0;
+//        ceshilianlu=0;
+//        ceshi0=0;
+//        ceshi1=0;
+//        ceshi2=0;
+//        ceshi3=0;
+//        System.out.println(Traffic.getTraffic(33).getFaultType()+"    "+Traffic.getTraffic(33).getName());
+        for(Traffic tra:Traffic.getTrafficList()) {
+        	tra.setFaultType(0);
+        }
 	}
 
-//	/**
-//	 * 节点多断
-//	 * 
-//	 * @param nodeList
-//	 * @return
-//	 */
-//	public static List<Traffic> multiNodeEva(List<CommonNode> nodeList) {
-//		Survivance surv = new Survivance();
-//		List<FiberLink> allEffectLinik = new LinkedList<FiberLink>();// 存放所有受影响的链路
-//		for (int i = 0; i < nodeList.size(); ++i) {
-//			CommonNode node = nodeList.get(i);
-//			List<FiberLink> nodeEffectLink = Survivance.getNodeEffectLink(node);
-//			for (int k = 0; k < nodeEffectLink.size(); ++k) {
-//				FiberLink fl = nodeEffectLink.get(k);
-//				if (!allEffectLinik.contains(fl))
-//					allEffectLinik.add(fl);
-//			} // end for
-//				// fiberlinklist.addAll(surv.getNodeFiberlink(node));
-//		} // end for
-//		Survivance.setFault(allEffectLinik);// 设置故障状态
-//		List<Traffic> trafficList = surv.getAffectedTraffic(allEffectLinik);
-//		List<Traffic> tl = evaluation(trafficList, 4);
-//		Survivance.setback(allEffectLinik);
-//		return tl;
-//	}
-
-//	/**
-//	 * 节点双断循环
-//	 * 
-//	 * @param allNodeList
-//	 */
-//	public static void dNodeListEvaluation(List<CommonNode> allNodeList,int suggset) {
-//		// TODO Auto-generated method stub
-//		dNodeCutoff = 0;
-//		dNodeKeep = 0;
-//		dNodeDown = 0;
-//		Evaluation.refresh();
-//		Suggest.isKanghui=true;//2017.10.25
-//		List<CommonNode> nList = new LinkedList<CommonNode>();
-//		for (int i = 0; i < allNodeList.size(); ++i) {// 任选一个节点和所有节点两两配对
-//			CommonNode node1 = allNodeList.get(i);
-//			nList.add(node1);
-//			for (int j = i + 1; j < allNodeList.size(); j++) {
-//				CommonNode node2 = allNodeList.get(j);
-//				nList.add(node2);
-//				List<Traffic> tralist = Evaluation.multiNodeEva(nList,suggset);
-//				Evaluation.clearRsmRoute(tralist);
-//				nList.remove(1);
-//			} // end for
-//			nList.remove(0);
-//		}
-//		Suggest.isKanghui=false;//2017.10.25
-//		// System.out.println("循环节点故障业务中断次数："+nodecutoff);
-//		// System.out.println("循环节点故障业务保持次数："+nodekeep);
-//		// System.out.println("循环节点故障业务降级次数："+nodedown);
-//	}
 
 	/**
 	 * 链路单断
@@ -244,15 +195,46 @@ public class Evaluation {
 	 * @return
 	 */
 	public static List<Traffic> linkEvaluation(FiberLink link) {
+		//初始化每个节点的dynUsedOTU[1]为0
+		for(CommonNode node : CommonNode.allNodeList) {
+			int[] dynUsedOTU = node.getDynUsedOTU();
+			dynUsedOTU[1]=0;
+		}
+		
 		List<FiberLink> basicLink = new LinkedList<FiberLink>();
-		basicLink.add(link);
+		System.out.println(link.getFiberRelatedList().size()!=0);
+		if(link.getFiberRelatedList().size()!=0) {
+			for(int i=0;i<link.getFiberRelatedList().size();i++) {
+				for(int j=0;j<link.getFiberRelatedList().get(i).getSRLGFiberLinkList().size();j++) {
+					basicLink.add(link.getFiberRelatedList().get(i).getSRLGFiberLinkList().get(j));
+				}
+			}
+		}else {
+			basicLink.add(link);
+			}
+		for(int i=0;i<basicLink.size();i++) {
+		System.out.println("+++++输出受影响的所有链路"+basicLink.get(i));
+		}
+		//加入SRLG对链路单断的影响
 		Survivance surv = new Survivance();
 		List<Traffic> trafficList = surv.getAffectedTraffic(basicLink);
+		for(int i=0;i<trafficList.size();i++) {
+			System.out.println("+++++输出所有受影响的业务"+trafficList.get(i));
+			Traffic tra = trafficList.get(i);
+			tra.setResumeRoute(null);
+			tra.setResumeRoutePro(null);
+		}
 		if (trafficList == null || trafficList.size() == 0)
 			return null; // 10.20 新增获得空业务判断
 		// System.out.println("受影响业务个数："+tl.size());
 		Survivance.setFault(basicLink);
-		List<Traffic> tl = evaluation(trafficList, 2);
+		List<Traffic> tl = evaluation(trafficList, 2,null);
+		
+		
+		
+		for (Traffic tr : tl) {
+			tr.setFaultType(0);
+		}
 		Survivance.setback(basicLink);
 		return tl;
 	}
@@ -262,57 +244,60 @@ public class Evaluation {
 	 * 
 	 * @param allLinkList
 	 */
+	//8.6
 	public static void listEvaluation(LinkedList<FiberLink> allLinkList) {
 		linkCutoff = 0;
 		linkKeep = 0;
 		linkDown = 0;
+		
+		//每次单断循环的时候都初始化节点dynUsedOTU[]和链路的dynUsedLink[]属性
+		for(CommonNode node : CommonNode.allNodeList) {
+			int[] dynUsedOTU = node.getDynUsedOTU();
+			dynUsedOTU[0]=dynUsedOTU[1]=0;
+		}
+		for(WDMLink link : WDMLink.WDMLinkList) {
+			int[] dynUsedLink = link.getDynUsedLink();
+			for(int i=0;i<dynUsedLink.length;i++) {
+				dynUsedLink[i]=0;
+			}
+		}
+		
 		Evaluation.refresh();
 		Suggest.isKanghui=true;//2017.10.25
+		HashSet<String> set = new HashSet<>();
+		LinkedList<FiberLink> norepeat = new LinkedList<>(); 
+		for(FiberLink link : allLinkList ) {
+			if(!set.contains(link.getName())) {
+				set.add(link.getName());
+				norepeat.add(link);
+			}
+		}
 	
-		for (int i = 0; i < allLinkList.size(); ++i) {
-
-			FiberLink fl = allLinkList.get(i);
+		for (int i = 0; i < norepeat.size(); ++i) {
+			FiberLink fl = norepeat.get(i);
 			// this.linkEvaluation(fl,isSRLG);
 			List<Traffic> tralist = Evaluation.linkEvaluation(fl);
-			if(tralist!=null&&tralist.size()!=0) {
-				for(Traffic tra:tralist) {
-					Evaluation.PutOutTraffic.add(tra);
+			if (tralist != null && tralist.size() != 0 ) {
+				for (Traffic tra : tralist) {
+					if (tra.getResumeRoute() != null) {
+						Route.setDynNodeAndLinkParams(tra.getResumeRoute());
+					}
 				}
 			}
-		
-			TrafficDatabase lldd=new TrafficDatabase();
-			lldd.OutPutRoute(fl);
+			// 判断此次仿真用了多少个OTU，如果大于当前使用的OTU数dynOTU[0]，则更新
+			for (CommonNode node : CommonNode.allNodeList) {
+				node.countUpdown1(node);//更新此次仿真用的上下路模块
+				int[] dynUsedOTU = node.getDynUsedOTU();
+				if (dynUsedOTU[1] > dynUsedOTU[0]) {
+					dynUsedOTU[0] = dynUsedOTU[1];
+				}
+			}
 			
-			PutOutTraffic.clear();
-			//******调用Traffic的时候调用这个PutOutTraffic,这个是每次循环受影响的业务*******//
-			//输出的地方我这里能提供的就是恢复路由，在表的第5列，调用的方法是traffic.getREsumeRoute().getWDMLinkList().get(n).getName()//
 			Evaluation.clearRsmRoute(tralist);
 		}
-		JOptionPane.showMessageDialog(null, "数据已导出");
-		TrafficDatabase.index=0;
-		Suggest.isKanghui=false;//2017.10.25
-//		System.out.println("循环链路故障业务中断次数：" + linkCutoff);
-//		System.out.println("循环链路故障业务保持次数：" + linkKeep);
-//		System.out.println("循环链路故障业务降级次数：" + linkDown);
+
 	}
 
-//	/**
-//	 * 链路多断
-//	 * 
-//	 * @param link
-//	 * @return
-//	 */
-//	public static List<Traffic> multiLinkEva(List<FiberLink> linkList) {
-//		Survivance surv = new Survivance();
-//		List<Traffic> trafficList = surv.getAffectedTraffic(linkList);
-//		if (trafficList == null || trafficList.size() == 0)
-//			return null; // 10.20 新增获得空业务判断
-//		// System.out.println("受影响业务个数："+tl.size());
-//		Survivance.setFault(linkList);
-//		List<Traffic> tl = evaluation(trafficList, 2);
-//		Survivance.setback(linkList);
-//		return tl;
-//	}	
     /**
      * 人工设置节点链路多断
      * 输入  linklist nodelist
@@ -335,7 +320,7 @@ public class Evaluation {
 		if(tra==null||tra.size()==0)
 			return null;
 		Survivance.setFault(linkList);
-		List<Traffic> tl=evaluation(tra,3);
+		List<Traffic> tl=evaluation(tra,3,null);
 		Survivance.setback(linkList);
 		return tl;
 	}
@@ -354,7 +339,7 @@ public class Evaluation {
 		if(trafficList==null||trafficList.size()==0)
 			return null;//空业务判断
 		Survivance.setFault(fiberlinklist);
-        List<Traffic>tl=evaluation(trafficList,4);
+        List<Traffic>tl=evaluation(trafficList,4,null);
         Survivance.setback(fiberlinklist);
         return tl;	
     }
@@ -378,36 +363,6 @@ public class Evaluation {
     }
 	
 
-//	/**
-//	 * 链路双断循环
-//	 * 
-//	 * @param allLinkList
-//	 */
-//	public static void dLinkListEvaluation(LinkedList<FiberLink> allLinkList,int suggset) {
-//		dLinkCutoff = 0;
-//		dLinkKeep = 0;
-//		dLinkDown = 0;
-//		Evaluation.refresh();
-//		Suggest.isKanghui=true;//2017.10.25
-//		List<FiberLink> lList = new LinkedList<FiberLink>();
-//		for (int i = 0; i < allLinkList.size(); ++i) {
-//			FiberLink link1 = allLinkList.get(i);
-//			lList.add(link1);
-//			for (int j = i + 1; j < allLinkList.size(); j++) {
-//				FiberLink link2 = allLinkList.get(j);
-//				lList.add(link2);
-//				List<Traffic> tralist = Evaluation.multiLinkEva(lList,suggset);
-//				Evaluation.clearRsmRoute(tralist);
-//				lList.remove(1);
-//			} // end for
-//			lList.remove(0);
-//		}
-//		Suggest.isKanghui=false;//2017.10.25
-//		// System.out.println("循环节点故障业务中断次数："+nodecutoff);
-//		// System.out.println("循环节点故障业务保持次数："+nodekeep);
-//		// System.out.println("循环节点故障业务降级次数："+nodedown);
-//	}
-
 	/**
 	 * 过程：释放、重新计算、统计、恢复受影响业务 核心评估算法
 	 * 统计
@@ -415,14 +370,18 @@ public class Evaluation {
 	 * @param flag 统计的类型。1=节点单断，2=链路单断，3=人工设置多断，4=SRLG单断
 	 * @return
 	 */
-	public static List<Traffic> evaluation(List<Traffic> trafficList, int flag) {
+	public static List<Traffic> evaluation(List<Traffic> trafficList, int flag, CommonNode node) {
 		int linkcutoff = 0;
 		int linkdown = 0;
 		int linkkeep = 0;
+		int cutoffnum=0;
+		int downnum=0;
+		int keepnum=0;
+		int sum=0;
+//		Evaluation.refresh();//单断的时候也需要清除受影响次数 12.1
+//		RscRelease.rscRelease(trafficList);// 释放资源
 
-		RscRelease.rscRelease(trafficList);// 释放资源
-
-		Survivance.reCompute(trafficList);// 重新计算(需要考虑多种恢复策略)
+		Survivance.reCompute(trafficList,node);// 重新计算(需要考虑多种恢复策略)
 
 		// assert FiberLink.allFiberLinkList.size() == 35 : "链路改变了";// 10.27
 
@@ -433,329 +392,159 @@ public class Evaluation {
 			case PERMANENT11:
 				if (tra.getResumeRoute() == null || tra.getResumeRoute().getWDMLinkList().size() == 0) {// 没有恢复路由,即中断
 					linkcutoff++;
+					cutoffnum++;
 					tra.setFailNum(tra.getFailNum() + 1);
 					tra.setEffectNum(tra.getEffectNum() + 1);
+					sum++;
 				} else if ((tra.getResumeRoute() != null && tra.getResumeRoute().getWDMLinkList().size() != 0)
 						&& (tra.getResumeRoutePro() == null || tra.getResumeRoutePro().getWDMLinkList().size() == 0)) {// 有恢复路由无恢复保护，即降级
 					linkdown++;
+					downnum++;
 //					tra.setFailNum(tra.getFailNum() + 1);
 					tra.setEffectNum(tra.getEffectNum() + 1);
+					sum++;
 				} else if ((tra.getResumeRoute() != null && tra.getResumeRoute().getWDMLinkList().size() != 0)
 						&& (tra.getResumeRoutePro() != null && tra.getResumeRoutePro().getWDMLinkList().size() != 0)) {// 有恢复有恢复保护,即保持
 					linkkeep++;
+					keepnum++;
 					tra.setEffectNum(tra.getEffectNum() + 1);
+					sum++;
 				}
 				break;
 			case NORMAL11:
 				if (tra.getResumeRoute() == null || tra.getResumeRoute().getWDMLinkList().size() == 0) {// 故障
 					linkcutoff++;
+					cutoffnum++;
 					tra.setFailNum(tra.getFailNum() + 1);
 					tra.setEffectNum(tra.getEffectNum() + 1);
+					sum++;
 				} else if ((tra.getResumeRoute() != null && tra.getResumeRoute().getWDMLinkList().size() != 0)
-						&& (tra.getResumeRoutePro() == null || tra.getResumeRoutePro().getWDMLinkList().size() == 0)) {// 降级
-					linkdown++;
+						&& (tra.getResumeRoutePro() == null || tra.getResumeRoutePro().getWDMLinkList().size() == 0)) {// 1+1只有保持
+					linkkeep++;
+					keepnum++;
 //					tra.setFailNum(tra.getFailNum() + 1);
 					tra.setEffectNum(tra.getEffectNum() + 1);
+					sum++;
 				} else if ((tra.getResumeRoute() != null && tra.getResumeRoute().getWDMLinkList().size() != 0)
 						&& (tra.getResumeRoutePro() != null && tra.getResumeRoutePro().getWDMLinkList().size() != 0)) {// 保持
 					linkkeep++;
+					keepnum++;
 					tra.setEffectNum(tra.getEffectNum() + 1);
+					sum++;
 				}
 				break;
 			case RESTORATION:
-				if (tra.getResumeRoute() == null || tra.getResumeRoute().getWDMLinkList().size() == 0) {// 没有恢复路由,即中断
+				if (tra.getResumeRoute() == null || tra.getResumeRoute().getWDMLinkList().size() == 0) {// 故障
 					linkcutoff++;
+					cutoffnum++;
 					tra.setFailNum(tra.getFailNum() + 1);
 					tra.setEffectNum(tra.getEffectNum() + 1);
-				} else if ((tra.getResumeRoute() != null && tra.getResumeRoute().getWDMLinkList().size() != 0)
-						&& (tra.getPreRoute() == null || tra.getPreRoute().getWDMLinkList().size() == 0)) {// 有恢复路由无恢复保护，即降级
-					linkdown++;
-//					tra.setFailNum(tra.getFailNum() + 1);
-					tra.setEffectNum(tra.getEffectNum() + 1);
-				} else if ((tra.getResumeRoute() != null && tra.getResumeRoute().getWDMLinkList().size() != 0)
-						&& (tra.getPreRoute() != null && tra.getPreRoute().getWDMLinkList().size() != 0)) {// 有恢复有恢复保护,即保持
+					sum++;
+				} else if ((tra.getResumeRoute() != null && tra.getResumeRoute().getWDMLinkList().size() != 0)) {// 保持
 					linkkeep++;
+					keepnum++;
 					tra.setEffectNum(tra.getEffectNum() + 1);
+					sum++;
 				}
 				break;
 			case NONPROTECT:
 				if (tra.getResumeRoute() == null || tra.getResumeRoute().getWDMLinkList().size() == 0) {// 中断
 					linkcutoff++;
+					cutoffnum++;
 					tra.setFailNum(tra.getFailNum() + 1);
 					tra.setEffectNum(tra.getEffectNum() + 1);
+					sum++;
 				} else if (tra.getResumeRoute() != null && tra.getResumeRoute().getWDMLinkList().size() != 0) {// 保持
 					linkkeep++;
+					keepnum++;
 					tra.setEffectNum(tra.getEffectNum() + 1);
+					sum++;
 				}
 				break;
 			case PROTECTandRESTORATION:// 保护+恢复
 				if (tra.getResumeRoute() == null || tra.getResumeRoute().getWDMLinkList().size() == 0) {// 没有恢复路由,即中断
 					linkcutoff++;
+					cutoffnum++;
 					tra.setFailNum(tra.getFailNum() + 1);
 					tra.setEffectNum(tra.getEffectNum() + 1);
+					sum++;
 				} else if ((tra.getResumeRoute() != null && tra.getResumeRoute().getWDMLinkList().size() != 0)
 						&& (tra.getPreRoute() == null || tra.getPreRoute().getWDMLinkList().size() == 0)) {// 有恢复路由无恢复保护，即降级
-					linkdown++;
+					linkkeep++;
+					keepnum++;
 //					tra.setFailNum(tra.getFailNum() + 1);
 					tra.setEffectNum(tra.getEffectNum() + 1);
+					sum++;
 				} else if ((tra.getResumeRoute() != null && tra.getResumeRoute().getWDMLinkList().size() != 0)
 						&& (tra.getPreRoute() != null && tra.getPreRoute().getWDMLinkList().size() != 0)) {// 有恢复有恢复保护,即保持
 					linkkeep++;
+					keepnum++;
 					tra.setEffectNum(tra.getEffectNum() + 1);
+					sum++;
 				}
 				// tra.setProtectLevel(TrafficLevel.RESTORATION);//保护级别降级
 				break;
-//			case PresetRESTORATION:// 专享预置恢复
-//				if (tra.getResumeRoute() == null || tra.getResumeRoute().getWDMLinkList().size() == 0) {// 故障
-//					linkcutoff++;
-//					tra.setFailNum(tra.getFailNum() + 1);
-//					tra.setEffectNum(tra.getEffectNum() + 1);
-//				} else if ((tra.getResumeRoute() != null && tra.getResumeRoute().getWDMLinkList().size() != 0)
-//						&& (tra.getResumeRoutePro() == null || tra.getResumeRoutePro().getWDMLinkList().size() == 0)) {// 降级
-//					linkdown++;
-//					tra.setFailNum(tra.getFailNum() + 1);
-//					tra.setEffectNum(tra.getEffectNum() + 1);
-//				} else if ((tra.getResumeRoute() != null && tra.getResumeRoute().getWDMLinkList().size() != 0)
-//						&& (tra.getResumeRoutePro() != null && tra.getResumeRoutePro().getWDMLinkList().size() != 0)) {// 保持
-//					linkkeep++;
-//					tra.setEffectNum(tra.getEffectNum() + 1);
-//				}
-//				break;
 			default:
 				break;
 			}// end switch
 
 			switch (flag) {
 			case 1:// 节点单断用百分比,循环用次数，
-				nodeCutoff = nodeCutoff + linkcutoff;
-				nodeKeep = nodeKeep + linkkeep;
-				nodeDown = nodeDown + linkdown;
+				nodeCutoff = nodeCutoff+cutoffnum;//还要再考虑一下
+				nodeKeep = nodeKeep+keepnum;
+				nodeDown = nodeDown+downnum;
 
-				if (trasum != 0) {
-					nCutoffPercent = (float) linkcutoff / trasum;
-					nKeepPercent = (float) linkkeep / trasum;
-					nDownPercent = (float) linkdown / trasum;
-					nUneffPercent = 1 - nCutoffPercent - nKeepPercent - nDownPercent;
+				if (sum != 0) {
+					nCutoffPercent = (float) linkcutoff / sum;
+					nKeepPercent = (float) linkkeep / sum;
+					nDownPercent = (float) linkdown / sum;
+//					nUneffPercent = 1 - nCutoffPercent - nKeepPercent - nDownPercent;
 				}
 				break;
 			case 2:// 链路单断用百分比,循环用次数，
-				linkCutoff = linkCutoff + linkcutoff;
-				linkKeep = linkKeep + linkkeep;
-				linkDown = linkDown + linkdown;
+				linkCutoff = linkCutoff + cutoffnum;
+				linkKeep = linkKeep + keepnum;
+				linkDown = linkDown + downnum;
 
-				if (trasum != 0) {
-					cutoffPercent = (float) linkcutoff / trasum;
-					keepPercent = (float) linkkeep / trasum;
-					downPercent = (float) linkdown / trasum;
-					uneffPercent = 1 - cutoffPercent - keepPercent - downPercent;
+				if (tra.getEffectNum() != 0) {
+					cutoffPercent = (float) linkcutoff / sum;
+					keepPercent = (float) linkkeep / sum;
+					downPercent = (float) linkdown / sum;
+//					uneffPercent = 1 - cutoffPercent - keepPercent - downPercent;
 				}
 				break;
 			case 3:// 人工设置多断只有百分比，不循环没有次数
-//				dLinkCutoff = dLinkCutoff + linkcutoff;
-//				dLinkKeep = dLinkKeep + linkkeep;
-//				dLinkDown = dLinkDown + linkdown;
 
-				if (trasum != 0) {
-					multiCutoffPer = (float) linkcutoff / trasum;
-					multiKeepPer = (float) linkkeep / trasum;
-					multiDownPer = (float) linkdown / trasum;
-					multiUneffPer = 1 - multiCutoffPer - multiKeepPer - multiDownPer;
+				if (tra.getEffectNum() != 0) {
+					multiCutoffPer = (float) linkcutoff / sum;
+					multiKeepPer = (float) linkkeep / sum;
+					multiDownPer = (float) linkdown / sum;
+//					multiUneffPer = 1 - multiCutoffPer - multiKeepPer - multiDownPer;
 				}
 				break;
 			
 			case 4://SRLG单断用百分比，循环用次数
-				    scutoff=scutoff+linkcutoff;
-				    skeep=skeep+linkkeep;
-				    sdown=sdown+linkdown;
+				    scutoff=scutoff+cutoffnum;
+				    skeep=skeep+keepnum;
+				    sdown=sdown+downnum;
 				if(trasum!=0) {
-				    scutoffpercent=(float)linkcutoff/trasum;
-				    skeeppercent=(float)linkkeep/trasum;
-				    sdownpercent=(float)linkdown/trasum;
-				    suneffpercent=1-scutoffpercent-skeeppercent-sdownpercent;
+				    scutoffpercent=(float)linkcutoff/sum;
+				    skeeppercent=(float)linkkeep/sum;
+				    sdownpercent=(float)linkdown/sum;
+//				    suneffpercent=1-scutoffpercent-skeeppercent-sdownpercent;
 				}				
-				
+		
 			}// end switch
-				// Survivance.setback(basicLink);
+			cutoffnum=0;
+			keepnum=0;
+			downnum=0;
+			// Survivance.setback(basicLink);
 		} // end trafficList for
-
-		RscRestore.rscRestore(trafficList);// 恢复仿真以前状态 11.6
-
+//		RscRestore.rscRestore(trafficList);// 恢复仿真以前状态 11.6
+		//2018.10.15 记录此次仿真使用的波长转换及
+        RouteAlloc.releaseRouteForSim1();
 		return trafficList;
 	}
-
-	/**
-	 * 用于同一业务二次故障仿真 过程：释放、重新计算、统计、恢复受影响业务 核心评估算法
-	 *
-	 * 
-	 * @param trafficList
-	 * @param flag
-	 *            统计的类型。1=链路单断，2=链路双断，3=节点单断，4=节点双断
-	 * @param times
-	 *            故障次数
-	 * @return
-	 */
-//	public static List<Traffic> evaluation(List<Traffic> trafficList, int flag, int times) {
-//		int linkcutoff = 0;
-//		int linkdown = 0;
-//		int linkkeep = 0;
-//
-//		RscRelease.rscRelease(trafficList);// 释放资源
-//
-//		Survivance.reCompute(trafficList);// 重新计算(需要考虑多种恢复策略)
-//
-//		// assert FiberLink.allFiberLinkList.size() == 35 : "链路改变了";// 10.27
-//
-//		// 统计故障恢复情况，中断、降级、保持的次数
-//		for (int j = 0; j < trafficList.size(); ++j) {
-//			Traffic tra = trafficList.get(j);
-//			switch (tra.getProtectLevel()) {
-//			case PERMANENT11:
-//				if (tra.getResumeRoute() == null || tra.getResumeRoute().getFiberLinkList().size() == 0) {// 没有恢复路由,即中断
-//					linkcutoff++;
-//					tra.setFailNum(tra.getFailNum() + 1);
-//					tra.setEffectNum(tra.getEffectNum() + 1);
-//				} else if ((tra.getResumeRoute() != null && tra.getResumeRoute().getFiberLinkList().size() != 0)
-//						&& (tra.getResumeRoutePro() == null || tra.getResumeRoutePro().getFiberLinkList().size() == 0)) {// 有恢复路由无恢复保护，即降级
-//					linkdown++;
-//					tra.setFailNum(tra.getFailNum() + 1);
-//					tra.setEffectNum(tra.getEffectNum() + 1);
-//				} else if ((tra.getResumeRoute() != null && tra.getResumeRoute().getFiberLinkList().size() != 0)
-//						&& (tra.getResumeRoutePro() != null && tra.getResumeRoutePro().getFiberLinkList().size() != 0)) {// 有恢复有恢复保护,即保持
-//					linkkeep++;
-//					tra.setEffectNum(tra.getEffectNum() + 1);
-//				}
-//				break;
-//			case NORMAL11:
-//				if (tra.getResumeRoute() == null || tra.getResumeRoute().getFiberLinkList().size() == 0) {// 故障
-//					linkcutoff++;
-//					tra.setFailNum(tra.getFailNum() + 1);
-//					tra.setEffectNum(tra.getEffectNum() + 1);
-//				} else if ((tra.getResumeRoute() != null && tra.getResumeRoute().getFiberLinkList().size() != 0)
-//						&& (tra.getResumeRoutePro() == null || tra.getResumeRoutePro().getFiberLinkList().size() == 0)) {// 降级
-//					linkdown++;
-//					tra.setFailNum(tra.getFailNum() + 1);
-//					tra.setEffectNum(tra.getEffectNum() + 1);
-//				} else if ((tra.getResumeRoute() != null && tra.getResumeRoute().getFiberLinkList().size() != 0)
-//						&& (tra.getResumeRoutePro() != null && tra.getResumeRoutePro().getFiberLinkList().size() != 0)) {// 保持
-//					linkkeep++;
-//					tra.setEffectNum(tra.getEffectNum() + 1);
-//				}
-//				// tra.setProtectLevel(TrafficLevel.NONPROTECT);//保护级别降级,不在这里设置
-//				break;
-//			case RESTORATION:
-//				if (tra.getResumeRoute() == null || tra.getResumeRoute().getFiberLinkList().size() == 0) {// 中断
-//					linkcutoff++;
-//					tra.setFailNum(tra.getFailNum() + 1);
-//					tra.setEffectNum(tra.getEffectNum() + 1);
-//				} else if (tra.getResumeRoute() != null && tra.getResumeRoute().getFiberLinkList().size() != 0) {// 保持
-//					linkkeep++;
-//					tra.setEffectNum(tra.getEffectNum() + 1);
-//				}
-//				break;
-//			case NONPROTECT:
-//				if (tra.getResumeRoute() == null || tra.getResumeRoute().getFiberLinkList().size() == 0) {// 中断
-//					linkcutoff++;
-//					tra.setFailNum(tra.getFailNum() + 1);
-//					tra.setEffectNum(tra.getEffectNum() + 1);
-//				} else if (tra.getResumeRoute() != null && tra.getResumeRoute().getFiberLinkList().size() != 0) {// 保持
-//					linkkeep++;
-//					tra.setEffectNum(tra.getEffectNum() + 1);
-//				}
-//				break;
-//			case PROTECTandRESTORATION:// 保护+恢复
-//				if (tra.getResumeRoute() == null || tra.getResumeRoute().getFiberLinkList().size() == 0) {// 没有恢复路由,即中断
-//					linkcutoff++;
-//					tra.setFailNum(tra.getFailNum() + 1);
-//					tra.setEffectNum(tra.getEffectNum() + 1);
-//				} else if ((tra.getResumeRoute() != null && tra.getResumeRoute().getFiberLinkList().size() != 0)
-//						&& (tra.getResumeRoutePro() == null || tra.getResumeRoutePro().getFiberLinkList().size() == 0)) {// 有恢复路由无恢复保护，即降级
-//					linkdown++;
-//					tra.setFailNum(tra.getFailNum() + 1);
-//					tra.setEffectNum(tra.getEffectNum() + 1);
-//				} else if ((tra.getResumeRoute() != null && tra.getResumeRoute().getFiberLinkList().size() != 0)
-//						&& (tra.getResumeRoutePro() != null && tra.getResumeRoutePro().getFiberLinkList().size() != 0)) {// 有恢复有恢复保护,即保持
-//					linkkeep++;
-//					tra.setEffectNum(tra.getEffectNum() + 1);
-//				}
-//				// tra.setProtectLevel(TrafficLevel.RESTORATION);//保护级别降级
-//				break;
-//			case PresetRESTORATION:// 专享预置恢复
-//				if (tra.getResumeRoute() == null || tra.getResumeRoute().getFiberLinkList().size() == 0) {// 没有恢复路由,即中断
-//					linkcutoff++;
-//					tra.setFailNum(tra.getFailNum() + 1);
-//					tra.setEffectNum(tra.getEffectNum() + 1);
-//				} else if ((tra.getResumeRoute() != null && tra.getResumeRoute().getFiberLinkList().size() != 0)
-//						&& (tra.getResumeRoutePro() == null || tra.getResumeRoutePro().getFiberLinkList().size() == 0)) {// 有恢复路由无恢复保护，即降级
-//					linkdown++;
-//					tra.setFailNum(tra.getFailNum() + 1);
-//					tra.setEffectNum(tra.getEffectNum() + 1);
-//				} else if ((tra.getResumeRoute() != null && tra.getResumeRoute().getFiberLinkList().size() != 0)
-//						&& (tra.getResumeRoutePro() != null && tra.getResumeRoutePro().getFiberLinkList().size() != 0)) {// 有恢复有恢复保护,即保持
-//					linkkeep++;
-//					tra.setEffectNum(tra.getEffectNum() + 1);
-//				}
-//				break;
-//			}// end switch
-//
-//			switch (flag) {
-//			case 1:// 链路单断用百分比,循环用次数，
-//				linkCutoff = linkCutoff + linkcutoff;
-//				linkKeep = linkKeep + linkkeep;
-//				linkDown = linkDown + linkdown;
-//
-//				if (trasum != 0) {
-//					cutoffPercent = (float) linkcutoff / trasum;
-//					keepPercent = (float) linkkeep / trasum;
-//					downPercent = (float) linkdown / trasum;
-//					uneffPercent = 1 - cutoffPercent - keepPercent - downPercent;
-//				}
-//				break;
-//			case 2:// 链路双断用百分比,循环用次数，
-//				dLinkCutoff = dLinkCutoff + linkcutoff;
-//				dLinkKeep = dLinkKeep + linkkeep;
-//				dLinkDown = dLinkDown + linkdown;
-//
-//				if (trasum != 0) {
-//					multiLinkCutoffPer = (float) linkcutoff / trasum;
-//					multiLinkKeepPer = (float) linkkeep / trasum;
-//					multiLinkDownPer = (float) linkdown / trasum;
-//					multiLinkUneffPer = 1 - cutoffPercent - keepPercent - downPercent;
-//				}
-//				break;
-//			case 3:// 节点单断用百分比,循环用次数，
-//				nodeCutoff = nodeCutoff + linkcutoff;
-//				nodeKeep = nodeKeep + linkkeep;
-//				nodeDown = nodeDown + linkdown;
-//
-//				if (trasum != 0) {
-//					nCutoffPercent = (float) linkcutoff / trasum;
-//					nKeepPercent = (float) linkkeep / trasum;
-//					nDownPercent = (float) linkdown / trasum;
-//					nUneffPercent = 1 - nCutoffPercent - nKeepPercent - nDownPercent;
-//				}
-//				break;
-//			case 4:// 节点双断用百分比,循环用次数，
-//				dNodeCutoff = dNodeCutoff + linkcutoff;
-//				dNodeKeep = dNodeKeep + linkkeep;
-//				dNodeDown = dNodeDown + linkdown;
-//
-//				if (trasum != 0) {
-//					multiNodeCutoffPer = (float) linkcutoff / trasum;
-//					multiNodeKeepPer = (float) linkkeep / trasum;
-//					multiNodeDownPer = (float) linkdown / trasum;
-//					multiNodeUneffPer = 1 - multiNodeCutoffPer - multiNodeKeepPer - multiNodeDownPer;
-//				}
-//				break;
-//			}// end switch
-//				// Survivance.setback(basicLink);
-//		} // end trafficList for
-//
-//		// RscRestore.rscRestore(trafficList);// 恢复仿真以前状态 11.6
-//		RscRelease.rscRelease(trafficList);
-//
-//		return trafficList;
-//	}
-
 	/**
 	 * 
 	 * @param tralist
@@ -783,6 +572,4 @@ public class Evaluation {
 			tra.setEffectNum(0);
 		}
 	}
-
-
 }

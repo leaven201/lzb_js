@@ -559,7 +559,7 @@ public class Dlg_SetFault extends JFrame{
 
 				} else if ((tra1.getResumeRoute() != null && tra1.getResumeRoute().getWDMLinkList().size() != 0)
 						&& (tra1.getResumeRoutePro() == null || tra1.getResumeRoutePro().getWDMLinkList().size() == 0))
-					data1[5] = "降级";
+					data1[5] = "保持";
 				else if ((tra1.getResumeRoute() != null && tra1.getResumeRoute().getWDMLinkList().size() != 0)
 						&& (tra1.getResumeRoutePro() != null && tra1.getResumeRoutePro().getWDMLinkList().size() != 0))
 					data1[5] = "保持";
@@ -576,7 +576,7 @@ public class Dlg_SetFault extends JFrame{
 					data1[5] = "中断";
 				} else if ((tra1.getResumeRoute() != null && tra1.getResumeRoute().getWDMLinkList().size() != 0)
 						&& (tra1.getResumeRoutePro() == null || tra1.getResumeRoutePro().getWDMLinkList().size() == 0))
-					data1[5] = "降级";
+					data1[5] = "保持";
 				else if ((tra1.getResumeRoute() != null && tra1.getResumeRoute().getWDMLinkList().size() != 0)
 						&& (tra1.getResumeRoutePro() != null && tra1.getResumeRoutePro().getWDMLinkList().size() != 0))
 					data1[5] = "保持";
@@ -586,7 +586,7 @@ public class Dlg_SetFault extends JFrame{
 					data1[5] = "中断";
 				} else if ((tra1.getResumeRoute() != null && tra1.getResumeRoute().getWDMLinkList().size() != 0)
 						&& (tra1.getResumeRoutePro() == null || tra1.getResumeRoutePro().getWDMLinkList().size() == 0))
-					data1[5] = "降级";
+					data1[5] = "保持";
 				else if ((tra1.getResumeRoute() != null && tra1.getResumeRoute().getWDMLinkList().size() != 0)
 						&& (tra1.getResumeRoutePro() != null && tra1.getResumeRoutePro().getWDMLinkList().size() != 0))
 					data1[5] = "保持";

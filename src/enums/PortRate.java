@@ -1,13 +1,22 @@
 package enums;
 
 public enum PortRate {//与trafficrate内容一样
-	G100, G10;
+	G100,G40,G2Dot5,G10,GE;
     
-    public static int Rate2Num(PortRate rate) {
-	int nrate = 0;
+    public static float Rate2Num(PortRate rate) {
+	float nrate = 0;
 	switch (rate) {
+	case GE:
+		 nrate = 1;
+		 break;
+	case G2Dot5:
+		nrate = (float) 2.5;
+		break;
 	case G10:
 	    nrate = 10;
+	    break;
+	case G40:
+	    nrate = 40;
 	    break;
 	case G100:
 	    nrate = 100;
@@ -27,6 +36,15 @@ public enum PortRate {//与trafficrate内容一样
 	case "100":
 	    rate = PortRate.G100;
 	    break;
+	case "2.5G":
+	    rate = G2Dot5;
+	    break;
+	case "40":
+	    rate = G40;
+	    break;
+	case  "1G":
+	    rate = GE;
+	    break;
 	default:
 	    break;
 	}
@@ -45,15 +63,15 @@ public enum PortRate {//与trafficrate内容一样
 	case G100:
 	    nrate = "100G";
 	    break;
-//	case G2Dot5:
-//	    nrate = "2.5G";
-//	    break;
-//	case G40:
-//	    nrate = "40G";
-//	    break;
-//	case GE:
-//	    nrate = "1G";
-//	    break;
+	case G2Dot5:
+	    nrate = "2.5G";
+	    break;
+	case G40:
+	    nrate = "40G";
+	    break;
+	case GE:
+	    nrate = "1G";
+	    break;
 //	case M155:
 //	    nrate = "155M";
 //	    break;

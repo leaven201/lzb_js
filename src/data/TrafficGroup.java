@@ -49,6 +49,14 @@ public class TrafficGroup implements Serializable{
 		return b1.toString();
 	}
 	
+	//清空所有关联业务组
+	public static void removeTrafficGroup() {
+		for(int i=0;i<Traffic.trafficList.size();i++) {
+			Traffic.trafficList.get(i).setTrafficgroup(null);
+		}
+	}
+	
+	
 //	public boolean isM_bSame() {
 //		return m_bSame;
 //	}

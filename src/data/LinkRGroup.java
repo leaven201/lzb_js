@@ -1,6 +1,7 @@
 package data;
 
 import java.io.Serializable;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -26,6 +27,49 @@ public class LinkRGroup implements Serializable {
 	@Override
 	public String toString() {
 		return "LinkRGroup [ID=" + ID + ", name=" + name + "]";
+	}
+	
+	//用于输出一个SRLG组
+		public static String PutOutSRLG(List<FiberLink> temp) {
+			StringBuilder s=new StringBuilder();
+			HashSet<String> set = new HashSet<>();
+			set.add(temp.get(0).getName());
+			s.append(temp.get(0).getName());
+			for(int i=1;i<temp.size();i++) {
+				if(!set.contains(temp.get(i).getName())) {
+					set.add(temp.get(i).getName());
+				    s.append("&"+temp.get(i).getName());
+				}
+			}
+			return s.toString();
+		}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ID;
+		result = prime * result + ((SRLGWDMLinkList == null) ? 0 : SRLGWDMLinkList.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		LinkRGroup other = (LinkRGroup) obj;
+		if (ID != other.ID)
+			return false;
+		if (SRLGWDMLinkList == null) {
+			if (other.SRLGWDMLinkList != null)
+				return false;
+		} else if (!SRLGWDMLinkList.equals(other.SRLGWDMLinkList))
+			return false;
+		return true;
 	}
 
 	public LinkRGroup(int nID, String layer, String name) {
@@ -107,22 +151,36 @@ public class LinkRGroup implements Serializable {
 	}
 
 	public static void automation() {
-
+		//2017.11.23 wb
+//		for(LinkRGroup lg:SRLGroupList) {
+//			if(lg.getBelongLayer().equals(Layer.WDM)) {
+//				SRLGroupList.remove(lg);
+//			}
+//		}
+		Iterator<LinkRGroup> it=SRLGroupList.iterator();
+		while(it.hasNext()) {
+			LinkRGroup lg=it.next();
+			if(lg.getBelongLayer().equals(Layer.WDM))
+				it.remove();
+		}
+		
 		for (int i = 0; i < SRLGroupList.size(); i++)// 按FIBER SRLG进行映射
 		{
+			
 			if (SRLGroupList.get(i).getBelongLayer().equals(Layer.Fiber)) {
 				System.out.println("fiber1");
 				List<FiberLink> fl = SRLGroupList.get(i).getSRLGFiberLinkList();
-				System.out.println(fl);
+				// System.out.println(fl);
 				int a = SRLGroupList.get(i).getID();
 				// WDM fiberid+10000;10000设置 为了区别
 				String str = "W-SRG" + a;
 				a = a + 10000;
+				
 				LinkRGroup wsrg = new LinkRGroup(a, "WDM", str);
 				for (int j = 0; j < fl.size(); j++)// 对该FIBER层srlg组中的每条fiberlink循环
 				{
 					FiberLink temp = fl.get(j);
-					System.out.println(temp.getCarriedWDMLinkList());
+					// System.out.println(temp.getCarriedWDMLinkList());
 					for (int k = 0; k < temp.getCarriedWDMLinkList().size(); k++)// 确定承载的链路没有在组中重复
 					{
 						if (!wsrg.getSRLGWDMLinkList().contains(temp.getCarriedWDMLinkList().get(k))) {
@@ -133,7 +191,10 @@ public class LinkRGroup implements Serializable {
 
 				}
 				if (wsrg.getSRLGWDMLinkList().size() > 1)
-					SRLGroupList.add(wsrg);
+					if (!SRLGroupList.contains(wsrg))
+						SRLGroupList.add(wsrg);
+//				System.out.println(wsrg.getSRLGFiberLinkList());
+//				System.out.println(wsrg.getSRLGWDMLinkList());
 			}
 		}
 
@@ -160,6 +221,8 @@ public class LinkRGroup implements Serializable {
 
 			}
 		}
+		
+		
 	}
 
 	public static void clear() {
@@ -171,7 +234,7 @@ public class LinkRGroup implements Serializable {
 				case WDM:
 					while (temp.getSRLGWDMLinkList().size() != 0)
 						temp.delWDMLinkList(temp.getSRLGWDMLinkList().get(0));
-				//	System.out.println(SRLGWDMLinkList.get(1));
+					// System.out.println(SRLGWDMLinkList.get(1));
 					break;
 				case Fiber:
 					while (temp.getSRLGFiberLinkList().size() != 0)
@@ -321,6 +384,5 @@ public class LinkRGroup implements Serializable {
 	public void setSRLGFiberLinkList(List<FiberLink> sRLGFiberLinkList) {
 		SRLGFiberLinkList = sRLGFiberLinkList;
 	}
-    
-	
+
 }

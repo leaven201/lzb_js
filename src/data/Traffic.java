@@ -28,14 +28,15 @@ public class Traffic implements Serializable{
     private boolean isShare;//预置共享
     private CommonNode MustPassNode;//必经站点
     private CommonNode MustAvoidNode;//必避站点
-    private WDMLink MustPassLink;//必经光纤
-    private WDMLink MustAvoidLink;//必避光纤
-    private boolean isHaveTraffic;//是否已有业务
+    private FiberLink MustPassLink;//必经光纤
+    private FiberLink MustAvoidLink;//必避光纤
+    private boolean isHaveTraffic=false;//是否已有业务
     private Route existRoute=null;//已有业务路由
     private int existWaveLength=0;//已有业务波长
 //    private int relatedID=Integer.MAX_VALUE;//关联业务组编号
     private TrafficGroupNew trafficgroup=null;//风险共享业务组
-    
+    private int numRank; //同源同宿业务中的第几个
+    private String trafficId;//业务编号    （常规-   关联业务组-）
     private int faultType; // 业务故障类型，0正常，1工作路由故障，2保护路由故障，3都故障
 //    private boolean isFromOTN; // 业务是否通过OTN由多个业务聚合而成
     private int effectNum; // 受影响次数，生存性使用
@@ -59,7 +60,7 @@ public class Traffic implements Serializable{
     public Traffic(int id,int rankId, CommonNode fromNode, CommonNode toNode, TrafficRate rate, int trafficNum,
     		TrafficLevel protectLevel, boolean isElectricalCrossConnection, boolean isShare,
     		TrafficGroupNew trafficgroup, CommonNode MustPassNode, CommonNode MustAvoidNode,
-    		WDMLink MustPassLink, WDMLink MustAvoidLink, boolean isHaveTraffic, Route existRoute, int existWaveLength) {
+    		FiberLink MustPassLink, FiberLink MustAvoidLink, boolean isHaveTraffic, Route existRoute, int existWaveLength) {
 		this.id = id;
 		this.rankId=rankId;
 		this.fromNode = fromNode;
@@ -82,7 +83,7 @@ public class Traffic implements Serializable{
 
   public Traffic(int id,String name, CommonNode fromNode, CommonNode toNode, TrafficRate rate, int trafficNum, String rank,
 			boolean isElectricalCrossConnection, String relatedTraffic, CommonNode mustPassNode,
-			CommonNode mustAvoidNode, FiberLink mustPassLink, WDMLink mustAvoidLink) {
+			CommonNode mustAvoidNode, FiberLink mustPassLink, FiberLink mustAvoidLink) {
 		super();
 		this.id = id;
 		this.name=name;
@@ -301,8 +302,17 @@ public class Traffic implements Serializable{
     public void setToNode(CommonNode toNode) {
         this.toNode = toNode;
     }
+    
 
-    public TrafficStatus getStatus() {
+    public int getNumRank() {
+		return numRank;
+	}
+
+	public void setNumRank(int numRank) {
+		this.numRank = numRank;
+	}
+
+	public TrafficStatus getStatus() {
         return status;
     }
 
@@ -413,7 +423,15 @@ public class Traffic implements Serializable{
         Traffic.trafficList = trafficList;
     }
 
-    public TrafficRate getRate() {
+    public boolean isHaveTraffic() {
+		return isHaveTraffic;
+	}
+
+	public void setHaveTraffic(boolean isHaveTraffic) {
+		this.isHaveTraffic = isHaveTraffic;
+	}
+
+	public TrafficRate getRate() {
         return rate;
     }
 
@@ -465,19 +483,19 @@ public class Traffic implements Serializable{
 		MustAvoidNode = mustAvoidNode;
 	}
 
-	public WDMLink getMustPassLink() {
+	public FiberLink getMustPassLink() {
 		return MustPassLink;
 	}
 
-	public void setMustPassLink(WDMLink mustPassLink) {
+	public void setMustPassLink(FiberLink mustPassLink) {
 		MustPassLink = mustPassLink;
 	}
 
-	public WDMLink getMustAvoidLink() {
+	public FiberLink getMustAvoidLink() {
 		return MustAvoidLink;
 	}
 
-	public void setMustAvoidLink(WDMLink mustAvoidLink) {
+	public void setMustAvoidLink(FiberLink mustAvoidLink) {
 		MustAvoidLink = mustAvoidLink;
 	}
 	
@@ -542,7 +560,8 @@ public Route getExistRoute() {
 			for (int n = 0; n < this.getWorkRoute().getNodeList().size(); n++) {
 				bufferw.append(this.getWorkRoute().getNodeList().get(n).getName());
 				if (n != this.getWorkRoute().getNodeList().size() - 1) {
-					bufferw.append("--");
+					bufferw.append("--<"+this.getWorkRoute().getWDMLinkList().get(n).getName()+">--");
+//					bufferw.append("--");
 				}
 			}
 		}return bufferw;
@@ -566,6 +585,23 @@ public Route getExistRoute() {
 			}
 			}
 		return b;
+	}
+	
+	public static List<Traffic> reRankList(List<Traffic> TraList){
+		List<Traffic> list = new LinkedList<>();
+		for(int i=0; i<TraList.size();i++) {
+			Traffic tra = TraList.get(i);
+			if(tra.getTrafficgroup()!=null) {
+				list.add(tra);
+			}
+		}
+		for(int i=0; i<TraList.size();i++) {
+			Traffic tra = TraList.get(i);
+			if(tra.getTrafficgroup()==null) {
+				list.add(tra);
+			}
+		}
+		return list;
 	}
 	
 
@@ -611,7 +647,24 @@ public Route getExistRoute() {
 	public void setDynamicRoute(Route dynamicRoute) {
 		this.dynamicRoute = dynamicRoute;
 	}
-	
+
+	public String getTrafficId() {
+		return trafficId;
+	}
+
+	public void setTrafficId(String trafficId) {
+		this.trafficId = trafficId;
+	}
+	public static void setAllTrafficId() {
+		for(int i=0;i<Traffic.trafficList.size();i++) {
+			Traffic tra = Traffic.trafficList.get(i);
+			if(tra.getTrafficgroup()==null) {
+				tra.setTrafficId("常规-"+(i+1));
+			}else {
+				tra.setTrafficId(tra.getTrafficgroup().getTheName()+tra.getNumRank());
+			}
+		}
+	}
 	
 
 

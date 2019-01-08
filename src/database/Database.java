@@ -43,7 +43,7 @@ public class Database {
 			// oos.writeObject(Traffic.s_lFiberTrafficList); //序列化FiberTraffic链路
 			// oos.writeObject(TrafficGroup.s_lTrafficGroupList); //序列化FiberTraffic链路
 			oos.writeObject(Traffic.trafficList); // 序列化trafficList链路
-			// oos.writeObject(Domain.s_lDomainList); //序列化域
+			oos.writeObject(TrafficGroupNew.grouplist); //序列化域
 			// lzb
 			oos.writeObject(DataSave.flexibleRaster);
 			oos.writeObject(DataSave.judge);
@@ -109,23 +109,34 @@ public class Database {
 			// List<Domain> domain=(List<Domain>)(ois.readObject());
 			// Domain.s_lDomainList=domain;
 			// fileProperty=(String)ois.readObject();
+			try {
+				boolean x1 = (Boolean) (ois.readObject());
+				DataSave.flexibleRaster = x1;
 
-			boolean x1 = (Boolean) (ois.readObject());
-			DataSave.flexibleRaster = x1;
-			PortRate x2 = (PortRate) ois.readObject();
-			DataSave.judge = x2;
-			int x3 = (Integer) (ois.readObject());
-			DataSave.systemRate = x3;
-			int x4 = (Integer) (ois.readObject());
-			DataSave.waveNum = x4;
-			List<CommonNode> rn = (List<CommonNode>) (ois.readObject());
-			CommonNode.ROADM_NodeList=rn;
-//			List<CommonNode> fn = (List<CommonNode>) (ois.readObject());
-//			CommonNode.allFiberNodeList=fn;
-			List<CommonNode> on = (List<CommonNode>) (ois.readObject());
-			CommonNode.OLA_NodeList=on;
-			List<TrafficGroup> trg = (List<TrafficGroup>) (ois.readObject());
-			TrafficGroup.grouptrafficGroupList = trg;
+				PortRate x2 = (PortRate) ois.readObject();
+				DataSave.judge = x2;
+				int x3 = (Integer) (ois.readObject());
+				DataSave.systemRate = x3;
+				int x4 = (Integer) (ois.readObject());
+				DataSave.waveNum = x4;
+
+				List<CommonNode> rn = (List<CommonNode>) (ois.readObject());
+				CommonNode.ROADM_NodeList = rn;
+				// List<CommonNode> fn = (List<CommonNode>) (ois.readObject());
+				// CommonNode.allFiberNodeList=fn;
+				List<CommonNode> on = (List<CommonNode>) (ois.readObject());
+				CommonNode.OLA_NodeList = on;
+				List<TrafficGroup> trg = (List<TrafficGroup>) (ois.readObject());
+				TrafficGroup.grouptrafficGroupList = trg;
+			} catch (Exception e) {
+				System.out.println("~~~~~~~~~~~~~~~~~~有java.lang.ClassCastException异常，不知道为什么~~~~~~~~~~~~~~~~~");
+				System.out.println("~~~~~~~~~~~~~~~~~~有java.lang.ClassCastException异常，不知道为什么~~~~~~~~~~~~~~~~~");
+				System.out.println("~~~~~~~~~~~~~~~~~~有java.lang.ClassCastException异常，不知道为什么~~~~~~~~~~~~~~~~~");
+				System.out.println("~~~~~~~~~~~~~~~~~~有java.lang.ClassCastException异常，不知道为什么~~~~~~~~~~~~~~~~~");
+				System.out.println("~~~~~~~~~~~~~~~~~~有java.lang.ClassCastException异常，不知道为什么~~~~~~~~~~~~~~~~~");
+				System.out.println("~~~~~~~~~~~~~~~~~~有java.lang.ClassCastException异常，不知道为什么~~~~~~~~~~~~~~~~~");
+				
+			}
 
 			ois.close();
 			// System.out.println(wdmnl.size());

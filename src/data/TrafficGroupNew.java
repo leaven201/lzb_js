@@ -11,6 +11,7 @@ public class TrafficGroupNew implements Serializable{
 	private int id;                      //风险共享业务组1A的1
 	private String belongGroup;          //风险共享业务组1A的A
 	private  String type;      //风险共享业务组类型
+	private String theName;   //命名（关联业务组1-A），方便导出
 	
 	public  List<Traffic> grouptrafficList=new LinkedList<>();//储存该组包含的业务
 	public static List<TrafficGroupNew> grouplist=new LinkedList<>();
@@ -21,8 +22,10 @@ public class TrafficGroupNew implements Serializable{
 		this.id=id;
 		this.belongGroup=belongGroup;
 		TrafficGroupNew.grouplist.add(this);
-
+		this.theName = "关联业务组"+id+"-"+belongGroup+"_";
 	}
+	
+	
 	
 	public int getId() {
 		return id;
@@ -39,6 +42,19 @@ public class TrafficGroupNew implements Serializable{
 	public void setBelongGroup(String belongGroup) {
 		this.belongGroup = belongGroup;
 	}
+	
+
+
+	public String getTheName() {
+		return theName;
+	}
+
+
+
+	public void setTheName(String theName) {
+		this.theName = theName;
+	}
+
 
 
 	public  List<Traffic> getGrouptrafficList() {

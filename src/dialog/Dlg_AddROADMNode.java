@@ -278,9 +278,11 @@ public class Dlg_AddROADMNode extends JDialog implements ItemListener{
 	frame.setTitle("Ìí¼ÓROADM½Úµã");
 	frame.setSize(470, 300);
 	frame.setLocation(360, 190);
-	ImageIcon imageIcon = new ImageIcon(frame.getClass().getResource("/resource/ddd1111.png"));
-	frame.setIconImage(imageIcon.getImage());
 	frame.setVisible(true);
+	ImageIcon imageIcon = new ImageIcon(frame.getClass().getResource("/resource/ddd1111.png"));
+
+	frame.setIconImage(imageIcon.getImage());
+	
 	
     }
 

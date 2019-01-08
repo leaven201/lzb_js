@@ -4,6 +4,8 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+import javax.xml.crypto.Data;
+
 import data.*;
 import dataControl.LinkData;
 
@@ -29,7 +31,7 @@ public class DAlgorithm {
 		{
 			while (itLink.hasNext()) {
 				WDMLink theLink = itLink.next();
-				theLink.setWeight(10+(81/(theLink.getRemainResource()+1)));
+				theLink.setWeight(1);
 			//	theLink.setWeight(1*0.4+(theLink.getZhongjiNum())*0.6);
 			}
 		} else if (flag == 0) {// 长度
@@ -37,7 +39,30 @@ public class DAlgorithm {
 				WDMLink theLink = itLink.next();
 				//先用该链路的长度除以平均链路长度使其归一
 	//			double weight = ((theLink.getLength()/LinkData.aveLinkLength)*0.4+(theLink.getZhongjiNum())*0.6);
-				theLink.setWeight(theLink.getLength()*10+(81/(theLink.getRemainResource()+1)));
+				theLink.setWeight(theLink.getLength());
+			}
+		}else if(flag == 2) {//负载均衡
+			while(itLink.hasNext()) {
+				WDMLink theLink = itLink.next();
+				theLink.setWeight(DataSave.waveNum + 1 - theLink.getRemainResource());
+			}
+		}else if(flag == 3) {//自定义算法
+			while(itLink.hasNext()) {
+				WDMLink theLink = itLink.next();
+				//if(DataSave.indexA!=1 && DataSave.indexB!=1 && DataSave.indexC!=1) {
+					theLink.setWeight(data.DataSave.indexB + (data.DataSave.indexA)*(theLink.getLength()/WDMLink.aveLength()) 
+							+ (data.DataSave.indexC)*((DataSave.waveNum-theLink.getRemainResource())/(DataSave.waveNum/2)) );
+				//}
+//				else if(DataSave.indexA == 1) {//距离
+//						theLink.setWeight(theLink.getLength());
+//				}
+//				else if(DataSave.indexB == 1) {//跳数
+//					theLink.setWeight(1);
+//				}
+//				else if(DataSave.indexC == 1) {//负载
+//					theLink.setWeight(DataSave.waveNum + 1 - theLink.getRemainResource());
+//				}
+				
 			}
 		}
 
@@ -118,7 +143,7 @@ public class DAlgorithm {
 		Initialization(flag, theLinkList);// 初始化链路权重
 		
 		//消除平行边的方法
-		removeParallelLink();
+		LinkedList<WDMLink> paralinkSetFalse=removeParallelLink();
 		
 		
 		int nNodeSum = SetNodeRankID(theNodeList);// 初始化节点id
@@ -237,6 +262,13 @@ public class DAlgorithm {
 					returnNodeList.addFirst(pLink.getFromNode());
 			}
 		}
+		//算法结束，消除平行边中设置不激活的链路要重新激活
+		if(paralinkSetFalse!=null) {
+			for(int i=0;i<paralinkSetFalse.size();i++) {
+				paralinkSetFalse.get(i).setActive(true);
+			}
+		}
+		
 		if (returnNodeList.size() == 1) {// 如果只有一个节点，表示没有路径，寻路失败
 			returnNodeList.clear();
 			return false;
@@ -377,31 +409,44 @@ public class DAlgorithm {
 	}
 	
 	//消除平行边的方法
-	public static void removeParallelLink() {
+	public static LinkedList<WDMLink> removeParallelLink() {
+		LinkedList<WDMLink> setFalseLink=new LinkedList<>();
 		for(int i=0;i<WDMLink.WDMLinkList.size();i++) {
 			WDMLink lk=WDMLink.WDMLinkList.get(i);
+			lk.updateLinkResoucre();
 			LinkedList<WDMLink> parallel=lk.getParallelLinkList();
 			//size==1说明没有平行边，直接找下一个链路
 			if(parallel.size()==1)
 				continue;
 			//有平行边
 			else {
+				//只找出状态为激活的平行边
+				LinkedList<WDMLink> activeLink=new LinkedList<>();
+				for(int n=0;n<parallel.size();n++) {
+					if(parallel.get(n).isActive()==true)
+						activeLink.add(parallel.get(n));
+				}
+				if(activeLink.size()==0||activeLink.size()==1)
+					continue;
 				int minindex=0;
-				double currentWeight=parallel.get(0).getWeight();
-				for(int j=0;j<parallel.size();j++) {
-					WDMLink plk=parallel.get(j);
+				double currentWeight=activeLink.get(0).getRemainResource();
+				//在状态为激活的平行边中，将可用波道最多的链路激活其余不激活
+				for(int j=0;j<activeLink.size();j++) {
+					WDMLink plk=activeLink.get(j);
 					plk.setActive(false);
-					//链路的weight必currentWeiht小，则更新minindex为链路的index，currentWeight为链路的weight
-					if(plk.getWeight()<currentWeight)
+					setFalseLink.add(plk);
+					//链路的weight比currentWeiht小，则更新minindex为链路的index，currentWeight为链路的weight
+					if(plk.getRemainResource()>currentWeight)
 					{
 						minindex=j;
-						currentWeight=plk.getWeight();
+						currentWeight=plk.getRemainResource();
 					}		
 				}
 				//将权值最小的链路激活
-				parallel.get(minindex).setActive(true);
+				activeLink.get(minindex).setActive(true);
 			}
 		}
+		return setFalseLink;
 	}
 
 }

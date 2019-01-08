@@ -349,7 +349,7 @@ public class Dlg_SetNodePoll extends JFrame {
 	    StringBuffer buffer1 = new StringBuffer();
 	    StringBuffer buffer2 = new StringBuffer();
 	    StringBuffer buffer3 = new StringBuffer();
-
+        //原工作路由
 	    from = tra.get(i).getFromNode().getName();
 	    for (int j = 0; j < tra.get(i).getWorkRoute().getWDMLinkList().size(); j++) {
 		if (j == 0) {
@@ -368,28 +368,31 @@ public class Dlg_SetNodePoll extends JFrame {
 		from = to;
 	    }
 	    data1[6] = buffer.toString();
-
+	    //原工作路由结束
+	    
+        //原保护路由
 	    from = tra.get(i).getFromNode().getName();
 	    if (tra.get(i).getProtectRoute() == null)
 		buffer1.append("");
-	    else {
-		for (int j = 0; j < tra.get(i).getProtectRoute().getWDMLinkList().size(); j++) {
-		    if (j == 0)
-			buffer1.append(from);
-		    link = tra.get(i).getProtectRoute().getWDMLinkList().get(j).getName();
-		    if (from.equals(tra.get(i).getProtectRoute().getWDMLinkList().get(j).getFromNode().getName()))
-			to = tra.get(i).getProtectRoute().getWDMLinkList().get(j).getToNode().getName();
-		    else
-			to = tra.get(i).getProtectRoute().getWDMLinkList().get(j).getFromNode().getName();
-		    // 添加链路类型提示
-		    buffer1.append("--<" + link + ">--");
-		    buffer1.append(to);
-		    from = to;
-		}
-	    }
+			else {
+				for (int j = 0; j < tra.get(i).getProtectRoute().getWDMLinkList().size(); j++) {
+					if (j == 0)
+						buffer1.append(from);
+					link = tra.get(i).getProtectRoute().getWDMLinkList().get(j).getName();
+					if (from.equals(tra.get(i).getProtectRoute().getWDMLinkList().get(j).getFromNode().getName()))
+						to = tra.get(i).getProtectRoute().getWDMLinkList().get(j).getToNode().getName();
+					else
+						to = tra.get(i).getProtectRoute().getWDMLinkList().get(j).getFromNode().getName();
+					// 添加链路类型提示
+					buffer1.append("--<" + link + ">--");
+					buffer1.append(to);
+					from = to;
+				}
+			}
 
 	    data1[7] = buffer1.toString();
-
+	    //原保护路由结束
+        //故障后恢复路由，也即恢复路由
 	    from = tra.get(i).getFromNode().getName();
 	    if (tra.get(i).getResumeRoute() != null) {
 
@@ -409,7 +412,9 @@ public class Dlg_SetNodePoll extends JFrame {
 	    }
 
 	    data1[8] = buffer2.toString();
-
+	    //故障后恢复路由结束
+	    
+        //故障后保护路由  
 	    from = tra.get(i).getFromNode().getName();
 	    if (tra.get(i).getResumeRoutePro() != null) {
 
@@ -429,66 +434,89 @@ public class Dlg_SetNodePoll extends JFrame {
 	    }
 
 	    data1[9] = buffer3.toString();
-
+        //故障后保护路由结束
 	    Traffic tra1 = tra.get(i);
 	    switch (tra1.getProtectLevel()) {
 	    case PERMANENT11:
-		if (tra1.getResumeRoute() == null || tra1.getResumeRoute().getWDMLinkList().size() == 0) {
-		    data1[5] = "中断";
+			if (tra1.getResumeRoute() == null || tra1.getResumeRoute().getWDMLinkList().size() == 0) {
+				data1[5] = "中断";
 
-		} else if ((tra1.getResumeRoute() != null && tra1.getResumeRoute().getWDMLinkList().size() != 0)
-			&& (tra1.getResumeRoutePro() == null || tra1.getResumeRoutePro().getWDMLinkList().size() == 0))
-		    data1[5] = "降级";
-		else if ((tra1.getResumeRoute() != null && tra1.getResumeRoute().getWDMLinkList().size() != 0)
-			&& (tra1.getResumeRoutePro() != null && tra1.getResumeRoutePro().getWDMLinkList().size() != 0))
-		    data1[5] = "保持";
-		break;
-	    case NONPROTECT:
-		if (tra1.getResumeRoute() == null || tra1.getResumeRoute().getWDMLinkList().size() == 0) {
-		    data1[5] = "中断";
+			} else if ((tra1.getResumeRoute() != null
+					&& tra1.getResumeRoute().getWDMLinkList().size() != 0)
+					&& (tra1.getResumeRoutePro() == null
+							|| tra1.getResumeRoutePro().getWDMLinkList().size() == 0))
+				data1[5] = "降级";
+			else if ((tra1.getResumeRoute() != null
+					&& tra1.getResumeRoute().getWDMLinkList().size() != 0)
+					&& (tra1.getResumeRoutePro() != null
+							&& tra1.getResumeRoutePro().getWDMLinkList().size() != 0))
+				data1[5] = "保持";
+			break;
+		case NONPROTECT:
+			if (tra1.getResumeRoute() == null || tra1.getResumeRoute().getWDMLinkList().size() == 0) {
+				data1[5] = "中断";
 
+			}
+			break;
+		case NORMAL11:
+			if (tra1.getResumeRoute() == null || tra1.getResumeRoute().getWDMLinkList().size() == 0) {
+				data1[5] = "中断";
+
+			} else if ((tra1.getResumeRoute() != null
+					&& tra1.getResumeRoute().getWDMLinkList().size() != 0)
+					&& (tra1.getResumeRoutePro() == null
+							|| tra1.getResumeRoutePro().getWDMLinkList().size() == 0))
+				data1[5] = "保持";
+			else if ((tra1.getResumeRoute() != null
+					&& tra1.getResumeRoute().getWDMLinkList().size() != 0)
+					&& (tra1.getResumeRoutePro() != null
+							&& tra1.getResumeRoutePro().getWDMLinkList().size() != 0))
+				data1[5] = "保持";
+			break;
+		case RESTORATION:
+			if (tra1.getResumeRoute() == null || tra1.getResumeRoute().getWDMLinkList().size() == 0) {
+				data1[5] = "中断";
+
+			} else  if ((tra1.getResumeRoute() != null && tra1.getResumeRoute().getWDMLinkList().size() != 0)
+					&& (tra1.getPreRoute() == null || tra1.getPreRoute().getWDMLinkList().size() == 0)) {
+				data1[5] = "保持";
+			} else if ((tra1.getResumeRoute() != null && tra1.getResumeRoute().getWDMLinkList().size() != 0)
+					&& (tra1.getPreRoute() != null && tra1.getPreRoute().getWDMLinkList().size() != 0)) {
+				data1[5] = "保持";
+			}
+			break;
+//		case PresetRESTORATION:
+//			if (tra1.getResumeRoute() == null || tra1.getResumeRoute().getWDMLinkList().size() == 0) {
+//				data1[5] = "中断";
+//			} else if ((tra1.getResumeRoute() != null
+//					&& tra1.getResumeRoute().getWDMLinkList().size() != 0)
+//					&& (tra1.getPreRoute() == null
+//							|| tra1.getPreRoute().getWDMLinkList().size() == 0))
+//				data1[5] = "保持";
+//			else if ((tra1.getResumeRoute() != null
+//					&& tra1.getResumeRoute().getWDMLinkList().size() != 0)
+//					&& (tra1.getPreRoute() != null
+//							&& tra1.getPreRoute().getWDMLinkList().size() != 0))
+//				data1[5] = "保持";
+//			break;
+		case PROTECTandRESTORATION:
+			if (tra1.getResumeRoute() == null || tra1.getResumeRoute().getWDMLinkList().size() == 0) {
+				data1[5] = "中断";
+			} else if ((tra1.getResumeRoute() != null
+					&& tra1.getResumeRoute().getWDMLinkList().size() != 0)
+					&& (tra1.getPreRoute() == null
+							|| tra1.getPreRoute().getWDMLinkList().size() == 0)) {
+				data1[5] = "保持";
+			}else if ((tra1.getResumeRoute() != null
+					&& tra1.getResumeRoute().getWDMLinkList().size() != 0)
+					&& (tra1.getPreRoute() != null
+							&& tra1.getPreRoute().getWDMLinkList().size() != 0)) {
+				data1[5] = "保持";
+			}
+			break;
+		default:
+			break;
 		}
-		break;
-	    case NORMAL11:
-		if (tra1.getResumeRoute() == null || tra1.getResumeRoute().getWDMLinkList().size() == 0) {
-		    data1[5] = "中断";
-
-		} else if ((tra1.getResumeRoute() != null && tra1.getResumeRoute().getWDMLinkList().size() != 0)
-			&& (tra1.getResumeRoutePro() == null || tra1.getResumeRoutePro().getWDMLinkList().size() == 0))
-		    data1[5] = "降级";
-		else if ((tra1.getResumeRoute() != null && tra1.getResumeRoute().getWDMLinkList().size() != 0)
-			&& (tra1.getResumeRoutePro() != null && tra1.getResumeRoutePro().getWDMLinkList().size() != 0))
-		    data1[5] = "保持";
-		break;
-	    case RESTORATION:
-		if (tra1.getResumeRoute() == null || tra1.getResumeRoute().getWDMLinkList().size() == 0) {
-		    data1[5] = "中断";
-
-		} else if (tra1.getResumeRoute() != null && tra1.getResumeRoute().getWDMLinkList().size() != 0)
-		    data1[5] = "保持";
-		break;
-
-	    case PresetRESTORATION:
-		if (tra1.getResumeRoute() == null || tra1.getResumeRoute().getWDMLinkList().size() == 0) {
-		    data1[5] = "中断";
-		} else if ((tra1.getResumeRoute() != null && tra1.getResumeRoute().getWDMLinkList().size() != 0)
-			&& (tra1.getResumeRoutePro() == null || tra1.getResumeRoutePro().getWDMLinkList().size() == 0))
-		    data1[5] = "降级";
-		else if ((tra1.getResumeRoute() != null && tra1.getResumeRoute().getWDMLinkList().size() != 0)
-			&& (tra1.getResumeRoutePro() != null && tra1.getResumeRoutePro().getWDMLinkList().size() != 0))
-		    data1[5] = "保持";
-		break;
-	    case PROTECTandRESTORATION:
-		if (tra1.getResumeRoute() == null || tra1.getResumeRoute().getWDMLinkList().size() == 0) {
-		    data1[5] = "中断";
-		} else if ((tra1.getResumeRoute() != null && tra1.getResumeRoute().getWDMLinkList().size() != 0)
-			&& (tra1.getResumeRoutePro() == null || tra1.getResumeRoutePro().getWDMLinkList().size() == 0))
-		    data1[5] = "降级";
-		else if ((tra1.getResumeRoute() != null && tra1.getResumeRoute().getWDMLinkList().size() != 0)
-			&& (tra1.getResumeRoutePro() != null && tra1.getResumeRoutePro().getWDMLinkList().size() != 0))
-		    data1[5] = "保持";
-		break;
-	    }
 
 	    trafficModel.addRow(data1);
 

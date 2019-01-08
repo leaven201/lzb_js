@@ -19,6 +19,69 @@ public class OSNR {
     private double ownNoise;//本级噪声
     private double OSNR;
     
+    //计算某路由的等效跨段数
+	public static double crossSum(Route route) {
+		List<FiberLink> fiberlist = route.getFiberLinkList();
+		double crosssum = 0;
+		if (fiberlist.size() != 0) {
+			for (FiberLink fiber : fiberlist) {
+				crosssum += fiber.getDissipation();
+			}
+		} else {
+			for (WDMLink link : route.getWDMLinkList()) {
+				fiberlist.addAll(link.getFiberLinkList());
+			}
+			for (FiberLink fiber : fiberlist) {
+				crosssum += fiber.getDissipation();
+			}
+		}
+		return crosssum;
+	}
+    
+    //计算某段路由的osnr
+	public static double calculateOSNR(Route route) {
+		double sum = 0;
+		List<FiberLink> fiberlist = route.getFiberLinkList();
+		if (fiberlist.size() != 0) {
+			for (FiberLink fiber : fiberlist) {
+				double osnrfiber = fiber.getOSNRCount();
+				
+//				System.out.println(fiber+" 计算量"+osnrfiber+" Q:"+Q+" K:"+K+" J:"+J+" O:"+O+" I:"+I);
+				sum += osnrfiber;
+			}
+		} else {
+			for (WDMLink link : route.getWDMLinkList()) {
+				fiberlist.addAll(link.getFiberLinkList());
+			}
+			for (FiberLink fiber : fiberlist) {
+				double osnrfiber = fiber.getOSNRCount();
+				sum += osnrfiber;
+			}
+		}
+		double OSNR;
+		OSNR = 58 - 10 * Math.log10(sum);
+		return OSNR;
+	}
+    //计算某段路由的OSNR容限
+    public static double crossOSNR(Route route) {
+    	double crossOSNR;
+    	double yuliang;
+    	double crossSum = crossSum(route);
+    	
+    	if(crossSum <= DataSave.BackToBackA) {
+    		yuliang = 4.5;
+    	}else if(crossSum <= DataSave.BackToBackB) {
+    		yuliang = 5;
+    	}else if(crossSum <= DataSave.BackToBackC) {
+    		yuliang = 5.5;
+    	}else {
+    		yuliang = 6;
+    	}
+    	crossOSNR = yuliang + DataSave.BackToBack;
+    	return crossOSNR;
+    }
+    
+    
     public double calculateOSNR(Traffic tra,int flag ){//flag=1 工作路由 ；flag=2 保护路由;
 							//flag=3 恢复路由 ;flag=4 恢复路由的保护路由
 //	OSNR osnr=new OSNR();
@@ -68,7 +131,7 @@ public class OSNR {
 	    ownNoise=this.calculateOwnNoise(NF, G_PA);
 	    allNoise=allNoise-L+G_PA;
 	    allNoise=this.calculateAllNoise(allNoise, ownNoise);
-	    inPower=;
+	    inPower=; 
 	    OSNR=inPower-allNoise;
 	}
  	
@@ -81,7 +144,60 @@ public class OSNR {
     }
     
     public double calculateAllNoise(double x,double y){
+    	
+    	
+    	
 	//10log(power(10,前级噪声累积到本级/10)+power(10，本级引入噪声/10))
 	return ( 10*Math.log10(Math.pow(10, x/10)+Math.pow(10, y/10)) );
+    }
+    //进行OSNR设置之后要重新计算OSNR的值
+    public static void resetOSNR() {
+    	for(FiberLink link : FiberLink.fiberLinkList) {
+    		double Q = data.DataSave.AF;
+    		double K = data.DataSave.OSC;
+    		double J = data.DataSave.road;
+    		double O = link.getInputPower();
+    		double I = link.getAttenuation();
+    		
+    		double zengyi = I + J + K;
+    		//根据增益设置放大器噪声系数
+    		if(zengyi <= DataSave.Gain) {
+    			Q = DataSave.BelowNF;
+    		}else {
+    			Q = DataSave.AboveNF;
+    		}
+    		
+    		//根据光纤类型，以及光纤衰减设置单波平均入纤光功率
+    		if(I <= 25) {
+    			if(link.getLinkType().equals("G.652")) {
+    				link.setInputPower(1); 
+    			}
+    			if(link.getLinkType().equals("G.655")) {
+    				link.setInputPower(0); 
+    			}
+    		}else if(I <= 32) {
+    			if(link.getLinkType().equals("G.652")) {
+    				link.setInputPower(2); 
+    			}
+    			if(link.getLinkType().equals("G.655")) {
+    				link.setInputPower(1); 
+    			}
+    		}else if(I <= 37) {
+    			if(link.getLinkType().equals("G.652")) {
+    				link.setInputPower(4); 
+    			}
+    			if(link.getLinkType().equals("G.655")) {
+    				link.setInputPower(2); 
+    			}
+    		}else {
+    			if(link.getLinkType().equals("G.652")) {
+    				link.setInputPower(7); 
+    			}
+    			if(link.getLinkType().equals("G.655")) {
+    				link.setInputPower(4); 
+    			}
+    		}
+    		link.setOSNRCount(Math.pow(10, ((I + J + K + Q - O) / 10)));
+    	}
     }
 }

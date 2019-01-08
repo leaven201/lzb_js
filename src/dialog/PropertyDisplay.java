@@ -135,10 +135,13 @@ public class PropertyDisplay{
 	
      public static void cleartable(){//CC
     	 
-    	 for(int i = 0;i < 2;i++){
-   		  for(int j = 0;j < 11;j++)
-   			  displayModel.setValueAt("", j, i);
-   	  }
+//    	 for(int i = 0;i < 2;i++){
+//   		  for(int j = 0;j < 11;j++)
+//   			  displayModel.setValueAt(null, j, i);
+//   	  }
+    	 while(displayModel.getRowCount()>0){
+    		 displayModel.removeRow(displayModel.getRowCount()-1);
+    	 }
      }
 	 private void initData(Element element){
 		
@@ -375,20 +378,20 @@ public class PropertyDisplay{
 				 UIFiberLinkList.get(i).putLink3D(true);
 			 }
 		 }
-		 if(layer.equals(Layer.OTN)){
-			 List<UIOTNLink> UIShortWaveLinkList=new LinkedList<UIOTNLink>(); 
-			 List<OTNLink> eleLinkList=new LinkedList<OTNLink>(); 
-			 eleLinkList = tra.getWorkRoute().getOTNLinkList();
-			 for(int i = 0;i < eleLinkList.size();i++){
-				 UIShortWaveLinkList.add(UIOTNLink.getUIEleLink(eleLinkList.get(i).getName()));
-			 }
-			 for(int i = 0;i < UIShortWaveLinkList.size();i++){
-				 UIShortWaveLinkList.get(i).putLinkColor(Color.yellow);
-				 UIShortWaveLinkList.get(i).putLinkFlowing(true);
-				 UIShortWaveLinkList.get(i).putLinkStyle(TWaverConst.LINK_STYLE_SOLID);
-				 UIShortWaveLinkList.get(i).putLink3D(true);
-			 }
-		 }
+//		 if(layer.equals(Layer.OTN)){
+//			 List<UIOTNLink> UIShortWaveLinkList=new LinkedList<UIOTNLink>(); 
+//			 List<OTNLink> eleLinkList=new LinkedList<OTNLink>(); 
+//			 eleLinkList = tra.getWorkRoute().getOTNLinkList();
+//			 for(int i = 0;i < eleLinkList.size();i++){
+//				 UIShortWaveLinkList.add(UIOTNLink.getUIEleLink(eleLinkList.get(i).getName()));
+//			 }
+//			 for(int i = 0;i < UIShortWaveLinkList.size();i++){
+//				 UIShortWaveLinkList.get(i).putLinkColor(Color.yellow);
+//				 UIShortWaveLinkList.get(i).putLinkFlowing(true);
+//				 UIShortWaveLinkList.get(i).putLinkStyle(TWaverConst.LINK_STYLE_SOLID);
+//				 UIShortWaveLinkList.get(i).putLink3D(true);
+//			 }
+//		 }
 		 if(layer.equals(Layer.WDM)){
 			 List<UIWDMLink> UIOptLinkList=new LinkedList<UIWDMLink>(); 
 			 List<WDMLink> optLinkList=new LinkedList<WDMLink>(); 

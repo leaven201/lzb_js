@@ -235,9 +235,10 @@ public class Dlg_DesignResult extends JFrame {
 						// break;
 						// }
 						bufferw.append("--");
-//						bufferw.append("--<" + theTraffic.getWorkRoute().getWDMLinkList().get(n).getName() + ">--");
+						bufferw.append("--<" + theTraffic.getWorkRoute().getWDMLinkList().get(n).getEnglishname() + ">--");
 					}
 				}
+				bufferw.append("   ²¨µÀ£º"+theTraffic.getWorkRoute().toStingwave());
 			}
 			content[i][3] = "   "+bufferw;
 
@@ -284,8 +285,11 @@ public class Dlg_DesignResult extends JFrame {
 					bufferpre.append(theTraffic.getPreRoute().getNodeList().get(n).getName());
 					if (n != theTraffic.getPreRoute().getNodeList().size() - 1) {
 						bufferpre.append("--");
+						bufferpre.append("--<" + theTraffic.getPreRoute().getWDMLinkList().get(n).getEnglishname() + ">--");
+
 					}
 				}
+				bufferpre.append("   ²¨µÀ£º"+theTraffic.getPreRoute().toStingwave());
 			}
 			content[i][5] = "   "+bufferpre;
 		}

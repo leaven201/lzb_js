@@ -30,7 +30,7 @@ public class LinkData {
 
 	public static void clearLink() {
 
-		BasicLink.allLinkList.clear();
+		//BasicLink.allLinkList.clear();
 		FiberLink.fiberLinkList.clear();
 		WDMLink.WDMLinkList.clear();
 		OTNLink.OTNLinkList.clear();
@@ -50,11 +50,13 @@ public class LinkData {
 			FiberLink Rlink = null;
 			WDMLink WDMlink = null;
 			Iterator<FiberLink> l = FiberLink.fiberLinkList.iterator();
-			int k = 0;
+			int k = 0;//wdmlink数目
 			double length = 0;
 			while (l.hasNext()) {
 				Rlink = l.next();
+				length = Rlink.getLength();
 				aveLinkLength = Rlink.getLength() + aveLinkLength; // lzb+这行就是为了算一下平均链路长度
+				int id = Rlink.getId();
 				CommonNode fromNode = Rlink.getFromNode();
 				CommonNode toNode = Rlink.getToNode();
 				int sumofosnr = 0;
@@ -68,16 +70,15 @@ public class LinkData {
 
 				else if (fromNode.getNodeType().equals(NodeType.ROADM) && toNode.getNodeType().equals(NodeType.OLA)) {
 					LinkedList<FiberLink> List = new LinkedList<FiberLink>();
-					List.add(FiberLink.getFiberLink(fromNode));
+					List.add(FiberLink.getFiberLink(id));
 					LinkedList<FiberLink> List2 = new LinkedList<FiberLink>();
 					List2.add(Rlink);
 					CommonNode TNode = toNode;
-					int j = 0;
+					int j = id;
 					while (TNode.getNodeType().equals(NodeType.OLA)) {
 						j++;
-						length = Rlink.getLength();
-						CommonNode FNode = CommonNode.getNode(TNode.getName());
-						Rlink = FiberLink.getFiberLink(FNode);
+						//CommonNode FNode = CommonNode.getNode(TNode.getName());
+						Rlink = FiberLink.getFiberLink(j);
 						List2.add(Rlink);
 						TNode = Rlink.getToNode();
 						length = length + Rlink.getLength();
@@ -99,7 +100,7 @@ public class LinkData {
 				WDMLink linkk=WDMLink.WDMLinkList.get(i);
 				linkk.createParallelLinkList();
 			}
-			
+			LinkRGroup.automation();
 			aveLinkLength = aveLinkLength / FiberLink.fiberLinkList.size();
 			msgw = "成功导入" + k + "条WDM链路数据" + "\n";
 			System.out.println(msgw);

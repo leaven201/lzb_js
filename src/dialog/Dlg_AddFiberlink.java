@@ -175,7 +175,7 @@ public class Dlg_AddFiberlink {
 		    					CommonNode.getM_lsCommonNode().get(choiceindexend), Double.parseDouble(String.valueOf(linklength.getText())),
 		    					Layer.Fiber,true,Double.parseDouble(String.valueOf(linkshuaijian)),Double.parseDouble(String.valueOf(linkpmd)),
 		    					typecombo.getSelectedItem().toString(),Integer.parseInt(String.valueOf(linkjieduan)));
-		    				FiberLink.fiberLinkList.add(fl);
+//		    				FiberLink.fiberLinkList.add(fl);
 		    				UIFiberLink addnew = new UIFiberLink(FiberLink.getFiberLink(Integer.parseInt(String.valueOf(linkId))));
 			    			UIFiberLink.s_lUIFiberLinkList.add(addnew);
 			    			linkDummy.addChild(addnew);
@@ -518,7 +518,7 @@ public class Dlg_AddFiberlink {
 		    					CommonNode.getM_lsCommonNode().get(choiceindexend), Double.parseDouble(String.valueOf(linklength.getText())),
 		    					Layer.Fiber,true,Double.parseDouble(String.valueOf(linkshuaijian)),Double.parseDouble(String.valueOf(linkpmd)),
 		    					typecombo.getSelectedItem().toString(),Integer.parseInt(String.valueOf(linkjieduan)));
-		    				FiberLink.fiberLinkList.add(fl);
+//		    				FiberLink.fiberLinkList.add(fl);
 		    				UIFiberLink addnew = new UIFiberLink(FiberLink.getFiberLink(Integer.parseInt(String.valueOf(linkId))));
 			    			UIFiberLink.s_lUIFiberLinkList.add(addnew);
 			    			linkDummy.addChild(addnew);
@@ -556,7 +556,7 @@ public class Dlg_AddFiberlink {
 			    		//	int childnumber=LinkDataBase.returnnetid(CommonNode.getM_lsCommonNode().get(choiceindexstart).getM_sName(), CommonNode.getM_lsCommonNode().get(choiceindexend).getM_sName());
 			    			WDMLink fl=new WDMLink(Integer.parseInt(String.valueOf(linkId)),linkname.getText(),CommonNode.getM_lsCommonNode().get(choiceindexstart),
 			    					CommonNode.getM_lsCommonNode().get(choiceindexend), Double.parseDouble(String.valueOf(linklength.getText())),
-			    					Layer.Fiber,true,Double.parseDouble(String.valueOf(linkshuaijian)),Double.parseDouble(String.valueOf(linkpmd)),
+			    					Layer.WDM,true,Double.parseDouble(String.valueOf(linkshuaijian)),Double.parseDouble(String.valueOf(linkpmd)),
 			    					typecombo.getSelectedItem().toString(),Integer.parseInt(String.valueOf(linkjieduan)));
 			    			WDMLink.WDMLinkList.add(fl);
 			    				UIWDMLink addnew = new UIWDMLink(WDMLink.getLinkByID(Integer.parseInt(String.valueOf(linkId))));

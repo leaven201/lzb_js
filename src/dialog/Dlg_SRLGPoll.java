@@ -222,6 +222,8 @@ public class Dlg_SRLGPoll extends JFrame{
 	        		  else  if(tra.get(i).getProtectLevel().equals(TrafficLevel.RESTORATION)){
 	        			  data1[4] = "恢复";
 	        		  }
+	        		  else if(tra.get(i).getProtectLevel().equals(TrafficLevel.PROTECTandRESTORATION))
+	      				  data1[4] ="保护+恢复";
 	        		  else  if(tra.get(i).getProtectLevel().equals(TrafficLevel.NONPROTECT)){
 	        			  data1[4] = "无保护";
 	        		  }
@@ -311,47 +313,86 @@ public class Dlg_SRLGPoll extends JFrame{
 	        		       		  
 	        		  Traffic tra1= tra.get(i);
 		              		switch(tra1.getProtectLevel()){
-		                  	case PERMANENT11:
-		                  		if(tra1.getResumeRoute()==null||tra1.getResumeRoute().getFiberLinkList().size()==0)
-		                  		{
-		                  			data1[5] = "中断";
-		                  			
-		                  		}  
-		                  		else if((tra1.getResumeRoute()!=null&&tra1.getResumeRoute().getFiberLinkList().size()!=0)&&(tra1.getResumeRoutePro()==null||tra1.getResumeRoutePro().getFiberLinkList().size()==0))
-		                  			data1[5] = "降级";
-		                  		else if((tra1.getResumeRoute()!=null&&tra1.getResumeRoute().getFiberLinkList().size()!=0)&&(tra1.getResumeRoutePro()!=null&&tra1.getResumeRoutePro().getFiberLinkList().size()!=0))
-		                  			data1[5] = "保持";
-		                  		break;
-		                 	case NONPROTECT:
-		                 		if(tra1.getResumeRoute()==null||tra1.getResumeRoute().getFiberLinkList().size()==0)
-		                 		{
-		                 			data1[5] = "中断";
-		                 			
-		                 		}
-		                 		break;
-		                  	case NORMAL11 :
-		                  		if(tra1.getResumeRoute()==null||tra1.getResumeRoute().getFiberLinkList().size()==0)
-		                  		{
-		                  			data1[5] = "中断";
-		                  			
-		                  		}
-		                  		else if((tra1.getResumeRoute()!=null&&tra1.getResumeRoute().getFiberLinkList().size()!=0)&&(tra1.getResumeRoutePro()==null||tra1.getResumeRoutePro().getFiberLinkList().size()==0))
-		                  			data1[5] = "降级";
-		                  		else if((tra1.getResumeRoute()!=null&&tra1.getResumeRoute().getFiberLinkList().size()!=0)&&(tra1.getResumeRoutePro()!=null&&tra1.getResumeRoutePro().getFiberLinkList().size()!=0))
-		                  			data1[5] = "保持";
-		                  		break;
-		                	case RESTORATION:
-		                  		if(tra1.getResumeRoute()==null||tra1.getResumeRoute().getFiberLinkList().size()==0)
-		                  		{
-		                  			data1[5] = "中断";
-		                  			
-		                  		}
-		                  		else if(tra1.getResumeRoute()!=null&&tra1.getResumeRoute().getFiberLinkList().size()!=0)
-		                  			data1[5] = "保持";
-		                  		break;
+		              		case PERMANENT11:
+								if (tra1.getResumeRoute() == null || tra1.getResumeRoute().getWDMLinkList().size() == 0) {
+									data1[5] = "中断";
+
+								} else if ((tra1.getResumeRoute() != null
+										&& tra1.getResumeRoute().getWDMLinkList().size() != 0)
+										&& (tra1.getResumeRoutePro() == null
+												|| tra1.getResumeRoutePro().getWDMLinkList().size() == 0))
+									data1[5] = "降级";
+								else if ((tra1.getResumeRoute() != null
+										&& tra1.getResumeRoute().getWDMLinkList().size() != 0)
+										&& (tra1.getResumeRoutePro() != null
+												&& tra1.getResumeRoutePro().getWDMLinkList().size() != 0))
+									data1[5] = "保持";
+								break;
+							case NONPROTECT:
+								if (tra1.getResumeRoute() == null || tra1.getResumeRoute().getWDMLinkList().size() == 0) {
+									data1[5] = "中断";
+
+								}
+								break;
+							case NORMAL11:
+								if (tra1.getResumeRoute() == null || tra1.getResumeRoute().getWDMLinkList().size() == 0) {
+									data1[5] = "中断";
+
+								} else if ((tra1.getResumeRoute() != null
+										&& tra1.getResumeRoute().getWDMLinkList().size() != 0)
+										&& (tra1.getResumeRoutePro() == null
+												|| tra1.getResumeRoutePro().getWDMLinkList().size() == 0))
+									data1[5] = "保持";
+								else if ((tra1.getResumeRoute() != null
+										&& tra1.getResumeRoute().getWDMLinkList().size() != 0)
+										&& (tra1.getResumeRoutePro() != null
+												&& tra1.getResumeRoutePro().getWDMLinkList().size() != 0))
+									data1[5] = "保持";
+								break;
+							case RESTORATION:
+								if (tra1.getResumeRoute() == null || tra1.getResumeRoute().getWDMLinkList().size() == 0) {
+									data1[5] = "中断";
+
+								} else  if ((tra1.getResumeRoute() != null && tra1.getResumeRoute().getWDMLinkList().size() != 0)
+										&& (tra1.getPreRoute() == null || tra1.getPreRoute().getWDMLinkList().size() == 0)) {
+									data1[5] = "保持";
+								} else if ((tra1.getResumeRoute() != null && tra1.getResumeRoute().getWDMLinkList().size() != 0)
+										&& (tra1.getPreRoute() != null && tra1.getPreRoute().getWDMLinkList().size() != 0)) {
+									data1[5] = "保持";
+								}
+								break;
+//							case PresetRESTORATION:
+//								if (tra1.getResumeRoute() == null || tra1.getResumeRoute().getWDMLinkList().size() == 0) {
+//									data1[5] = "中断";
+//								} else if ((tra1.getResumeRoute() != null
+//										&& tra1.getResumeRoute().getWDMLinkList().size() != 0)
+//										&& (tra1.getPreRoute() == null
+//												|| tra1.getPreRoute().getWDMLinkList().size() == 0))
+//									data1[5] = "保持";
+//								else if ((tra1.getResumeRoute() != null
+//										&& tra1.getResumeRoute().getWDMLinkList().size() != 0)
+//										&& (tra1.getPreRoute() != null
+//												&& tra1.getPreRoute().getWDMLinkList().size() != 0))
+//									data1[5] = "保持";
+//								break;
+							case PROTECTandRESTORATION:
+								if (tra1.getResumeRoute() == null || tra1.getResumeRoute().getWDMLinkList().size() == 0) {
+									data1[5] = "中断";
+								} else if ((tra1.getResumeRoute() != null
+										&& tra1.getResumeRoute().getWDMLinkList().size() != 0)
+										&& (tra1.getPreRoute() == null
+												|| tra1.getPreRoute().getWDMLinkList().size() == 0)) {
+									data1[5] = "保持";
+								}else if ((tra1.getResumeRoute() != null
+										&& tra1.getResumeRoute().getWDMLinkList().size() != 0)
+										&& (tra1.getPreRoute() != null
+												&& tra1.getPreRoute().getWDMLinkList().size() != 0)) {
+									data1[5] = "保持";
+								}
+								break;
 							default:
 								break;
-		                  	}
+							}
 		              		
 	        		trafficModel.addRow(data1);
 		              
