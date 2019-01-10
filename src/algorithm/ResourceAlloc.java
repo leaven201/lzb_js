@@ -9,18 +9,13 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
-import java.util.Set;
-
-import javax.xml.crypto.Data;
 
 import data.CommonNode;
 import data.DataSave;
 import data.FiberLink;
 import data.LinkRGroup;
-import data.Network;
 import data.Route;
 import data.Traffic;
-import data.TrafficGroup;
 import data.WDMLink;
 import dialog.Dlg_PolicySetting;
 import enums.NodeType;
@@ -74,7 +69,6 @@ public class ResourceAlloc {
 		LinkedList<Traffic> protectFailure = new LinkedList<>();
 		// 存放预置路由计算失败的业务
 		LinkedList<Traffic> preFailure = new LinkedList<>();
-		
 
 		Route route = null;
 		OSNR osnr = new OSNR();
@@ -85,7 +79,7 @@ public class ResourceAlloc {
 
 		Iterator<Traffic> it = trafficList.iterator();
 		while (it.hasNext()) {// 循环计算链表里每个业务的工作路由/保护路由（如果有）
-			
+
 			index++;
 			Traffic traffic = it.next();
 
@@ -103,7 +97,6 @@ public class ResourceAlloc {
 
 			// 必经节点、必经链路,算路
 			route = ResourceAlloc.routeForTraffic(traffic, flag);
-			
 
 			// 关联业务组业务，当路由中链路有平行边时，优先使用没有SRLG的链路
 			if (traffic.getTrafficgroup() != null) {
@@ -153,7 +146,7 @@ public class ResourceAlloc {
 					lastroute.setBelongsTraffic(traffic);
 					islastOk = isRouteConsist(lastroute, traffic, 1);
 				}
-				if (islastOk ) {
+				if (islastOk) {
 					route = lastroute;
 				} else if (lastTraffic.getRankId() == traffic.getRankId()) {
 					Route lastTrafficroute = lastTraffic.getWorkRoute();
@@ -574,8 +567,7 @@ public class ResourceAlloc {
 
 		Iterator<Traffic> it = trafficList.iterator();
 		while (it.hasNext()) {// 循环计算链表里每个业务的工作路由/保护路由（如果有）
-			
-			
+
 			index++;
 			Traffic traffic = it.next();
 
@@ -597,7 +589,7 @@ public class ResourceAlloc {
 			// 关联业务组业务，当路由中链路有平行边时，优先使用没有SRLG的链路
 			if (traffic.getTrafficgroup() != null) {
 				if ((traffic.getTrafficgroup().getBelongGroup().equals("A")
-						|| traffic.getTrafficgroup().getBelongGroup().equals("B"))&&route != null) {
+						|| traffic.getTrafficgroup().getBelongGroup().equals("B")) && route != null) {
 					for (int i = 0; i < route.getWDMLinkList().size(); i++) {
 						WDMLink link = route.getWDMLinkList().get(i);
 						if (link.getParallelLinkList().size() > 1) {
@@ -2649,12 +2641,12 @@ public class ResourceAlloc {
 	public static List<CommonNode> adjacentNode(CommonNode crt, HashSet<CommonNode> dict) {
 		List<CommonNode> adjacent = new ArrayList<CommonNode>();
 		for (WDMLink link : WDMLink.WDMLinkList) {
-			if (link.getFromNode().equals(crt)) {
+			if (link.getFromNode().equals(crt) && link.isActive()) {
 				CommonNode adnode = link.getToNode();
 				if (!adjacent.contains(adnode)) {
 					adjacent.add(adnode);
 				}
-			} else if (link.getToNode().equals(crt)) {
+			} else if (link.getToNode().equals(crt) && link.isActive()) {
 				CommonNode adnode = link.getFromNode();
 				if (!adjacent.contains(adnode)) {
 					adjacent.add(adnode);
@@ -2934,6 +2926,58 @@ public class ResourceAlloc {
 //			
 //			}
 //		}
+	}
+
+	// 灵活光网络资源分配
+	public static void allocateResourceGrid(List<Traffic> traList, int flag) {
+		// flag=0:最短长度；=1：最小跳
+		Survivance.mark = flag;// 用于抗毁仿真中标记分配的时候使用的哪种路由算法
+		CommonAlloc.fallBuffer = new StringBuffer();// 链路资源分配日志
+		PortAlloc.portFallBuffer = new StringBuffer();// 端口资源分配日志
+		trafficList = new LinkedList<Traffic>();
+		trafficList.addAll(traList);// 镜像了一份业务列表，对trafficList的操作不会影响traList
+		// Collections.reverse(traList);
+
+		// 存放工作路由计算失败的业务
+		LinkedList<Traffic> workFailure = new LinkedList<>();
+		// 存放保护路由计算失败的业务
+		LinkedList<Traffic> protectFailure = new LinkedList<>();
+		// 存放预置路由计算失败的业务
+		LinkedList<Traffic> preFailure = new LinkedList<>();
+
+		Route route = null;
+		OSNR osnr = new OSNR();
+		if (!RouteAlloc.isLimitHop) {
+			RouteAlloc.hopLimit = Integer.MAX_VALUE;
+		} // 新增跳数限制(不过不限制跳数，就把跳数设置为无穷大)
+		else if (RouteAlloc.hopLimit == Integer.MAX_VALUE) {
+			RouteAlloc.hopLimit = 5;
+		} // 默认跳数限制为5
+
+		Iterator<Traffic> it = trafficList.iterator();
+		while (it.hasNext()) {// 循环计算链表里每个业务的工作路由/保护路由（如果有）
+
+			index++;
+			Traffic traffic = it.next();
+
+			// 将必避链路、节点设为不激活
+			ResourceAlloc.setMustAvoidUnactive(traffic);
+
+			// 关联业务组设置设置不激活（包括设置相应的SRLG为不激活）
+			ResourceAlloc.setRelatedTrafficUnactive(traffic, DataSave.separate);
+
+			HashSet<CommonNode> dict = ResourceAlloc.setdict();
+			
+			//计算出所有满足情况的路由点集
+			List<List<CommonNode>> nodeRoutes = ResourceAlloc.findAllRoute(traffic.getFromNode(),
+					traffic.getToNode(), dict);
+			
+			
+			
+			
+			
+		}
+
 	}
 
 }

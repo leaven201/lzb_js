@@ -21,12 +21,11 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
-import twaver.Dummy;
-import twaver.TDataBox;
 import dataControl.LinkData;
 import dataControl.NodeData;
-import dataControl.PortData;
 import dataControl.TrafficData;
+import twaver.Dummy;
+import twaver.TDataBox;
 
 public class Dlg_InputInfo extends JFrame {
 

@@ -9,37 +9,24 @@ import java.util.ListIterator;
 
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
-import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-import algorithm.ResourceAlloc;
-import algorithm.RouteAlloc;
-import twaver.Dummy;
-import twaver.TDataBox;
-import data.*;
+import data.BasicLink;
+import data.CommonNode;
+import data.FiberLink;
+import data.OTNLink;
+import data.WDMLink;
 import dataControl.LinkData;
 import dataControl.NodeData;
-import dataControl.PortData;
-import dataControl.TrafficData;
 import datastructure.UIFiberLink;
 import datastructure.UINode;
 import datastructure.UIOTNLink;
 import datastructure.UIWDMLink;
 import design.NetDesign_zs;
 import enums.Layer;
-import data.BasicLink;
-import data.CommonNode;
-import data.FiberLink;
-import data.*;
-import dataControl.LinkData;
-import dataControl.NodeData;
-import dataControl.PortData;
-import datastructure.UIFiberLink;
-import datastructure.UINode;
-import datastructure.*;
-import design.NetDesign_zs;
-import enums.Layer;
+import twaver.Dummy;
+import twaver.TDataBox;
 
 public class Dlg_InputAll extends JFrame{
 	private static String filelist = NetDesign_zs.openfilelist;

@@ -49,7 +49,15 @@ public class WDMLink extends BasicLink implements Serializable {
 	private int otherUsedWaveNum = 0;// 用于其他的波长总数
 	private boolean isBroken = true;
 	private int[] dynUsedLink = new int[81];//统计动态重路由时使用的波道，0：未使用 1：使用（从1到80）
+	private boolean[] solts = new boolean[320];//频隙数组
 	
+	public boolean[] getSolts() {
+		return solts;
+	}
+
+	public void setSolts(boolean[] solts) {
+		this.solts = solts;
+	}
 	private String unactiveReason= "" ;    //为测试时分析不激活原因
 
 	// private List<FiberLink> fiberLinkList = new

@@ -9,10 +9,17 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-import data.*;
-import database.*;
-import enums.*;
-import layerroute.AutoRoute;
+import data.BasicLink;
+import data.CommonNode;
+import data.FiberLink;
+import data.LinkRGroup;
+import data.OTNLink;
+import data.Traffic;
+import data.WDMLink;
+import database.LinkDataBase;
+import database.NodeDataBase;
+import enums.Layer;
+import enums.NodeType;
 
 public class LinkData {
 	public LinkData() {
@@ -132,15 +139,15 @@ public class LinkData {
 		// }
 	}
 
-	public void outputLink(String str) {
+	/*public void outputLink(String str) {
 		LinkDataBase link = new LinkDataBase();
 		link.outputLink(str);
 		s_sFiberMsg = link.msgf;
 
 		s_serr = link.msgerr;
-	}
+	}*/
 
-	public void addLink(int id, String name, CommonNode fromNode, CommonNode toNode, double length, int waveNum,
+/*	public void addLink(int id, String name, CommonNode fromNode, CommonNode toNode, double length, int waveNum,
 			boolean isActive, String SRLG, Layer linkLayer, double inPower, double spanLoss, double NF) {
 		switch (linkLayer) {
 		case Fiber:
@@ -160,7 +167,7 @@ public class LinkData {
 
 		}
 
-	}
+	}*/
 
 	public boolean delFiberlink(FiberLink fiberlink) {// 只有光纤链路需要释放资源 CC 625
 
@@ -207,40 +214,40 @@ public class LinkData {
 		return true;
 	}
 
-	public void delLink(BasicLink link) {
-
-		if (BasicLink.getCarriedTraffic() != null) // 释放fiberkink上的业务资源 CC
-		{
-			Iterator<Traffic> it = link.getCarriedTraffic().iterator();
-			List<Traffic> trList = new LinkedList<Traffic>();
-			trList.addAll(link.getCarriedTraffic()); // 貌似后面没用到
-			while (it.hasNext()) {
-				Traffic tr = it.next();
-				tr.releaseTraffic(tr, 0);
-				tr.releasePortSource(tr, 0);
-			} // end while
-				// TODO Auto-generated method stub
-				// switch (basicLink.getClass().getName()) {
-				// case "data.FiberLink" :delFiberlink((FiberLink) basicLink);
-				// case "data.SatelliteLink":delSatelliteLink((SatelliteLink)
-				// basicLink);
-				// case "data.ShortWaveLink":delShortWaveLink((ShortWaveLink)
-				// basicLink);
-				//
-				// }
-		} // end if
-		BasicLink.allLinkList.remove(link);
-		System.out.println(link.getClass().getName());
-		switch (link.getClass().getName()) {// 值得借鉴
-		case "data.FiberLink":
-			delFiberlink((FiberLink) link);
-			break;
-		case "data.EleLink":
-			delEleLink((OTNLink) link);
-			break;
-		case "data.OptLink":
-			delOptLink((WDMLink) link);
-			break;
-		}
-	}
+//	public void delLink(BasicLink link) {
+//
+//		if (BasicLink.getCarriedTraffic() != null) // 释放fiberkink上的业务资源 CC
+//		{
+//			Iterator<Traffic> it = link.getCarriedTraffic().iterator();
+//			List<Traffic> trList = new LinkedList<Traffic>();
+//			trList.addAll(link.getCarriedTraffic()); // 貌似后面没用到
+//			while (it.hasNext()) {
+//				Traffic tr = it.next();
+//				tr.releaseTraffic(tr, 0);
+//				tr.releasePortSource(tr, 0);
+//			} // end while
+//				// TODO Auto-generated method stub
+//				// switch (basicLink.getClass().getName()) {
+//				// case "data.FiberLink" :delFiberlink((FiberLink) basicLink);
+//				// case "data.SatelliteLink":delSatelliteLink((SatelliteLink)
+//				// basicLink);
+//				// case "data.ShortWaveLink":delShortWaveLink((ShortWaveLink)
+//				// basicLink);
+//				//
+//				// }
+//		} // end if
+//		BasicLink.allLinkList.remove(link);
+//		System.out.println(link.getClass().getName());
+//		switch (link.getClass().getName()) {// 值得借鉴
+//		case "data.FiberLink":
+//			delFiberlink((FiberLink) link);
+//			break;
+//		case "data.EleLink":
+//			delEleLink((OTNLink) link);
+//			break;
+//		case "data.OptLink":
+//			delOptLink((WDMLink) link);
+//			break;
+//		}
+//	}
 }

@@ -9,27 +9,23 @@ import java.util.ListIterator;
 
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
-import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-import algorithm.ResourceAlloc;
-import algorithm.RouteAlloc;
-import twaver.Dummy;
-import twaver.TDataBox;
-import data.*;
+import data.BasicLink;
+import data.CommonNode;
 import data.FiberLink;
-import data.Traffic;
-import dataControl.LinkData;
+import data.OTNLink;
+import data.WDMLink;
 import dataControl.NodeData;
-import dataControl.PortData;
-import dataControl.TrafficData;
 import datastructure.UIFiberLink;
 import datastructure.UINode;
 import datastructure.UIOTNLink;
 import datastructure.UIWDMLink;
 import design.NetDesign_zs;
 import enums.Layer;
+import twaver.Dummy;
+import twaver.TDataBox;
 
 //完成数据导入 filelist 为导入文件的路径文件名
 public class Dlg_InputNodes extends JFrame {

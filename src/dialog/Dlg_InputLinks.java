@@ -7,26 +7,23 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ListIterator;
 
-import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-import twaver.Dummy;
-import twaver.TDataBox;
 import data.BasicLink;
-import data.CommonNode;
 import data.FiberLink;
-import data.*;
+import data.OTNLink;
+import data.WDMLink;
 import dataControl.LinkData;
-import dataControl.NodeData;
-import dataControl.PortData;
 import datastructure.UIFiberLink;
-import datastructure.UINode;
-import datastructure.*;
+import datastructure.UIOTNLink;
+import datastructure.UIWDMLink;
 import design.NetDesign_zs;
 import enums.Layer;
+import twaver.Dummy;
+import twaver.TDataBox;
 
 //完成数据导入 filelist 为导入文件的路径文件名
 public class Dlg_InputLinks extends JFrame {

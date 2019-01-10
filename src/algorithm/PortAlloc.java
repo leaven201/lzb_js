@@ -14,46 +14,24 @@ import enums.PortType;
 import enums.TrafficLevel;
 
 public class PortAlloc {
-    public static StringBuffer portFallBuffer = new StringBuffer();// 节点端口资源分配失败日志
+	public static StringBuffer portFallBuffer = new StringBuffer();// 节点端口资源分配失败日志
 
-    public static boolean allocatePort(Route route) {
-	LinkedList<Port> portList = new LinkedList<Port>();// 存储链路的路由的port
-	Traffic traffic = route.getBelongsTraffic();
-	List<WDMLink> wdmlinkList = route.getWDMLinkList();// 根据链路找端口，完美！
-	int hopSum = wdmlinkList.size();
-	///////////////// 首先开始分配业务首节点的支路端口
-	Port port = findPort(traffic, PortKind.支路端口, traffic.getFromNode(), traffic.getNrate(), null);
-	if (port == null) {
-	    portFallBuffer.append("业务-" + traffic.getName() +"(" + traffic.getId() + ") 在节点: "
-		    + traffic.getFromNode().getName() + "处无" + traffic.getNrate() + "G支路端口可用" + "\r\n");
-	    return false;
-	}
-	portList.add(port);
-	port.getCarriedTraffic().add(traffic);
-
-	// 开始分配业务末节点的支路端口
-	port = findPort(traffic, PortKind.支路端口, traffic.getToNode(), traffic.getNrate(), null);
-	if (port == null) {
-	    portFallBuffer.append("业务-" + traffic.getName() +"(" + traffic.getId() + ") 在节点: "
-		    + traffic.getToNode().getName() + "处无" + traffic.getNrate() + "G支路端口可用" + "\r\n");
-	    return false;
-	}
-	portList.add(port);
-	port.getCarriedTraffic().add(traffic);
-
-	/////////////////// 有可用支路端口,开始找线路端口
-	for (int hop = 0; hop < hopSum; hop++) {
-		WDMLink link = wdmlinkList.get(hop);
-		port = findPort(traffic, PortKind.线路端口, link.getFromNode(), traffic.getNrate(), link.getToNode());// 前向端口
+	public static boolean allocatePort(Route route) {
+		LinkedList<Port> portList = new LinkedList<Port>();// 存储链路的路由的port
+		Traffic traffic = route.getBelongsTraffic();
+		List<WDMLink> wdmlinkList = route.getWDMLinkList();// 根据链路找端口，完美！
+		int hopSum = wdmlinkList.size();
+		///////////////// 首先开始分配业务首节点的支路端口
+		Port port = findPort(traffic, PortKind.支路端口, traffic.getFromNode(), traffic.getNrate(), null);
 		if (port == null) {
 			portFallBuffer.append("业务-" + traffic.getName() + "(" + traffic.getId() + ") 在节点: "
-					+ link.getFromNode().getName() + "处无" + traffic.getNrate() + "G" + "线路端口可用" + "\r\n");
+					+ traffic.getFromNode().getName() + "处无" + traffic.getNrate() + "G支路端口可用" + "\r\n");
 			return false;
 		}
 		portList.add(port);
 		port.getCarriedTraffic().add(traffic);
 
-	    // 根据这条链路的类型在末节点找线路端口
+		// 开始分配业务末节点的支路端口
 		port = findPort(traffic, PortKind.支路端口, traffic.getToNode(), traffic.getNrate(), null);
 		if (port == null) {
 			portFallBuffer.append("业务-" + traffic.getName() + "(" + traffic.getId() + ") 在节点: "
@@ -63,106 +41,130 @@ public class PortAlloc {
 		portList.add(port);
 		port.getCarriedTraffic().add(traffic);
 
-	} // 线路端口分配完毕
+		/////////////////// 有可用支路端口,开始找线路端口
+		for (int hop = 0; hop < hopSum; hop++) {
+			WDMLink link = wdmlinkList.get(hop);
+			port = findPort(traffic, PortKind.线路端口, link.getFromNode(), traffic.getNrate(), link.getToNode());// 前向端口
+			if (port == null) {
+				portFallBuffer.append("业务-" + traffic.getName() + "(" + traffic.getId() + ") 在节点: "
+						+ link.getFromNode().getName() + "处无" + traffic.getNrate() + "G" + "线路端口可用" + "\r\n");
+				return false;
+			}
+			portList.add(port);
+			port.getCarriedTraffic().add(traffic);
 
-	// 开始对portlist里的端口状态进行更新，1和2是支路端口
-	for (int i = 0; i < portList.size(); i++) {
-	    port = portList.get(i);
-	    if (i == 0) {// 表明是支路端口
-		port.setStatus(PortStatus.上路);
-		port.setRemainResource(0);
-	    } else if (i == 1) {// 表明是支路端口
-		port.setStatus(PortStatus.下路);
-		port.setRemainResource(0);
-	    } else {// 其他的都是线路端口
-		port.setStatus(PortStatus.通过);
-		port.setRemainResource(0);
-	    }
-	    // port.getCarriedTraffic().add(traffic);
+			// 根据这条链路的类型在末节点找线路端口
+			port = findPort(traffic, PortKind.支路端口, traffic.getToNode(), traffic.getNrate(), null);
+			if (port == null) {
+				portFallBuffer.append("业务-" + traffic.getName() + "(" + traffic.getId() + ") 在节点: "
+						+ traffic.getToNode().getName() + "处无" + traffic.getNrate() + "G支路端口可用" + "\r\n");
+				return false;
+			}
+			portList.add(port);
+			port.getCarriedTraffic().add(traffic);
+
+		} // 线路端口分配完毕
+
+		// 开始对portlist里的端口状态进行更新，1和2是支路端口
+		for (int i = 0; i < portList.size(); i++) {
+			port = portList.get(i);
+			if (i == 0) {// 表明是支路端口
+				port.setStatus(PortStatus.上路);
+				port.setRemainResource(0);
+			} else if (i == 1) {// 表明是支路端口
+				port.setStatus(PortStatus.下路);
+				port.setRemainResource(0);
+			} else {// 其他的都是线路端口
+				port.setStatus(PortStatus.通过);
+				port.setRemainResource(0);
+			}
+			// port.getCarriedTraffic().add(traffic);
+		}
+		route.setPortList(portList);// 如果到这一步说明端口已经分配成功，无需清空。
+		Port.usedPortList.addAll(portList);// 方便清空
+		return true;
 	}
-	route.setPortList(portList);// 如果到这一步说明端口已经分配成功，无需清空。
-	Port.usedPortList.addAll(portList);// 方便清空
-	return true;
-    }
 
-    /**（分配失败不需要释放）
-     * 仿真专用的端口分配，区别在于最后把用过的端口放在了路由的不同list里面
-     * 
-     * @param route
-     * @return
-     */
-    public static boolean SimAllocatePort(Route route) {
-	LinkedList<Port> portList = new LinkedList<Port>();// 存储链路的路由的port
+	/**
+	 * （分配失败不需要释放） 仿真专用的端口分配，区别在于最后把用过的端口放在了路由的不同list里面
+	 * 
+	 * @param route
+	 * @return
+	 */
+	public static boolean SimAllocatePort(Route route) {
+		LinkedList<Port> portList = new LinkedList<Port>();// 存储链路的路由的port
 
-	Traffic traffic = route.getBelongsTraffic();
-	List<WDMLink> linkList = route.getWDMLinkList();// 根据链路找端口，完美！
-	int hopSum = linkList.size();
-	// 首先开始分配业务首节点的支路端口
-	Port port = findPort(traffic, PortKind.支路端口, traffic.getFromNode(), traffic.getNrate(), null);
-	if (port == null) {
-	    portFallBuffer.append("端口分配失败：\r\n业务-" + traffic.getName() +"(" + traffic.getId() + ") 在节点: "
-		    + traffic.getFromNode().getName() + "处无" + traffic.getNrate() + "G支路端口可用" + "\r\n");
-	    return false;
+		Traffic traffic = route.getBelongsTraffic();
+		List<WDMLink> linkList = route.getWDMLinkList();// 根据链路找端口，完美！
+		int hopSum = linkList.size();
+		// 首先开始分配业务首节点的支路端口
+		Port port = findPort(traffic, PortKind.支路端口, traffic.getFromNode(), traffic.getNrate(), null);
+		if (port == null) {
+			portFallBuffer.append("端口分配失败：\r\n业务-" + traffic.getName() + "(" + traffic.getId() + ") 在节点: "
+					+ traffic.getFromNode().getName() + "处无" + traffic.getNrate() + "G支路端口可用" + "\r\n");
+			return false;
+		}
+		portList.add(port);
+		port.getCarriedTraffic().add(traffic);
+
+		// 开始分配业务末节点的支路端口
+		port = findPort(traffic, PortKind.支路端口, traffic.getToNode(), traffic.getNrate(), null);
+		if (port == null) {
+			portFallBuffer.append("端口分配失败：\r\n业务-" + traffic.getName() + "(" + traffic.getId() + ") 在节点: "
+					+ traffic.getToNode().getName() + "处无" + traffic.getNrate() + "G支路端口可用" + "\r\n");
+			return false;
+		}
+		portList.add(port);
+		port.getCarriedTraffic().add(traffic);
+
+		// 有可用支路端口,开始找线路端口
+		for (int hop = 0; hop < hopSum; hop++) {
+			BasicLink link = linkList.get(hop);// 根据这条链路的类型在首节点找线路端口
+			port = findPort(traffic, PortKind.线路端口, link.getFromNode(), traffic.getNrate(), link.getToNode());// 前向端口
+			if (port == null) {
+				portFallBuffer.append("端口分配失败：\r\n业务-" + traffic.getName() + "(" + traffic.getId() + "): "
+						+ traffic.getName() + " 在节点: " + link.getFromNode().getName() + "处无" + traffic.getNrate()
+						+ "G线路端口可用" + "\r\n");
+				return false;
+			}
+			portList.add(port);
+			port.getCarriedTraffic().add(traffic);
+
+			// 根据这条链路的类型在末节点找线路端口
+			port = findPort(traffic, PortKind.线路端口, link.getToNode(), traffic.getNrate(), link.getFromNode());// 后向端口
+			if (port == null) {
+				portFallBuffer.append("端口分配失败：\r\n业务-" + traffic.getName() + "(" + traffic.getId() + ") 在节点: "
+						+ link.getToNode().getName() + "处无" + traffic.getNrate() + "G线路端口可用" + "\r\n");
+				return false;
+			}
+			portList.add(port);
+			port.getCarriedTraffic().add(traffic);
+
+		} // 线路端口分配完毕
+
+		// 开始对portlist里的端口状态进行更新，1和2是支路端口
+		for (int i = 0; i < portList.size(); i++) {
+			port = portList.get(i);
+			if (i == 0) {// 表明是支路端口
+				port.setStatus(PortStatus.上路);
+				port.setRemainResource(0);
+			} else if (i == 1) {// 表明是支路端口
+				port.setStatus(PortStatus.下路);
+				port.setRemainResource(0);
+			} else {// 其他的都是线路端口
+				port.setStatus(PortStatus.通过);
+				// if(port.getType().equals(PortType.短波))
+				// port.setRemainResource(0);//12.14 短波端口bu'fu'yon
+				// else
+				// port.setRemainResource(port.getRemainResource() - traffic.getNrate());
+				port.setRemainResource(0);
+			}
+			// port.getCarriedTraffic().add(traffic);
+		}
+		route.setSimPortList(portList);
+		return true;
 	}
-	portList.add(port);
-	port.getCarriedTraffic().add(traffic);
 
-	// 开始分配业务末节点的支路端口
-	port = findPort(traffic, PortKind.支路端口, traffic.getToNode(), traffic.getNrate(), null);
-	if (port == null) {
-	    portFallBuffer.append("端口分配失败：\r\n业务-" + traffic.getName() +"(" + traffic.getId() + ") 在节点: "
-		    + traffic.getToNode().getName() + "处无" + traffic.getNrate() + "G支路端口可用" + "\r\n");
-	    return false;
-	}
-	portList.add(port);
-	port.getCarriedTraffic().add(traffic);
-
-	// 有可用支路端口,开始找线路端口
-	for (int hop = 0; hop < hopSum; hop++) {
-	    BasicLink link = linkList.get(hop);// 根据这条链路的类型在首节点找线路端口
-	    port = findPort(traffic, PortKind.线路端口, link.getFromNode(), traffic.getNrate(), link.getToNode());// 前向端口
-	    if (port == null) {
-		portFallBuffer.append("端口分配失败：\r\n业务-" + traffic.getName() +"(" + traffic.getId() + "): " + traffic.getName()
-			+ " 在节点: " + link.getFromNode().getName() + "处无" + traffic.getNrate() + "G线路端口可用" + "\r\n");
-		return false;
-	    }
-	    portList.add(port);
-	    port.getCarriedTraffic().add(traffic);
-
-	    // 根据这条链路的类型在末节点找线路端口
-	    port = findPort(traffic, PortKind.线路端口, link.getToNode(), traffic.getNrate(), link.getFromNode());// 后向端口
-	    if (port == null) {
-		portFallBuffer.append("端口分配失败：\r\n业务-" + traffic.getName() +"(" + traffic.getId() + ") 在节点: "
-			+ link.getToNode().getName() + "处无" + traffic.getNrate() + "G线路端口可用" + "\r\n");
-		return false;
-	    }
-	    portList.add(port);
-	    port.getCarriedTraffic().add(traffic);
-
-	} // 线路端口分配完毕
-
-	// 开始对portlist里的端口状态进行更新，1和2是支路端口
-	for (int i = 0; i < portList.size(); i++) {
-	    port = portList.get(i);
-	    if (i == 0) {// 表明是支路端口
-		port.setStatus(PortStatus.上路);
-		port.setRemainResource(0);
-	    } else if (i == 1) {// 表明是支路端口
-		port.setStatus(PortStatus.下路);
-		port.setRemainResource(0);
-	    } else {// 其他的都是线路端口
-		port.setStatus(PortStatus.通过);
-		// if(port.getType().equals(PortType.短波))
-		// port.setRemainResource(0);//12.14 短波端口bu'fu'yon
-		// else
-	//	port.setRemainResource(port.getRemainResource() - traffic.getNrate());
-		port.setRemainResource(0);
-	    }
-	    // port.getCarriedTraffic().add(traffic);
-	}
-	route.setSimPortList(portList);
-	return true;
-    }
 	/**
 	 * 此函数功能：为wdmLink找到指定类型（线路/支路） 指定速率的端口
 	 * 
@@ -178,11 +180,12 @@ public class PortAlloc {
 			// 找到符合类型的空闲支路端口
 			if (port.getKind().equals(kind) && kind.equals(PortKind.支路端口) && port.getNrate() == rate
 					&& (port.getStatus().equals(PortStatus.空闲) || (!port.getStatus().equals(PortStatus.空闲)
-							&& (tra.getProtectLevel() == TrafficLevel.PROTECTandRESTORATION||tra.getProtectLevel() == TrafficLevel.RESTORATION))))
+							&& (tra.getProtectLevel() == TrafficLevel.PROTECTandRESTORATION
+									|| tra.getProtectLevel() == TrafficLevel.RESTORATION))))
 				return port;
-			else if (port.getKind().equals(kind) && kind.equals(PortKind.线路端口)
-					&& (port.getRemainResource() == 1 || (port.getRemainResource() != 1
-							&& (tra.getProtectLevel() == TrafficLevel.PROTECTandRESTORATION||tra.getProtectLevel() == TrafficLevel.RESTORATION)))
+			else if (port.getKind().equals(kind) && kind.equals(PortKind.线路端口) && (port.getRemainResource() == 1
+					|| (port.getRemainResource() != 1 && (tra.getProtectLevel() == TrafficLevel.PROTECTandRESTORATION
+							|| tra.getProtectLevel() == TrafficLevel.RESTORATION)))
 					&& (port.getStatus().equals(PortStatus.空闲) || port.getStatus().equals(PortStatus.通过))
 					&& direction.equals(port.getDirection()))
 				return port;
@@ -244,19 +247,19 @@ public class PortAlloc {
 //	// return null;
 //    }
 
-    public static PortType LinkType2Port(LinkType type) {// 把链路类型转换为端口类型
-	switch (type) {
-	case Fiber:
-	    return PortType.光纤;
-	case Satellite:
-	    return PortType.卫星;
-	case ShortWave:
-	    return PortType.短波;
-	default:
-	    break;
-	}
-	return null;
+	/*public static PortType LinkType2Port(LinkType type) {// 把链路类型转换为端口类型
+		switch (type) {
+		case Fiber:
+			return PortType.光纤;
+		case Satellite:
+			return PortType.卫星;
+		case ShortWave:
+			return PortType.短波;
+		default:
+			break;
+		}
+		return null;
 
-    }
+	}*/
 
 }

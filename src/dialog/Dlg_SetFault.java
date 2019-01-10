@@ -26,7 +26,6 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -36,21 +35,18 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumnModel;
 
+import data.CommonNode;
+import data.FiberLink;
+import data.Traffic;
+import datastructure.UIFiberLink;
+import enums.TrafficLevel;
+import survivance.Evaluation;
+import survivance.Survivance;
 import twaver.Element;
 import twaver.Node;
 import twaver.TDataBox;
 import twaver.TWaverConst;
 import twaver.chart.PieChart;
-import twaver.table.TTableColumn;
-import data.CommonNode;
-import data.FiberLink;
-import data.Network;
-import data.Traffic;
-import datastructure.UIFiberLink;
-import enums.Layer;
-import enums.TrafficLevel;
-import survivance.Evaluation;
-import survivance.Survivance;
 
 public class Dlg_SetFault extends JFrame{
 	private DefaultTableModel nodeModel;

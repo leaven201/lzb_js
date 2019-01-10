@@ -11,8 +11,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.util.LinkedList;
-import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
@@ -36,16 +34,11 @@ import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.PlainDocument;
 
-import algorithm.ResourceAlloc;
-import algorithm.RouteAlloc;
-import algorithm.algorithm;
 import data.CommonNode;
 import data.DataSave;
 import data.FiberLink;
-import data.Network;
 //import data.SpanLink;
 import data.Traffic;
-import data.TrafficGroup;
 import data.WDMLink;
 
 public class Dlg_PolicySetting extends JFrame {

@@ -1,9 +1,9 @@
-package database;
+/*package database;
 
-/*******
+*//*******
  * 此类功能为导出业务到EXCEL
  * 
- */
+ *//*
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -26,11 +26,11 @@ import enums.PortRate;
 import enums.PortStatus;
 import enums.PortType;
 
-/*
- * 端口数据的导入导出，从excel导入程序，从程序导出excel
- * @firesky 
- * 2011.4.22
- */
+
+  端口数据的导入导出，从excel导入程序，从程序导出excel
+  @firesky 
+  2011.4.22
+ 
 public class PortDataBase {
 
     public String msg = ""; // 导入导出信息提示
@@ -38,115 +38,115 @@ public class PortDataBase {
     public static boolean flag = true;
     public static boolean flagnportnull = true;// 该标志位对是空白工程还是进来就有内容进行标示，flase标示进行导入之前就有内容
 
-    /*
-     * 函数名称：inputPort 功能：导入端口 输入：目录地址 str 输出：void
-     */
-    /*
-     * public void inputPort(String str){ flag=true; msgErro="";
-     * List<CommonNode> NodeList=new LinkedList<CommonNode>();
-     * if(nodeDateBase.flag==false||CommonNode.m_lCommonNode.size()==0) {
-     * msgErro="未导入节点端口信息"; flag=false; } else{ FileInputStream fins=null; try {
-     * fins = new FileInputStream(str); } catch (FileNotFoundException e1) { //
-     * TODO 自动生成 catch 块 e1.printStackTrace(); } HSSFWorkbook wb = null;
-     * POIFSFileSystem fs = null; try { fs = new POIFSFileSystem(fins); wb = new
-     * HSSFWorkbook(fs); } catch (IOException e) { e.printStackTrace(); }
-     * HSSFSheet sheet=null; try { sheet =wb.getSheet("端口"); } catch (Exception
-     * e) { // TODO: handle exception }
-     * 
-     * int f=0; //标记成功导入总行数 if(sheet!=null){ outter: for(Row row : sheet) {
-     * if(row.getRowNum()!=0) { int a=row.getRowNum()+1; //格式控制，判断
-     * if(((row.getCell(0)==null)||(row.getCell(0)!=null&&row.getCell(0).
-     * getCellType()==Cell.CELL_TYPE_STRING&&row.getCell(0).getStringCellValue()
-     * .trim().equals(""))||row.getCell(0).getCellType()==Cell.CELL_TYPE_BLANK)
-     * &&((row.getCell(1)==null)||(row.getCell(1)!=null&&row.getCell(1).
-     * getCellType()==Cell.CELL_TYPE_STRING&&row.getCell(1).getStringCellValue()
-     * .trim().equals(""))||row.getCell(1).getCellType()==Cell.CELL_TYPE_BLANK)
-     * &&((row.getCell(2)==null)||(row.getCell(2)!=null&&row.getCell(2).
-     * getCellType()==Cell.CELL_TYPE_STRING&&row.getCell(2).getStringCellValue()
-     * .trim().equals(""))||row.getCell(2).getCellType()==Cell.CELL_TYPE_BLANK)
-     * ) { break outter; } else { int id=0; //端口id CommonNode belongsNode=null;
-     * //端口所属节点 Layer layer=null; //端口所属层 PortRate portRate=null;//端口速率 int
-     * portNumber=0; //端口数量 PortType portType=null; //端口类型 PortStatus
-     * portStatus=null;//端口状态
-     * 
-     * try{ String portRateString=row.getCell(3).getStringCellValue().trim();
-     * if(portRateString.equals("40G")){portRate=PortRate.G40;} else
-     * if(portRateString.equals("10G")){portRate=PortRate.G10;} else
-     * if(portRateString.equals("2.5G")){portRate=PortRate.G2point5;} else
-     * if(portRateString.equals("GE")){portRate=PortRate.GE;} else
-     * if(portRateString.equals("622M")){portRate=PortRate.M622;} else
-     * if(portRateString.equals("155M")){portRate=PortRate.M155;} else
-     * if(portRateString.equals("FE")){portRate=PortRate.FE;} else
-     * if(portRateString.equals("2M")){portRate=PortRate.M2;} }catch(Exception
-     * e){ e.printStackTrace(); }
-     * 
-     * try{ String portTypeString=row.getCell(4).getStringCellValue().trim();
-     * if(portTypeString.equals("业务")||portTypeString.equals("业务端口")){portType=
-     * PortType.业务端口;} else
-     * if(portTypeString.equals("线路")||portTypeString.equals("线路端口")){portType=
-     * PortType.线路端口;} }catch(Exception e){ e.printStackTrace(); }
-     * 
-     * try{ String portStatusString=row.getCell(5).getStringCellValue().trim();
-     * if(portStatusString.equals("空闲")){portStatus=PortStatus.空闲;} else
-     * if(portStatusString.equals("通过")){portStatus=PortStatus.通过;} else
-     * if(portStatusString.equals("上路")){portStatus=PortStatus.上路;} else
-     * if(portStatusString.equals("下路")){portStatus=PortStatus.下路;} else
-     * if(portStatusString.equals("人工占用")){portStatus=PortStatus.人工占用;}
-     * }catch(Exception e){ e.printStackTrace(); }
-     * 
-     * 
-     * try{ String layerString=row.getCell(2).getStringCellValue().trim();
-     * if(layerString.equals(Layer.FIBER.toString())){layer=Layer.FIBER;} else
-     * if(layerString.equals(Layer.Satellite.toString())){layer=Layer.Satellite;
-     * } else if(layerString.equals(Layer.OTN.toString())){layer=Layer.OTN;}
-     * else if(layerString.equals(Layer.ASON.toString())){layer=Layer.ASON;}
-     * else
-     * if(layerString.equals(Layer.ShortWave.toString())){layer=Layer.ShortWave;
-     * } }catch(Exception e){ e.printStackTrace(); }
-     * 
-     * try{ String belongsNodeString=row.getCell(1).getStringCellValue().trim();
-     * Iterator<CommonNode> it=CommonNode.m_lCommonNode.iterator();
-     * while(it.hasNext()){ CommonNode node=it.next();
-     * if(node.getM_sName().equals(belongsNodeString)) { belongsNode=node;
-     * break; } } }catch(Exception e){ e.printStackTrace(); }
-     * 
-     * try{ if(row.getCell(0).getCellType()==Cell.CELL_TYPE_NUMERIC) {
-     * id=(int)row.getCell(0).getNumericCellValue(); portNumber=1; } else
-     * if(row.getCell(0).getCellType()==Cell.CELL_TYPE_STRING) { String
-     * idString=row.getCell(0).getStringCellValue().trim(); String[]
-     * idStringList; idStringList=idString.split("-");
-     * if(idStringList.length==1){ id=Integer.parseInt(idStringList[0]);
-     * portNumber=1; } else if(idStringList.length==2){
-     * id=Integer.parseInt(idStringList[0]);
-     * portNumber=Integer.parseInt(idStringList[1])-Integer.parseInt(
-     * idStringList[0])+1; } } }catch(Exception e){
-     * 
-     * e.printStackTrace(); }
-     * 
-     * //异常处理 if(layer==null) { msgErro+="端口表格存在错误: "+a+"行 ，层属性有错误，请确认！"+"\n";
-     * // clear(); // break outter; } else if(belongsNode==null) { msgErro+=
-     * "端口表格存在错误: "+a+"行 ，无该所属节点，请确认！"+"\n"; // clear(); // break outter; } else
-     * if(portRate==null) { msgErro+="端口表格存在错误: "+a+"行 ，速率属性有错误，请确认！"+"\n"; //
-     * clear(); // break outter; } else if(portType==null) { msgErro+=
-     * "端口表格存在错误: "+a+"行 ，端口类型属性有错误，请确认！"+"\n"; // clear(); // break outter; }
-     * else if(portStatus==null) { msgErro+="端口表格存在错误: "+a+"行 ，端口状态属性有错误，请确认！"
-     * +"\n"; // clear(); // break outter; } else if(portNumber==0) { msgErro+=
-     * "端口表格存在错误: "+a+"行 ，端口数量属性为0，请按规定格式输入，如1-10！"+"\n"; // clear(); // break
-     * outter; } else{ //新建新端口 for(;portNumber>0;--portNumber){ new
-     * Port(id++,belongsNode,layer,portRate,portType.toString(),portStatus.
-     * toString()); } f++; } } } } } try { fins.close(); } catch (IOException e)
-     * { // TODO 自动生成 catch 块 e.printStackTrace(); } msg="成功导入端口"+f+"个"; }
-     * 
-     * }
-     */
-    /*
-     * 函数名称：outputPort 
-     * 函数功能：沿着节点链，依次导出各个节点上的端口 
-     * 输入：导出路径str 
-     * 输出：void
-     * 
-     * @firesky 2011.4.23
-     */
+    
+      函数名称：inputPort 功能：导入端口 输入：目录地址 str 输出：void
+     
+    
+      public void inputPort(String str){ flag=true; msgErro="";
+      List<CommonNode> NodeList=new LinkedList<CommonNode>();
+      if(nodeDateBase.flag==false||CommonNode.m_lCommonNode.size()==0) {
+      msgErro="未导入节点端口信息"; flag=false; } else{ FileInputStream fins=null; try {
+      fins = new FileInputStream(str); } catch (FileNotFoundException e1) { //
+      TODO 自动生成 catch 块 e1.printStackTrace(); } HSSFWorkbook wb = null;
+      POIFSFileSystem fs = null; try { fs = new POIFSFileSystem(fins); wb = new
+      HSSFWorkbook(fs); } catch (IOException e) { e.printStackTrace(); }
+      HSSFSheet sheet=null; try { sheet =wb.getSheet("端口"); } catch (Exception
+      e) { // TODO: handle exception }
+      
+      int f=0; //标记成功导入总行数 if(sheet!=null){ outter: for(Row row : sheet) {
+      if(row.getRowNum()!=0) { int a=row.getRowNum()+1; //格式控制，判断
+      if(((row.getCell(0)==null)||(row.getCell(0)!=null&&row.getCell(0).
+      getCellType()==Cell.CELL_TYPE_STRING&&row.getCell(0).getStringCellValue()
+      .trim().equals(""))||row.getCell(0).getCellType()==Cell.CELL_TYPE_BLANK)
+      &&((row.getCell(1)==null)||(row.getCell(1)!=null&&row.getCell(1).
+      getCellType()==Cell.CELL_TYPE_STRING&&row.getCell(1).getStringCellValue()
+      .trim().equals(""))||row.getCell(1).getCellType()==Cell.CELL_TYPE_BLANK)
+      &&((row.getCell(2)==null)||(row.getCell(2)!=null&&row.getCell(2).
+      getCellType()==Cell.CELL_TYPE_STRING&&row.getCell(2).getStringCellValue()
+      .trim().equals(""))||row.getCell(2).getCellType()==Cell.CELL_TYPE_BLANK)
+      ) { break outter; } else { int id=0; //端口id CommonNode belongsNode=null;
+      //端口所属节点 Layer layer=null; //端口所属层 PortRate portRate=null;//端口速率 int
+      portNumber=0; //端口数量 PortType portType=null; //端口类型 PortStatus
+      portStatus=null;//端口状态
+      
+      try{ String portRateString=row.getCell(3).getStringCellValue().trim();
+      if(portRateString.equals("40G")){portRate=PortRate.G40;} else
+      if(portRateString.equals("10G")){portRate=PortRate.G10;} else
+      if(portRateString.equals("2.5G")){portRate=PortRate.G2point5;} else
+      if(portRateString.equals("GE")){portRate=PortRate.GE;} else
+      if(portRateString.equals("622M")){portRate=PortRate.M622;} else
+      if(portRateString.equals("155M")){portRate=PortRate.M155;} else
+      if(portRateString.equals("FE")){portRate=PortRate.FE;} else
+      if(portRateString.equals("2M")){portRate=PortRate.M2;} }catch(Exception
+      e){ e.printStackTrace(); }
+      
+      try{ String portTypeString=row.getCell(4).getStringCellValue().trim();
+      if(portTypeString.equals("业务")||portTypeString.equals("业务端口")){portType=
+      PortType.业务端口;} else
+      if(portTypeString.equals("线路")||portTypeString.equals("线路端口")){portType=
+      PortType.线路端口;} }catch(Exception e){ e.printStackTrace(); }
+      
+      try{ String portStatusString=row.getCell(5).getStringCellValue().trim();
+      if(portStatusString.equals("空闲")){portStatus=PortStatus.空闲;} else
+      if(portStatusString.equals("通过")){portStatus=PortStatus.通过;} else
+      if(portStatusString.equals("上路")){portStatus=PortStatus.上路;} else
+      if(portStatusString.equals("下路")){portStatus=PortStatus.下路;} else
+      if(portStatusString.equals("人工占用")){portStatus=PortStatus.人工占用;}
+      }catch(Exception e){ e.printStackTrace(); }
+      
+      
+      try{ String layerString=row.getCell(2).getStringCellValue().trim();
+      if(layerString.equals(Layer.FIBER.toString())){layer=Layer.FIBER;} else
+      if(layerString.equals(Layer.Satellite.toString())){layer=Layer.Satellite;
+      } else if(layerString.equals(Layer.OTN.toString())){layer=Layer.OTN;}
+      else if(layerString.equals(Layer.ASON.toString())){layer=Layer.ASON;}
+      else
+      if(layerString.equals(Layer.ShortWave.toString())){layer=Layer.ShortWave;
+      } }catch(Exception e){ e.printStackTrace(); }
+      
+      try{ String belongsNodeString=row.getCell(1).getStringCellValue().trim();
+      Iterator<CommonNode> it=CommonNode.m_lCommonNode.iterator();
+      while(it.hasNext()){ CommonNode node=it.next();
+      if(node.getM_sName().equals(belongsNodeString)) { belongsNode=node;
+      break; } } }catch(Exception e){ e.printStackTrace(); }
+      
+      try{ if(row.getCell(0).getCellType()==Cell.CELL_TYPE_NUMERIC) {
+      id=(int)row.getCell(0).getNumericCellValue(); portNumber=1; } else
+      if(row.getCell(0).getCellType()==Cell.CELL_TYPE_STRING) { String
+      idString=row.getCell(0).getStringCellValue().trim(); String[]
+      idStringList; idStringList=idString.split("-");
+      if(idStringList.length==1){ id=Integer.parseInt(idStringList[0]);
+      portNumber=1; } else if(idStringList.length==2){
+      id=Integer.parseInt(idStringList[0]);
+      portNumber=Integer.parseInt(idStringList[1])-Integer.parseInt(
+      idStringList[0])+1; } } }catch(Exception e){
+      
+      e.printStackTrace(); }
+      
+      //异常处理 if(layer==null) { msgErro+="端口表格存在错误: "+a+"行 ，层属性有错误，请确认！"+"\n";
+      // clear(); // break outter; } else if(belongsNode==null) { msgErro+=
+      "端口表格存在错误: "+a+"行 ，无该所属节点，请确认！"+"\n"; // clear(); // break outter; } else
+      if(portRate==null) { msgErro+="端口表格存在错误: "+a+"行 ，速率属性有错误，请确认！"+"\n"; //
+      clear(); // break outter; } else if(portType==null) { msgErro+=
+      "端口表格存在错误: "+a+"行 ，端口类型属性有错误，请确认！"+"\n"; // clear(); // break outter; }
+      else if(portStatus==null) { msgErro+="端口表格存在错误: "+a+"行 ，端口状态属性有错误，请确认！"
+      +"\n"; // clear(); // break outter; } else if(portNumber==0) { msgErro+=
+      "端口表格存在错误: "+a+"行 ，端口数量属性为0，请按规定格式输入，如1-10！"+"\n"; // clear(); // break
+      outter; } else{ //新建新端口 for(;portNumber>0;--portNumber){ new
+      Port(id++,belongsNode,layer,portRate,portType.toString(),portStatus.
+      toString()); } f++; } } } } } try { fins.close(); } catch (IOException e)
+      { // TODO 自动生成 catch 块 e.printStackTrace(); } msg="成功导入端口"+f+"个"; }
+      
+      }
+     
+    
+      函数名称：outputPort 
+      函数功能：沿着节点链，依次导出各个节点上的端口 
+      输入：导出路径str 
+      输出：void
+      
+      @firesky 2011.4.23
+     
     public void outputPort(String str) {
 	HSSFWorkbook wb = new HSSFWorkbook();
 	POIFSFileSystem fs = null;
@@ -322,11 +322,11 @@ public class PortDataBase {
 
     }
 
-/**
+*//**
  * 功能：导出某个节点的端口
  * @param str
  * @param Node
- */
+ *//*
     
     public void outputPort(String str, CommonNode Node) {
 	String name = Node.getName();
@@ -539,3 +539,4 @@ public class PortDataBase {
     }
 
 }
+*/

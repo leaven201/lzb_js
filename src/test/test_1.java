@@ -1,33 +1,19 @@
 package test;
 
 import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 
-import algorithm.CommonAlloc;
 import algorithm.OSNR;
 import algorithm.ResourceAlloc;
-import algorithm.RouteAlloc;
-import algorithm.Suggest;
-import algorithm.algorithm;
-import data.BasicLink;
 import data.CommonNode;
 import data.DataSave;
-import data.FiberLink;
-import data.LinkRGroup;
-import data.Route;
 //import data.SpanLink;
 import data.Traffic;
-import data.TrafficGroup;
 import data.WDMLink;
-import data.WaveLength;
-import dataControl.*;
-import enums.NodeType;
+import dataControl.LinkData;
+import dataControl.NodeData;
+import dataControl.TrafficData;
 import enums.PortRate;
-import enums.Status;
-import survivance.Evaluation;
 
 /*
  * 测试业务
@@ -43,22 +29,21 @@ public class test_1 {
 
 		LinkData dbsl = new LinkData();
 		dbsl.inputLink("附表1：拓扑导入模板 - 站点实名 - 含OA及衰耗NEW.xls");
-		
+
 		TrafficData dbst = new TrafficData();
 		dbst.inputTraffic("附表2：业务导入模板 - 实际new.xls");
-		
-		
 
-		
-		data.DataSave.locknum = 10;
-		DataSave.OSNR = true;
-		ResourceAlloc.allocateResource1(Traffic.trafficList, 0);
-		for(int i=0;i<20;i++) {
-			System.out.println(Traffic.trafficList.get(i).getWorkRoute());
+		HashSet<CommonNode> dict = ResourceAlloc.setdict();
+		CommonNode node1 = CommonNode.getNode("九江浔阳");
+		CommonNode node2 = CommonNode.getNode("南京大行宫");
+		CommonNode node3 = CommonNode.getNode("芜湖微波楼");
+
+		System.out.println(node1 + " " + node2 + " " + node3);
+		List<List<CommonNode>> nodeRoutes = ResourceAlloc.findAllRoute(CommonNode.getNode("九江浔阳"),
+				CommonNode.getNode("南京大行宫"), dict);
+
+		for (List<CommonNode> list : nodeRoutes) {
+			System.out.println(list.size());
 		}
-		double osnr = OSNR.calculateOSNR(Traffic.trafficList.get(1).getWorkRoute());
-		System.out.println(osnr);
-
-
 	}
 }
