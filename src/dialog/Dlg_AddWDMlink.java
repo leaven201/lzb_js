@@ -19,21 +19,14 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 
-import twaver.Dummy;
-import twaver.TDataBox;
 import data.CommonNode;
 import data.FiberLink;
-import data.OTNLink;
 //import data.SDHLink;
 import data.WDMLink;
-import datastructure.UIFiberLink;
-import datastructure.UINode;
-import database.LinkDataBase;
 //import enums.Area;
 import enums.Layer;
-//import enums.MaintainUnit;
-//import enums.PerfunctoryWay;
-import greenDesign.greenDesign;
+import twaver.Dummy;
+import twaver.TDataBox;
 
 public class Dlg_AddWDMlink {
 	private Dummy linkDummy;

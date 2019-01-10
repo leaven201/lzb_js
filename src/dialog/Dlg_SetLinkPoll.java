@@ -65,236 +65,236 @@ public class Dlg_SetLinkPoll extends JFrame {
 	private Element cc = new Node();
 	private Element dd = new Node();
 
-	public Dlg_SetLinkPoll(Frame owner) {
-		setTitle("链路故障设置");
-		ImageIcon imageIcon = new ImageIcon(this.getClass().getResource("/resource/titlexiao.png"));
-		this.setIconImage(imageIcon.getImage());
-		// super(owner,"链路双断循环",true);
-		this.setSize(1000, 600);
-		Toolkit tl = Toolkit.getDefaultToolkit();
-		Dimension screenSize = tl.getScreenSize();
-		this.setLocation((int) screenSize.getWidth() / 2 - (int) this.getSize().getWidth() / 2,
-				(int) screenSize.getHeight() / 2 - (int) this.getSize().getHeight() / 2);
-
-		trafficModel = new DefaultTableModel(null, trafficHeader);
-
-		linkModel = new DefaultTableModel(linkHeader, 0);
-		// linkModel.addRow(new Object[] {new
-		// Boolean(false),"fox","12","050101","男"});
-		Object data[] = new Object[5];
-		for (int n = 0; n < FiberLink.fiberLinkList.size(); n++) {
-			data[0] = new Boolean(false);
-			data[1] = FiberLink.fiberLinkList.get(n).getId();
-			data[2] = FiberLink.fiberLinkList.get(n).getName();
-			data[3] = FiberLink.fiberLinkList.get(n).getFromNode().getName();
-			data[4] = FiberLink.fiberLinkList.get(n).getToNode().getName();
-			linkModel.addRow(data);
-		}
-		linkTable = new JTable(linkModel) {
-			public boolean isCellEditable(int row, int column) {
-				if (column == 0) {
-					return true;
-				} else {
-					return false;
-				}
-
-			}
-		};
-
-		trafficTable = new JTable(trafficModel) {
-			public boolean isCellEditable(int row, int column) {
-				return false;
-			}
-		};
-		pie.setSize(40, 80);
-
-		trafficTable.getTableHeader().setReorderingAllowed(false);
-		linkTable.getTableHeader().setReorderingAllowed(false); // 列不可动
-		JScrollPane pane1 = new JScrollPane(linkTable);
-		JScrollPane pane2 = new JScrollPane(trafficTable);
-		pane1.setRowHeaderView(new RowHeaderTable(linkTable, 40));
-
-		linkTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF); // 水平滚动条
-		trafficTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF); // 水平滚动条
-
-		TableColumnModel tcm = trafficTable.getColumnModel();
-		tcm.getColumn(7).setPreferredWidth(200);
-		tcm.getColumn(8).setPreferredWidth(200);
-		tcm.getColumn(9).setPreferredWidth(200);
-		tcm.getColumn(6).setPreferredWidth(200);
-
-		tcm = linkTable.getColumnModel();
-
-		tcm.getColumn(0).setCellEditor(new DefaultCellEditor(new JCheckBox()));
-		tcm.getColumn(0).setCellRenderer(new MyTableRenderer());
-
-		tcm.getColumn(0).setPreferredWidth(20);
-		tcm.getColumn(0).setWidth(20);
-		tcm.getColumn(0).setMaxWidth(20);
-		tcm.getColumn(1).setPreferredWidth(50);
-		tcm.getColumn(2).setPreferredWidth(90);
-
-		JButton close = new JButton(" 关  闭  ");
-//		JButton Browse = new JButton("统计结果");
-		JButton simulation = new JButton(" 仿  真  ");
-		Font f = new Font("微软雅黑", Font.PLAIN, 12);
-		close.setFont(f);
-//		Browse.setFont(f);
-		simulation.setFont(f);
-		simulation.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				int num = 0;
-
-				recoveryLinkListcol(thelink);
-
-				thelink = new LinkedList<FiberLink>();
-				for (int i = 0; i < linkTable.getRowCount(); i++) {
-
-					if (linkTable.getValueAt(i, 0).toString().equals("true")) {
-						++num;
-						thelink.add(FiberLink.getFiberLink(Integer.parseInt(String.valueOf(linkTable.getValueAt(i, 1)))));
-						if (num == 3)
-							break;
-					}
-
-				}
-//				if (num == 2) {MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
-//					// 设置故障链路 thelink
+//	public Dlg_SetLinkPoll(Frame owner) {
+//		setTitle("链路故障设置");
+//		ImageIcon imageIcon = new ImageIcon(this.getClass().getResource("/resource/titlexiao.png"));
+//		this.setIconImage(imageIcon.getImage());
+//		// super(owner,"链路双断循环",true);
+//		this.setSize(1000, 600);
+//		Toolkit tl = Toolkit.getDefaultToolkit();
+//		Dimension screenSize = tl.getScreenSize();
+//		this.setLocation((int) screenSize.getWidth() / 2 - (int) this.getSize().getWidth() / 2,
+//				(int) screenSize.getHeight() / 2 - (int) this.getSize().getHeight() / 2);
 //
-					tra = Evaluation.multiLinkEva(thelink, 0);
-
-					setLinkListcol(thelink);
-
-					aa.putChartValue(Evaluation.multiLinkKeepPer);
-					bb.putChartValue(Evaluation.multiLinkDownPer);
-					cc.putChartValue(Evaluation.multiLinkCutoffPer);
-					dd.putChartValue(Evaluation.multiLinkUneffPer);
-
-					showEffectTraffic(tra);
-					Evaluation.clearRsmRoute(tra);
+//		trafficModel = new DefaultTableModel(null, trafficHeader);
 //
+//		linkModel = new DefaultTableModel(linkHeader, 0);
+//		// linkModel.addRow(new Object[] {new
+//		// Boolean(false),"fox","12","050101","男"});
+//		Object data[] = new Object[5];
+//		for (int n = 0; n < FiberLink.fiberLinkList.size(); n++) {
+//			data[0] = new Boolean(false);
+//			data[1] = FiberLink.fiberLinkList.get(n).getId();
+//			data[2] = FiberLink.fiberLinkList.get(n).getName();
+//			data[3] = FiberLink.fiberLinkList.get(n).getFromNode().getName();
+//			data[4] = FiberLink.fiberLinkList.get(n).getToNode().getName();
+//			linkModel.addRow(data);
+//		}
+//		linkTable = new JTable(linkModel) {
+//			public boolean isCellEditable(int row, int column) {
+//				if (column == 0) {
+//					return true;
 //				} else {
-//					thelink = new LinkedList<FiberLink>();
-//					JOptionPane.showMessageDialog(null, "请设置两条故障链路！");
-//				}MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
-			}
-		});
-		close.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-
-				recoveryLinkListcol(thelink);
-				setVisible(false);
-				dispose();// 释放窗体所占内存资源?
-			}
-		});
-		setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
-		addWindowListener(new WindowAdapter() {
-			public void windowClosing(WindowEvent e) {
-				// TODO Auto-generated method stub
-				recoveryLinkListcol(thelink);
-				setVisible(false);
-				dispose();
-			}
-		});
-//		Browse.addActionListener(new ActionListener() {
+//					return false;
+//				}
+//
+//			}
+//		};
+//
+//		trafficTable = new JTable(trafficModel) {
+//			public boolean isCellEditable(int row, int column) {
+//				return false;
+//			}
+//		};
+//		pie.setSize(40, 80);
+//
+//		trafficTable.getTableHeader().setReorderingAllowed(false);
+//		linkTable.getTableHeader().setReorderingAllowed(false); // 列不可动
+//		JScrollPane pane1 = new JScrollPane(linkTable);
+//		JScrollPane pane2 = new JScrollPane(trafficTable);
+//		pane1.setRowHeaderView(new RowHeaderTable(linkTable, 40));
+//
+//		linkTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF); // 水平滚动条
+//		trafficTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF); // 水平滚动条
+//
+//		TableColumnModel tcm = trafficTable.getColumnModel();
+//		tcm.getColumn(7).setPreferredWidth(200);
+//		tcm.getColumn(8).setPreferredWidth(200);
+//		tcm.getColumn(9).setPreferredWidth(200);
+//		tcm.getColumn(6).setPreferredWidth(200);
+//
+//		tcm = linkTable.getColumnModel();
+//
+//		tcm.getColumn(0).setCellEditor(new DefaultCellEditor(new JCheckBox()));
+//		tcm.getColumn(0).setCellRenderer(new MyTableRenderer());
+//
+//		tcm.getColumn(0).setPreferredWidth(20);
+//		tcm.getColumn(0).setWidth(20);
+//		tcm.getColumn(0).setMaxWidth(20);
+//		tcm.getColumn(1).setPreferredWidth(50);
+//		tcm.getColumn(2).setPreferredWidth(90);
+//
+//		JButton close = new JButton(" 关  闭  ");
+////		JButton Browse = new JButton("统计结果");
+//		JButton simulation = new JButton(" 仿  真  ");
+//		Font f = new Font("微软雅黑", Font.PLAIN, 12);
+//		close.setFont(f);
+////		Browse.setFont(f);
+//		simulation.setFont(f);
+//		simulation.addActionListener(new ActionListener() {
 //			public void actionPerformed(ActionEvent e) {
-//				/*
-//				 * 统计结果窗口
-//				 */
-//				Evaluation.dLinkListEvaluation(FiberLink.allFiberLinkList, 0);
-//				new Dlg_SurvivanceResult_ls();
+//				int num = 0;
+//
+//				recoveryLinkListcol(thelink);
+//
+//				thelink = new LinkedList<FiberLink>();
+//				for (int i = 0; i < linkTable.getRowCount(); i++) {
+//
+//					if (linkTable.getValueAt(i, 0).toString().equals("true")) {
+//						++num;
+//						thelink.add(FiberLink.getFiberLink(Integer.parseInt(String.valueOf(linkTable.getValueAt(i, 1)))));
+//						if (num == 3)
+//							break;
+//					}
+//
+//				}
+////				if (num == 2) {MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
+////					// 设置故障链路 thelink
+////
+//					tra = Evaluation.multiLinkEva(thelink, 0);
+//
+//					setLinkListcol(thelink);
+//
+//					aa.putChartValue(Evaluation.multiLinkKeepPer);
+//					bb.putChartValue(Evaluation.multiLinkDownPer);
+//					cc.putChartValue(Evaluation.multiLinkCutoffPer);
+//					dd.putChartValue(Evaluation.multiLinkUneffPer);
+//
+//					showEffectTraffic(tra);
+//					Evaluation.clearRsmRoute(tra);
+////
+////				} else {
+////					thelink = new LinkedList<FiberLink>();
+////					JOptionPane.showMessageDialog(null, "请设置两条故障链路！");
+////				}MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
 //			}
 //		});
-
-		aa.setName("保持");
-		bb.setName("降级");
-		cc.setName("中断");
-		dd.setName("无影响");
-
-		// 设置背景色加深
-		// barChart.setBackgroundVisible(true);
-		pie.setBackgroundVisible(true);
-
-		// 图示付色
-		aa.putChartColor(Color.green);
-		bb.putChartColor(Color.blue);
-		cc.putChartColor(Color.RED);
-		dd.putChartColor(Color.yellow);
-
-		// //图示的比例值
-		// aa.putChartValue(0.25);
-		// bb.putChartValue(0.25);
-		// cc.putChartValue(0.25);
-
-		box.addElement(aa);
-		box.addElement(bb);
-		box.addElement(cc);
-		box.addElement(dd);
-
-		JPanel piepanel = new JPanel(new BorderLayout());
-		piepanel.add(pie, BorderLayout.CENTER);
-
-		JPanel p1 = new JPanel(new BorderLayout());
-		// p1.setBorder(BorderFactory.createTitledBorder("链路列表"));
-		p1.setBorder(BorderFactory.createTitledBorder(null, "链路列表", TitledBorder.LEFT, TitledBorder.TOP,
-				new java.awt.Font("微软雅黑", Font.BOLD, 12)));
-		p1.add(pane1, BorderLayout.CENTER);
-
-		JPanel p2 = new JPanel(new BorderLayout());
-		// p2.setBorder(BorderFactory.createTitledBorder("受影响业务列表"));
-		p2.setBorder(BorderFactory.createTitledBorder(null, "受影响业务列表", TitledBorder.LEFT, TitledBorder.TOP,
-				new java.awt.Font("微软雅黑", Font.BOLD, 12)));
-		p2.add(pane2, BorderLayout.CENTER);
-
-		JPanel p4 = new JPanel();
-		GridBagLayout mg = new GridBagLayout();
-		GridBagConstraints mgc = new GridBagConstraints();
-		p4.setLayout(mg);
-		mgc.fill = GridBagConstraints.NONE;
-
-		mgc.gridwidth = GridBagConstraints.REMAINDER;
-		mgc.weightx = 1.0;
-		mgc.weighty = 1.0;
-		mgc.gridheight = 1;
-		p4.add(simulation, mgc);
-		mgc.gridwidth = GridBagConstraints.REMAINDER;
-//		p4.add(Browse, mgc);
-		mgc.gridwidth = GridBagConstraints.REMAINDER;
-		p4.add(close, mgc);
-
-		JPanel p3 = new JPanel();
-
-		Insets insert;
-		mg = new GridBagLayout();
-		mgc = new GridBagConstraints();
-		p3.setLayout(mg);
-		mgc.fill = GridBagConstraints.BOTH;
-
-		mgc.gridwidth = GridBagConstraints.REMAINDER;
-		mgc.weightx = 1.0;
-		mgc.weighty = 2.0;
-		mgc.gridheight = 2;
-		p3.add(p1, mgc);
-		mgc.gridwidth = 1;
-		mgc.weighty = 1.0;
-		mgc.gridheight = 1;
-		insert = new Insets(5, 30, 5, -15);
-		mgc.insets = insert;
-		p3.add(piepanel, mgc);
-		mgc.gridwidth = GridBagConstraints.REMAINDER;
-		insert = new Insets(0, 0, 0, -35);
-		mgc.insets = insert;
-		p3.add(p4, mgc);
-
-		JSplitPane split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, p3, p2);
-		split.setOneTouchExpandable(true);
-		split.setDividerLocation(380);
-
-		setContentPane(split);
-		this.setVisible(true);
-		ImageIcon imageIcon1 = new ImageIcon(this.getClass().getResource("/resource/ddd1111.png"));
-		this.setIconImage(imageIcon1.getImage());
-	}
+//		close.addActionListener(new ActionListener() {
+//			public void actionPerformed(ActionEvent e) {
+//
+//				recoveryLinkListcol(thelink);
+//				setVisible(false);
+//				dispose();// 释放窗体所占内存资源?
+//			}
+//		});
+//		setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
+//		addWindowListener(new WindowAdapter() {
+//			public void windowClosing(WindowEvent e) {
+//				// TODO Auto-generated method stub
+//				recoveryLinkListcol(thelink);
+//				setVisible(false);
+//				dispose();
+//			}
+//		});
+////		Browse.addActionListener(new ActionListener() {
+////			public void actionPerformed(ActionEvent e) {
+////				/*
+////				 * 统计结果窗口
+////				 */
+////				Evaluation.dLinkListEvaluation(FiberLink.allFiberLinkList, 0);
+////				new Dlg_SurvivanceResult_ls();
+////			}
+////		});
+//
+//		aa.setName("保持");
+//		bb.setName("降级");
+//		cc.setName("中断");
+//		dd.setName("无影响");
+//
+//		// 设置背景色加深
+//		// barChart.setBackgroundVisible(true);
+//		pie.setBackgroundVisible(true);
+//
+//		// 图示付色
+//		aa.putChartColor(Color.green);
+//		bb.putChartColor(Color.blue);
+//		cc.putChartColor(Color.RED);
+//		dd.putChartColor(Color.yellow);
+//
+//		// //图示的比例值
+//		// aa.putChartValue(0.25);
+//		// bb.putChartValue(0.25);
+//		// cc.putChartValue(0.25);
+//
+//		box.addElement(aa);
+//		box.addElement(bb);
+//		box.addElement(cc);
+//		box.addElement(dd);
+//
+//		JPanel piepanel = new JPanel(new BorderLayout());
+//		piepanel.add(pie, BorderLayout.CENTER);
+//
+//		JPanel p1 = new JPanel(new BorderLayout());
+//		// p1.setBorder(BorderFactory.createTitledBorder("链路列表"));
+//		p1.setBorder(BorderFactory.createTitledBorder(null, "链路列表", TitledBorder.LEFT, TitledBorder.TOP,
+//				new java.awt.Font("微软雅黑", Font.BOLD, 12)));
+//		p1.add(pane1, BorderLayout.CENTER);
+//
+//		JPanel p2 = new JPanel(new BorderLayout());
+//		// p2.setBorder(BorderFactory.createTitledBorder("受影响业务列表"));
+//		p2.setBorder(BorderFactory.createTitledBorder(null, "受影响业务列表", TitledBorder.LEFT, TitledBorder.TOP,
+//				new java.awt.Font("微软雅黑", Font.BOLD, 12)));
+//		p2.add(pane2, BorderLayout.CENTER);
+//
+//		JPanel p4 = new JPanel();
+//		GridBagLayout mg = new GridBagLayout();
+//		GridBagConstraints mgc = new GridBagConstraints();
+//		p4.setLayout(mg);
+//		mgc.fill = GridBagConstraints.NONE;
+//
+//		mgc.gridwidth = GridBagConstraints.REMAINDER;
+//		mgc.weightx = 1.0;
+//		mgc.weighty = 1.0;
+//		mgc.gridheight = 1;
+//		p4.add(simulation, mgc);
+//		mgc.gridwidth = GridBagConstraints.REMAINDER;
+////		p4.add(Browse, mgc);
+//		mgc.gridwidth = GridBagConstraints.REMAINDER;
+//		p4.add(close, mgc);
+//
+//		JPanel p3 = new JPanel();
+//
+//		Insets insert;
+//		mg = new GridBagLayout();
+//		mgc = new GridBagConstraints();
+//		p3.setLayout(mg);
+//		mgc.fill = GridBagConstraints.BOTH;
+//
+//		mgc.gridwidth = GridBagConstraints.REMAINDER;
+//		mgc.weightx = 1.0;
+//		mgc.weighty = 2.0;
+//		mgc.gridheight = 2;
+//		p3.add(p1, mgc);
+//		mgc.gridwidth = 1;
+//		mgc.weighty = 1.0;
+//		mgc.gridheight = 1;
+//		insert = new Insets(5, 30, 5, -15);
+//		mgc.insets = insert;
+//		p3.add(piepanel, mgc);
+//		mgc.gridwidth = GridBagConstraints.REMAINDER;
+//		insert = new Insets(0, 0, 0, -35);
+//		mgc.insets = insert;
+//		p3.add(p4, mgc);
+//
+//		JSplitPane split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, p3, p2);
+//		split.setOneTouchExpandable(true);
+//		split.setDividerLocation(380);
+//
+//		setContentPane(split);
+//		this.setVisible(true);
+//		ImageIcon imageIcon1 = new ImageIcon(this.getClass().getResource("/resource/ddd1111.png"));
+//		this.setIconImage(imageIcon1.getImage());
+//	}
 
 	public void showEffectTraffic(List<Traffic> tra) {
 

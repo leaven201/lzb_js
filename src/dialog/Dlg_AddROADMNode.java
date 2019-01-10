@@ -1,42 +1,29 @@
 package dialog;
 
 import java.awt.Dimension;
-import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.Frame;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.text.DecimalFormat;
-import java.util.Date;
-import java.util.Iterator;
 
 import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
 import javax.swing.JRadioButton;
-import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
-import twaver.Dummy;
-import twaver.TDataBox;
-import datastructure.UINode;
 import data.CommonNode;
 import dataControl.NodeData;
-import design.NetDesign_zs;
-import enums.NodeType;
-import test.design;
+import datastructure.UINode;
+import twaver.Dummy;
+import twaver.TDataBox;
 
 public class Dlg_AddROADMNode extends JDialog implements ItemListener{
 //    private JTextField nodename = new JTextField("新建节点" + Integer.toString(CommonNode.getNode(ID) + 1), 6);

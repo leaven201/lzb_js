@@ -1,39 +1,130 @@
 package design;
 
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Container;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.Frame;
+import java.awt.GridLayout;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.io.File;
-import java.io.FileFilter;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.*;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javax.swing.*;
+
+import javax.swing.ButtonGroup;
+import javax.swing.ImageIcon;
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+import javax.swing.JProgressBar;
+import javax.swing.JRadioButton;
+import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
 import javax.swing.Timer;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.plaf.MenuItemUI;
 import javax.swing.plaf.PopupMenuUI;
 import javax.swing.plaf.basic.BasicMenuUI;
 
-import org.apache.poi.hssf.record.formula.functions.Fixed1ArgFunction;
 import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 
-import Interface.UserInterface;
-import Interface.UserInterface.Progress;
+import NSUI.NSMenuItemUI;
+import NSUI.NSMenuUI;
+import NSUI.NSPopupMenuUI;
+import UIGradient.GradientMenubar;
+import UIGradient.GradientPanel;
+import UIGradient.GradientToolbar;
+import UIGradient.MySplitPaneUI;
+import algorithm.OSNR;
+import data.BasicLink;
+import data.CommonNode;
+import data.DataSave;
+import data.FiberLink;
+import data.LinkRGroup;
+import data.Network;
+import data.Route;
+import data.Traffic;
+import data.WDMLink;
+import data.WaveLength;
+import dataControl.LinkData;
+import dataControl.NodeData;
+import dataControl.TrafficData;
+import database.Database;
+import database.NodeDataBase;
+import database.TrafficDatabase;
+import datastructure.UIFiberLink;
+import datastructure.UINode;
+import datastructure.UIOTNLink;
+import datastructure.UIWDMLink;
+import dialog.AFSetting;
+import dialog.BackToBackCoefficient;
+import dialog.Dlg_AddFiberlink;
+import dialog.Dlg_AddOLANode;
+import dialog.Dlg_AddROADMNode;
+import dialog.Dlg_AddTraffic;
+import dialog.Dlg_BussinessPlan;
+import dialog.Dlg_DesignResult;
+import dialog.Dlg_InputAll;
+import dialog.Dlg_InputLinks;
+import dialog.Dlg_InputNodes;
+import dialog.Dlg_LinkPoll;
+import dialog.Dlg_NewProject;
+import dialog.Dlg_NodePoll;
+import dialog.Dlg_OpenProject;
+import dialog.Dlg_PolicySetting;
+import dialog.Dlg_ProjectSaveAs;
+import dialog.Dlg_RelatedTraffic;
+import dialog.Dlg_SRLG;
+import dialog.Dlg_SRLGSet;
+import dialog.Dlg_SetFault;
+import dialog.Dlg_TrafficInput;
+import dialog.Dlg_fiberresult;
+import dialog.Dlg_noderesult;
+import dialog.Dlg_wdmresult;
+import dialog.PropertyDisplay;
+import dialog.TestProgressBar;
+import dialog.designFiberlink;
+import dialog.designROADMnode;
+import enums.NodeType;
+import enums.Status;
 import netdesigntitle.NSTitleFrame;
 import survivance.Evaluation;
-import twaver.*;
+import twaver.DataBoxAdapter;
+import twaver.DataBoxEvent;
+import twaver.Dummy;
+import twaver.Element;
+import twaver.GeoCoordinate;
+import twaver.PopupMenuGenerator;
+import twaver.ResizableNode;
+import twaver.TDataBox;
+import twaver.TView;
+import twaver.VisibleFilter;
 import twaver.gis.GeographyMap;
 import twaver.gis.GisManager;
 import twaver.gis.GisNetworkAdapter;
@@ -42,28 +133,6 @@ import twaver.gis.gadget.Navigator;
 import twaver.gis.gadget.StatusBar;
 import twaver.network.TNetwork;
 import twaver.tree.TTree;
-import NSUI.NSMenuItemUI;
-import NSUI.NSMenuUI;
-import NSUI.NSPopupMenuUI;
-import NSUI.NSSeparatorUI;
-import UIGradient.GradientMenubar;
-import UIGradient.GradientPanel;
-import UIGradient.GradientToolbar;
-import UIGradient.MySplitPaneUI;
-import algorithm.OSNR;
-import algorithm.RouteAlloc;
-import data.*;
-import dataControl.LinkData;
-import dataControl.NodeData;
-import dataControl.TrafficData;
-import datastructure.*;
-import database.*;
-import dialog.*;
-import enums.NodeType;
-import enums.Status;
-
-import java.lang.*;
-import java.text.SimpleDateFormat;
 
 public class NetDesign_zs extends NSTitleFrame {
 	
@@ -1388,7 +1457,7 @@ public class NetDesign_zs extends NSTitleFrame {
 //					}
 //				});//wdm
 
-				delnode.addActionListener(new ActionListener() {
+				/*delnode.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
 						UINode uinode = (UINode) network.getDataBox().getLastSelectedElement();
 						NodeData nd = new NodeData();
@@ -1416,72 +1485,72 @@ public class NetDesign_zs extends NSTitleFrame {
 							}
 						}
 					}
-				});
-				dellink.addActionListener(new ActionListener() {
-					public void actionPerformed(ActionEvent e) {// 删除光纤Fiber
-						// link
-						LinkData ld = new LinkData();
-						UIFiberLink uilink = (UIFiberLink) network.getDataBox().getLastSelectedElement();
+				});*/
+//				dellink.addActionListener(new ActionListener() {
+//					public void actionPerformed(ActionEvent e) {// 删除光纤Fiber
+//						// link
+//						LinkData ld = new LinkData();
+//						UIFiberLink uilink = (UIFiberLink) network.getDataBox().getLastSelectedElement();
+//
+//						int response = 0;
+//						if (uilink.getFiberLink().getCarriedTraffic().size() != 0) {
+//							response = JOptionPane.showConfirmDialog(null,
+//									"链路" + "“" + uilink.getFiberLink().getName() + "”" + "已承载业务," + "是否删除该链路？", "删除链路",
+//									JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+//						} else {
+//							response = JOptionPane.showConfirmDialog(null,
+//									"链路" + "“" + uilink.getFiberLink().getName() + "”" + "没有承载业务，" + "是否删除该链路？", "删除链路",
+//									JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+//						}
+//						if (response == 0) {
+//							ld.delLink(uilink.getFiberLink());
+//							UIdatarefresh();
+//						}
+//					}
+//				});
 
-						int response = 0;
-						if (uilink.getFiberLink().getCarriedTraffic().size() != 0) {
-							response = JOptionPane.showConfirmDialog(null,
-									"链路" + "“" + uilink.getFiberLink().getName() + "”" + "已承载业务," + "是否删除该链路？", "删除链路",
-									JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
-						} else {
-							response = JOptionPane.showConfirmDialog(null,
-									"链路" + "“" + uilink.getFiberLink().getName() + "”" + "没有承载业务，" + "是否删除该链路？", "删除链路",
-									JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
-						}
-						if (response == 0) {
-							ld.delLink(uilink.getFiberLink());
-							UIdatarefresh();
-						}
-					}
-				});
+//				dellink1.addActionListener(new ActionListener() {
+//					public void actionPerformed(ActionEvent e) {// 删除卫星 删除Sate
+//						LinkData ld = new LinkData();
+//						UIWDMLink uilink = (UIWDMLink) network.getDataBox().getLastSelectedElement();
+//
+//						int response = 0;
+//						if (uilink.getOptLink().getCarriedTraffic().size() != 0) {
+//							response = JOptionPane.showConfirmDialog(null,
+//									"链路" + "“" + uilink.getOptLink().getName() + "”" + "已承载业务," + "是否删除该链路？", "删除链路",
+//									JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+//						} else {
+//							response = JOptionPane.showConfirmDialog(null,
+//									"链路" + "“" + uilink.getOptLink().getName() + "”" + "没有承载业务，" + "是否删除该链路？", "删除链路",
+//									JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+//						}
+//
+//						if (response == 0) {
+//							ld.delLink(uilink.getOptLink());
+//							UIdatarefresh();
+//						}
+//					}
+//				});
 
-				dellink1.addActionListener(new ActionListener() {
-					public void actionPerformed(ActionEvent e) {// 删除卫星 删除Sate
-						LinkData ld = new LinkData();
-						UIWDMLink uilink = (UIWDMLink) network.getDataBox().getLastSelectedElement();
-
-						int response = 0;
-						if (uilink.getOptLink().getCarriedTraffic().size() != 0) {
-							response = JOptionPane.showConfirmDialog(null,
-									"链路" + "“" + uilink.getOptLink().getName() + "”" + "已承载业务," + "是否删除该链路？", "删除链路",
-									JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
-						} else {
-							response = JOptionPane.showConfirmDialog(null,
-									"链路" + "“" + uilink.getOptLink().getName() + "”" + "没有承载业务，" + "是否删除该链路？", "删除链路",
-									JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
-						}
-
-						if (response == 0) {
-							ld.delLink(uilink.getOptLink());
-							UIdatarefresh();
-						}
-					}
-				});
-
-				dellink2.addActionListener(new ActionListener() {// 删除短波 删除SHORT
-					public void actionPerformed(ActionEvent e) {
-						LinkData ld = new LinkData();
-						UIOTNLink uilink = (UIOTNLink) network.getDataBox().getLastSelectedElement();
-
-						if (uilink.getEleLink().getCarriedTraffic().size() != 0) {
-							JOptionPane.showConfirmDialog(null,
-									"链路" + "“" + uilink.getEleLink().getName() + "”" + "已承载业务," + "是否删除该链路？", "删除链路",
-									JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
-						} else {
-							JOptionPane.showConfirmDialog(null,
-									"链路" + "“" + uilink.getEleLink().getName() + "”" + "没有承载业务，" + "是否删除该链路？", "删除链路",
-									JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
-
-						}
-						ld.delLink(uilink.getEleLink());
-						UIdatarefresh();
-					}
-				});
+//				dellink2.addActionListener(new ActionListener() {// 删除短波 删除SHORT
+//					public void actionPerformed(ActionEvent e) {
+//						LinkData ld = new LinkData();
+//						UIOTNLink uilink = (UIOTNLink) network.getDataBox().getLastSelectedElement();
+//
+//						if (uilink.getEleLink().getCarriedTraffic().size() != 0) {
+//							JOptionPane.showConfirmDialog(null,
+//									"链路" + "“" + uilink.getEleLink().getName() + "”" + "已承载业务," + "是否删除该链路？", "删除链路",
+//									JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+//						} else {
+//							JOptionPane.showConfirmDialog(null,
+//									"链路" + "“" + uilink.getEleLink().getName() + "”" + "没有承载业务，" + "是否删除该链路？", "删除链路",
+//									JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+//
+//						}
+//						ld.delLink(uilink.getEleLink());
+//						UIdatarefresh();
+//					}
+//				});
 				addlink.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
 						// new Dlg_Addlink(dt, network, FiberLinkDummy, WDMLinkDummy, linklayer);
@@ -1698,15 +1767,15 @@ public class NetDesign_zs extends NSTitleFrame {
 			}
 		});
 
-		menuItemproperty.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {// 工程信息
-				if (filenameall == null) {
-					JOptionPane.showMessageDialog(null, "请先建立一个工程！", "提示", JOptionPane.INFORMATION_MESSAGE);
-					return;
-				} else
-					new Dlg_ProjectInfo();
-			}
-		});
+//		menuItemproperty.addActionListener(new ActionListener() {
+//			public void actionPerformed(ActionEvent e) {// 工程信息
+//				if (filenameall == null) {
+//					JOptionPane.showMessageDialog(null, "请先建立一个工程！", "提示", JOptionPane.INFORMATION_MESSAGE);
+//					return;
+//				} else
+//					new Dlg_ProjectInfo();
+//			}
+//		});
 
 		menuItemExit.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) { // 退出
@@ -1829,8 +1898,7 @@ public class NetDesign_zs extends NSTitleFrame {
 							TrafficDummy);
 				displayLinkandNode();}
 				
-			}});
-		
+			}});	
 		// 导入业务
 		businessimport.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {

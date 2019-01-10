@@ -31,20 +31,19 @@ import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumnModel;
 
-import twaver.Element;
-import twaver.Node;
-import twaver.TDataBox;
-import twaver.TWaverConst;
-import twaver.chart.PieChart;
 import data.FiberLink;
 import data.LinkRGroup;
-import data.Network;
 import data.Traffic;
 import datastructure.UIFiberLink;
 import enums.Layer;
 import enums.TrafficLevel;
 import survivance.Evaluation;
 //import evaluation.Evaluation;
+import twaver.Element;
+import twaver.Node;
+import twaver.TDataBox;
+import twaver.TWaverConst;
+import twaver.chart.PieChart;
 
 public class Dlg_SRLGPoll extends JFrame{
 	private DefaultTableModel srgModel;

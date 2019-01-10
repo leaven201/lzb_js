@@ -1,35 +1,26 @@
 package algorithm;
 
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 
 import data.CommonNode;
-import data.Route;
-import data.SpanLink;
-import data.Traffic;
-import data.WDMLink;
 import data.WaveLength;
-import dialog.Dlg_PolicySetting;
-import survivance.Evaluation;
 
 public class Suggest {
-	public static boolean isKanghui;//标记是否为抗毁部分2017.10.25
+	public static boolean isKanghui;// 标记是否为抗毁部分2017.10.25
 	public static boolean isSuggested;// 标记是否为规划建议部分
 	public static boolean isDouble;// ture 双断 false 单断
 	public static boolean isSurvived;// 是否已经考虑过抗毁
 	public static int flag;// =0波长转换分析，=1抗毁波长转换分析
 
-	public static List<WaveLength> zuichuWaveLengthlist;//只存放最初路由分配的波长list
+	public static List<WaveLength> zuichuWaveLengthlist;// 只存放最初路由分配的波长list
 	public static List<CommonNode> allosnrNodeList = new LinkedList<>();// 存放所有建议再生节点(考虑抗毁)
 	public static List<CommonNode> allosnrNodeList2 = new LinkedList<>();// 存放所有建议再生节点(不考虑抗毁)
 	public static List<CommonNode> conversionNodeList = new LinkedList<>();// 存储所有波长转换节点(考虑抗毁)
 	public static List<CommonNode> conversionNodeList2 = new LinkedList<>();// 存储所有波长转换节点(不考虑抗毁)
-	public static List<CommonNode> converNodeKanghuiList= new LinkedList<>();//存储抗毁的波长转换节点--2017.10.26
+	public static List<CommonNode> converNodeKanghuiList = new LinkedList<>();// 存储抗毁的波长转换节点--2017.10.26
 
-	// 给list中的节点赋予再生功能
+	/*// 给list中的节点赋予再生功能
 	public static void regenerate(List<CommonNode> list) {
 		for (CommonNode node : list) {
 			node.setRegenerated(true);
@@ -75,7 +66,7 @@ public class Suggest {
 //				}
 //			}
 			for (Route route : OSNR.OSNRRouteList) {
-				 System.out.println(route);
+				System.out.println(route);
 				if (osnr.calculateOSNR(route) < Dlg_PolicySetting.osnRGate) {
 					List<CommonNode> nl = OSNR.select(route);
 					CommonNode n = nl.get(nl.size() - 1);
@@ -108,7 +99,7 @@ public class Suggest {
 		}
 		List<List<CommonNode>> olist = new LinkedList<List<CommonNode>>();
 		olist.addAll(osnrlist);// 备份一份，防止影响原来数据
-		 System.out.println("osnrlistsize" + olist.size());
+		System.out.println("osnrlistsize" + olist.size());
 		List<CommonNode> allnode = new LinkedList<>();// 存放所有节点
 		// List<List<CommonNode>> deletelist = new LinkedList<List<CommonNode>>();//
 		// 存放要删除的nlist
@@ -154,7 +145,7 @@ public class Suggest {
 			node.setTimes(0);
 		}
 		return list;
-	}
+	}*/
 
 	public static boolean conversion(CommonNode n, List<CommonNode> l2) {
 		if (l2.contains(n)) {

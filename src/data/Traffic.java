@@ -10,6 +10,8 @@ import java.io.Serializable;
  */
 import java.util.*;
 
+import javax.xml.crypto.Data;
+
 import algorithm.RouteAlloc;
 
 public class Traffic implements Serializable{
@@ -665,8 +667,20 @@ public Route getExistRoute() {
 			}
 		}
 	}
+	//计算业务所需频隙数'
+	//strategy调制格式：1-BPSK 2-QPSK 3-16QAM
+	public int needSolts(int strategy, double C) {
+		int n = 0;
+		if(strategy == 2) {
+			//向上取整
+			n = (int) Math.ceil(C/(DataSave.Cslot*2));
+		}else if(strategy == 3) {
+			n = (int) Math.ceil(C/(DataSave.Cslot*4));
+		}else {
+			n = (int) Math.ceil(C/(DataSave.Cslot*1));
+		}
+		return n + DataSave.GuardBand;
+	}
 	
-
-
 	
 }

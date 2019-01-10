@@ -81,7 +81,7 @@ public class DAlgorithm {
 	/*
 	 * flag=1 跳数 ; =0 长度; =2 负载均衡算法，根据flag初始化链路不同的权重
 	 */
-	public static boolean Initialization(List<WDMLink> s, int flag) {// 初始化WDMLink
+	/*public static boolean Initialization(List<WDMLink> s, int flag) {// 初始化WDMLink
 
 		List<WDMLink> theLinkList = s;// theLinkList是传入的链表，初始化这个链表
 		// 初始化链路权重
@@ -114,7 +114,7 @@ public class DAlgorithm {
 		}
 		return true;
 	}// 只使用了theLinkList
-
+*/
 	/*
 	 * 函数名称：SetNodeRankID 函数作用：给所有节点设置ID,为了构造权重表邻接矩阵 输入参数：需要设置算法ID的节点链表 返回参数：返回节点总数
 	 */
@@ -279,7 +279,7 @@ public class DAlgorithm {
 
 	
 
-	public static boolean dijkstra(int flag, CommonNode from, CommonNode to, List<CommonNode> nodeList,
+	/*public static boolean dijkstra(int flag, CommonNode from, CommonNode to, List<CommonNode> nodeList,
 			LinkedList<SpanLink> linkList, LinkedList<SpanLink> returnLinkList, LinkedList<CommonNode> returnNodeList) {// 只计算光纤链路
 		// TODO Auto-generated method stub
 
@@ -406,7 +406,7 @@ public class DAlgorithm {
 			return false;
 		}
 		return true;
-	}
+	}*/
 	
 	//消除平行边的方法
 	public static LinkedList<WDMLink> removeParallelLink() {
